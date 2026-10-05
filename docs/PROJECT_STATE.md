@@ -1,6 +1,20 @@
 # Cognova — Estado del Proyecto
 
-**Estado:** diseño técnico cerrado / listo para iniciar desarrollo.
+**Estado:** fase inicial en curso; skeleton FastAPI creado (2026-10-05).
+
+## Avance backend
+- Factory FastAPI, router reservado `/api/v1`, configuración Pydantic desde `.env`.
+- CORS configurable, paquetes por capa y pruebas de arranque/OpenAPI/CORS.
+- Dependencias y guía local declaradas en `pyproject.toml` y README.
+- Sin endpoints de negocio implementados; frontend sin modificaciones.
+
+## Pendientes de especificación antes de funcionalidades
+- API_CONTRACT.md enumera rutas pero no define requests/responses, códigos de
+  estado, paginación ni validaciones por campo. Completar el contrato antes de
+  implementar cada funcionalidad; no inventar campos alternativos.
+- QUESTIONNAIRE.md no contiene opciones ni cardinalidad por pregunta.
+- DATA_MODEL.md todavía no define persistencia de pausas del temporizador ni
+  entidad de dependencias. Resolver antes de esas funcionalidades.
 
 ## Decisiones principales
 - Frontend: React + TypeScript + Vite.
@@ -34,11 +48,10 @@
 - Grafo de dependencias académicas.
 
 ## Próximo paso
-1. Crear repositorios.
-2. Copiar esta documentación.
-3. Crear skeleton de backend/frontend.
-4. Respetar API_CONTRACT.md.
-5. Desarrollar por commits progresivos.
+1. Completar infraestructura PostgreSQL y pruebas de ciclo de vida.
+2. Cerrar la fase inicial sin implementar funcionalidades completas.
+3. Posteriormente precisar contrato de autenticación y agregar User, migraciones,
+   hashing y JWT mediante commits progresivos.
 
 ## Continuidad
 Antes de trabajar, leer:
@@ -53,3 +66,7 @@ Antes de trabajar, leer:
 9. AGENT_RULES.md
 
 Si código y documentación se contradicen, no asumir: registrar y resolver.
+
+## Validación del skeleton
+- Python 3.14.5: 2 tests aprobados; Ruff y git diff --check correctos.
+- Aviso de deprecación del TestClient de Starlette sobre httpx; sin fallos.
