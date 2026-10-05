@@ -749,16 +749,19 @@ No se considera suficiente:
 Orden de prioridad:
 
 ```text
-1. Cumplir requisitos académicos.
-2. Mantener coherencia con el propósito.
-3. Funcionar correctamente.
-4. Ser demostrable.
-5. Mantener código limpio y POO.
-6. Tener buena experiencia visual.
-7. Funciones adicionales.
+1. Correctitud, integridad de datos y seguridad.
+2. Mantener coherencia con el propósito de Cognova.
+3. Funcionar de forma robusta en escenarios reales.
+4. Cumplir todos los requisitos funcionales y de estructuras de datos.
+5. Mantener código limpio, modular y POO.
+6. Tener buena experiencia visual y accesible.
+7. Ser desplegable, observable y recuperable.
+8. Funciones adicionales.
 ```
 
-No agregar funciones extras si rompen el flujo principal.
+No usar la naturaleza académica del proyecto como justificación para seguridad débil, mocks permanentes o funcionalidad incompleta.
+
+No agregar funciones extras si comprometen el flujo principal, la seguridad o la estabilidad.
 
 ---
 

@@ -12,3 +12,17 @@
 10. ¿Qué esperas que esta aplicación te ayude a comprender o mejorar?
 
 Las respuestas serán de selección única o múltiple según corresponda.
+
+---
+
+## Estado de especificación
+
+Las 10 preguntas están aprobadas, pero esta versión del documento **no contiene todavía las opciones completas ni la cardinalidad exacta de cada pregunta**.
+
+No inventar opciones durante implementación.
+
+Antes de construir el formulario definitivo:
+1. recuperar las opciones aprobadas desde Git/historial/documentación previa si existen;
+2. si no pueden recuperarse, detener únicamente esa funcionalidad y solicitar/registrar la decisión;
+3. sincronizar este archivo en backend y frontend antes de continuar.
+
