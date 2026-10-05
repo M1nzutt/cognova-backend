@@ -1,32 +1,150 @@
-# Cognova — Arquitectura
+# Cognova — Arquitectura Backend
 
 ```text
 Usuario
   ↓
 Frontend (React + TypeScript + Vite)
-  ↓ HTTPS/JSON
+  ↓ HTTPS / JSON
 Backend (Python + FastAPI)
   ├── PostgreSQL
-  └── Servicio de IA
+  └── Proveedor de IA
 ```
 
-## Reglas
-- Frontend solo consume backend.
-- Frontend no toca DB ni IA.
-- Backend concentra lógica, estructuras, persistencia e IA.
-- Routers delgados; servicios con lógica.
-- Una clase relevante por archivo.
-- Repos: `cognova-backend` y `cognova-frontend`.
+## Límites
 
-## Infraestructura inicial del backend
-- Factory `app.main:create_app`; router `/api/v1` sin rutas de negocio todavía.
-- Settings desde entorno/`.env`; CORS con orígenes explícitos.
-- SQLAlchemy 2 síncrono con psycopg 3 para PostgreSQL.
-- Un motor por lifespan, conexiones diferidas y cierre del pool al apagar.
-- Sesión por petición mediante `app/database/dependencies.py`; commit explícito
-  en servicios, rollback ante excepciones y cierre garantizado.
-- Routers que ejecuten servicios síncronos de DB deberán ser `def` para evitar
-  bloquear el event loop. Las futuras integraciones async requieren adaptación.
-- `Base` centraliza metadata; modelos y migraciones quedan para la siguiente fase.
-- Arranque y OpenAPI no prueban conectividad DB; prueba opcional con
-  `TEST_DATABASE_URL` ejecuta `SELECT 1` sin modificar tablas.
+- Frontend solo consume API.
+- Frontend no toca DB ni proveedor de IA.
+- Backend concentra lógica de negocio, seguridad, estructuras, persistencia, analytics e IA.
+- Dos repos: `cognova-backend` y `cognova-frontend`.
+
+## Capas esperadas
+
+```text
+app/
+├── api/
+├── core/
+├── database/
+├── models/
+├── schemas/
+├── services/
+├── structures/
+│   └── nodes/
+└── tests/
+```
+
+Reglas:
+- routers delgados;
+- servicios contienen casos de uso;
+- acceso DB encapsulado;
+- una clase relevante por archivo;
+- dependencias explícitas;
+- no lógica de negocio dispersa en routers.
+
+## Infraestructura ya iniciada
+
+- factory `app.main:create_app`;
+- router `/api/v1`;
+- settings desde entorno/`.env`;
+- CORS configurable;
+- SQLAlchemy 2 + psycopg 3;
+- engine por lifespan;
+- sesión DB por request;
+- Alembic;
+- User + fundamentos de Argon2id/JWT iniciados.
+
+El estado exacto vive en `PROJECT_STATE.md` y Git.
+
+## Autenticación de producción
+
+```text
+login/register
+   ↓
+User + AuthSession
+   ↓
+Access JWT corto ─────────→ frontend memory
+Refresh token opaco ──────→ HttpOnly cookie
+CSRF token ───────────────→ cookie legible + header
+```
+
+`AuthSession` permite:
+- refresh rotation;
+- revocación;
+- logout;
+- gestión de sesiones;
+- invalidar access tokens ligados a `sid`.
+
+La implementación anterior sin refresh/logout se considera obsoleta y debe migrarse, no ignorarse.
+
+## Seguridad transversal
+
+Middleware/dependencias/servicios deben cubrir:
+- auth;
+- ownership;
+- rate limiting;
+- CORS;
+- error handling;
+- request IDs/logging;
+- security headers cuando aplique.
+
+Ver `SECURITY_BASELINE.md`.
+
+## Temporizador
+
+Backend es fuente de verdad.
+
+El frontend puede mostrar un contador optimista, pero:
+- start/pause/resume/finish se registran en backend;
+- duración oficial se deriva de timestamps/intervalos persistidos;
+- refrescar la página no debe perder el estado real.
+
+## Estructuras de datos
+
+Se implementan manualmente en backend y se integran en casos de uso reales.
+
+La DB sigue siendo la fuente persistente; las estructuras no sustituyen PostgreSQL.
+
+## IA
+
+Flujo:
+
+```text
+datos persistidos
+   ↓
+analytics deterministas
+   ↓
+evidencia estructurada
+   ↓
+servicio IA
+   ↓
+salida validada
+   ↓
+observación / conversación / reto
+```
+
+La IA no debe calcular silenciosamente hechos que el backend puede obtener de forma determinista.
+
+## Observabilidad
+
+Producción debe contar con:
+- health/readiness;
+- logs estructurados;
+- monitoreo de errores;
+- métricas básicas;
+- configuración por entorno.
+
+## PostgreSQL
+
+- migraciones Alembic;
+- constraints;
+- índices;
+- backups;
+- restauración documentada;
+- usuario de mínimo privilegio.
+
+## Async/sync
+
+La base actual usa SQLAlchemy síncrono.
+
+Routers/servicios que ejecuten DB síncrona deben evitar bloquear innecesariamente el event loop.
+
+No migrar toda la arquitectura a async sin motivo medido y documentado.

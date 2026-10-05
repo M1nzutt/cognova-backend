@@ -1,88 +1,139 @@
-# Cognova — Estado del Proyecto
+# Cognova — Estado del Proyecto (Backend)
 
-**Estado:** fase inicial implementada (2026-10-05); funcionalidades pendientes.
+**Fecha de referencia:** 2026-10-05
 
-## Avance backend
-- Factory FastAPI, router reservado `/api/v1`, configuración Pydantic desde `.env`.
-- CORS configurable, paquetes por capa y pruebas de arranque/OpenAPI/CORS.
-- Dependencias y guía local declaradas en `pyproject.toml` y README.
-- Sin endpoints de negocio implementados; frontend sin modificaciones.
-- SQLAlchemy 2 y psycopg 3: base declarativa, motor PostgreSQL diferido, sesiones
-  por petición, rollback ante errores y cierre del pool en lifespan.
-- DATABASE_URL obligatoria, validada y ocultada en la representación de Settings.
-- Sin modelos de dominio, migraciones, auth/JWT, IA, seed ni despliegue todavía.
+**Estado general:** backend en desarrollo. La autenticación quedó interrumpida durante una migración de alcance; hay fundamentos implementados, pero el flujo de producción NO está terminado.
 
-## Pendientes de especificación antes de funcionalidades
-- API_CONTRACT.md enumera rutas pero no define requests/responses, códigos de
-  estado, paginación ni validaciones por campo. Completar el contrato antes de
-  implementar cada funcionalidad; no inventar campos alternativos.
-- QUESTIONNAIRE.md no contiene opciones ni cardinalidad por pregunta.
-- DATA_MODEL.md todavía no define persistencia de pausas del temporizador ni
-  entidad de dependencias. Resolver antes de esas funcionalidades.
+## Regla crítica al reanudar
 
-## Decisiones principales
-- Frontend: React + TypeScript + Vite.
-- Backend: Python + FastAPI.
-- Base de datos: PostgreSQL.
-- Dos repositorios separados.
-- API REST.
-- POO obligatoria.
-- Una clase relevante por archivo.
-- Código en inglés; interfaz en español.
-- Multiusuario.
-- Tema claro y oscuro.
-- Estética: Notion + pastel suave + detalles cósmicos.
-- IA real vía API.
-- Mínimo 5 sesiones antes de hablar de patrones.
-- Seed/demo data.
+Antes de tocar código:
 
-## Funcionalidades confirmadas
-- Registro e inicio de sesión.
-- Perfil: nombre, carrera, semestre, objetivo académico.
-- Cuestionario obligatorio de 10 preguntas.
-- Materias personalizables.
-- Actividades con tipo, prioridad y fecha límite.
-- Calendario visual.
-- Temporizador.
-- Estados: completed, partial, postponed, cancelled.
-- Motivos predefinidos y personalizados.
-- Historial, dashboard y racha.
-- Acompañante IA conversacional limitado al contexto académico.
-- Retos sugeridos por IA y aceptados/rechazados por el usuario.
-- Grafo de dependencias académicas.
+```bash
+git status
+git diff
+git log --oneline -15
+```
 
-## Próximo paso
-1. Precisar y documentar requests/responses y errores de registro/login en el
-   contrato antes de programar autenticación.
-2. Agregar User, migraciones, hashing y JWT, con pruebas de auth y ownership.
-3. Continuar por funcionalidades y commits progresivos al autorizar esa fase.
+No asumir que un archivo quedó guardado/commiteado solo porque fue mencionado en una sesión anterior.
+
+## Lo confirmado antes de la interrupción
+
+Base backend:
+- FastAPI factory;
+- `/api/v1`;
+- Pydantic settings;
+- CORS configurable;
+- SQLAlchemy 2;
+- psycopg 3;
+- PostgreSQL como DB objetivo;
+- sesiones DB por request;
+- Alembic;
+- tests de infraestructura.
+
+Commits confirmados de fase inicial:
+- `a633870 chore: initialize FastAPI backend`
+- `98e12bb feat: add database configuration`
+
+Autenticación — primer bloque implementado antes del corte:
+- `User`;
+- migración Alembic inicial;
+- schemas de auth;
+- Argon2id;
+- JWT HS256;
+- tests de hashing/JWT/migración;
+- documentación parcial.
+
+En la última validación conocida de ese bloque se reportaron:
+- 30 tests aprobados;
+- 1 omitido por no disponer de PostgreSQL real;
+- Ruff correcto;
+- SQL de migración validado.
+
+El hash del commit posterior de fundamentos de auth no está fijado en esta documentación; Git debe confirmarlo.
+
+## Lo que NO debe darse por terminado
+
+El trabajo se interrumpió antes de completar la autenticación.
+
+No asumir completos:
+- `POST /auth/register`;
+- `POST /auth/login`;
+- `GET /auth/me`;
+- refresh;
+- logout;
+- AuthSession;
+- CSRF;
+- rate limiting;
+- gestión/revocación de sesiones;
+- endpoint tests finales;
+- integración PostgreSQL real.
+
+Además, el diseño anterior de auth (JWT largo + localStorage + logout local) quedó obsoleto.
+
+## Nueva decisión de producción
+
+Debe migrarse a `AUTH_CONTRACT.md` vigente:
+- access token corto;
+- access token solo en memoria;
+- refresh token opaco rotativo HttpOnly;
+- `AuthSession`;
+- CSRF;
+- logout/revocación;
+- rate limiting;
+- ownership.
+
+Preservar código útil existente; no rehacer Argon2id/User/migraciones sin motivo.
+
+## PostgreSQL
+
+A la última comprobación conocida:
+- no había `psql`/Docker/servicio PostgreSQL local disponible;
+- prueba real con `TEST_DATABASE_URL` estaba omitida.
+
+Antes de producción se requiere integración real con PostgreSQL.
+
+## Gaps de contrato detectados
+
+Antes de implementar funcionalidades posteriores:
+- DTOs exactos de varios endpoints aún deben completarse;
+- paginación/filtros de historial deben definirse;
+- `QUESTIONNAIRE.md` tiene preguntas pero no contiene las opciones completas;
+- el modelo de temporizador y dependencias fue ampliado en `DATA_MODEL.md`, pero código/migraciones aún deben implementarlo.
+
+## Próximo paso exacto
+
+1. Leer toda la documentación actualizada.
+2. Inspeccionar Git.
+3. Identificar cambios de auth existentes y no rehacerlos.
+4. Completar migración a autenticación de producción.
+5. Ejecutar suite completa.
+6. Actualizar este archivo con archivos modificados, pruebas y commits.
+7. Continuar por fases del prompt definitivo.
+
+## Funcionalidades posteriores pendientes
+
+- cuestionario;
+- materias;
+- objetivos;
+- actividades;
+- dependencias;
+- sesiones/temporizador;
+- estructuras de datos;
+- analytics;
+- historial;
+- racha;
+- IA real;
+- observaciones;
+- reflexiones;
+- retos;
+- seed;
+- seguridad final;
+- despliegue.
 
 ## Continuidad
-Antes de trabajar, leer:
-1. APP_CONTEXT.md
-2. PROJECT_STATE.md
-3. DECISIONS.md
-4. API_CONTRACT.md
-5. ARCHITECTURE.md
-6. DATA_MODEL.md
-7. DATA_STRUCTURES.md
-8. AI_BEHAVIOR.md
-9. QUESTIONNAIRE.md
-10. AGENT_RULES.md
 
-Si código y documentación se contradicen, no asumir: registrar y resolver.
-
-## Validación del skeleton
-- Python 3.14.5: 2 tests aprobados; Ruff y git diff --check correctos.
-- Aviso de deprecación del TestClient de Starlette sobre httpx; sin fallos.
-
-## Validación final de la fase inicial
-- Python 3.14.5: 9 tests aprobados, 1 omitido; Ruff sin problemas.
-- `pip check`: dependencias compatibles. Editor sin diagnósticos.
-- Prueba real PostgreSQL omitida por falta de TEST_DATABASE_URL. No se detectaron
-  psql/Docker en PATH ni servicios PostgreSQL locales; conectividad no verificada.
-- Python mínimo declarado: 3.11; otros intérpretes no se verificaron en esta sesión.
-- Revisión de git diff y whitespace completada antes de los commits.
-- Primer commit: `a633870 chore: initialize FastAPI backend`.
-- Segundo commit: `feat: add database configuration` (incluye este cierre).
-- No se realizó push ni despliegue. Se detiene el trabajo en la fase inicial.
+Si se interrumpe otra vez:
+- actualizar este documento antes de terminar;
+- indicar siguiente paso exacto;
+- dejar repo estable;
+- no borrar trabajo no commiteado.

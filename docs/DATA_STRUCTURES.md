@@ -15,3 +15,12 @@
 - Trie: autocompletado.
 
 Reglas: implementación manual, una clase por archivo, nodos auxiliares separados, pruebas unitarias, uso real.
+
+## Reglas de integración
+
+- PostgreSQL sigue siendo la fuente persistente de datos.
+- Las estructuras se implementan manualmente para cumplir su función algorítmica real; no sustituyen la base de datos.
+- Cada estructura debe tener pruebas unitarias y al menos un caso de uso integrado cuando corresponda.
+- No mantener dos fuentes de verdad inconsistentes entre estructura en memoria y DB.
+- Documentar complejidad esperada de operaciones principales.
+
