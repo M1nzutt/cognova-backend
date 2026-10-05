@@ -1,3 +1,5 @@
+import secrets
+
 import pytest
 
 
@@ -8,3 +10,6 @@ def isolated_environment(monkeypatch):
         "DATABASE_URL", "postgresql+psycopg://test:test@localhost:5432/cognova_test"
     )
     monkeypatch.setenv("CORS_ORIGINS", "[]")
+    monkeypatch.setenv("JWT_SECRET", secrets.token_urlsafe(48))
+    monkeypatch.setenv("JWT_ALGORITHM", "HS256")
+    monkeypatch.setenv("JWT_EXPIRE_MINUTES", "60")

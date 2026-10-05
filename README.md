@@ -11,7 +11,8 @@ Requiere Python 3.11 o superior y PostgreSQL (16 o superior recomendado).
 python -m venv .venv
 .venv\Scripts\python -m pip install -e ".[dev]"
 Copy-Item .env.example .env
-# Editar DATABASE_URL en .env antes de iniciar el servidor.
+# Editar DATABASE_URL y JWT_SECRET en .env antes de iniciar el servidor.
+.venv\Scripts\python -m alembic upgrade head
 .venv\Scripts\python -m uvicorn app.main:create_app --factory --reload
 ```
 
@@ -35,8 +36,22 @@ El motor se crea durante el lifespan de FastAPI y se libera al apagar.
 Las conexiones son diferidas: iniciar el servidor no verifica disponibilidad de
 PostgreSQL. La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
-No se crean tablas automáticamente. Modelos y migraciones se añadirán con la
-primera funcionalidad persistente; la infraestructura aún no aplica ownership.
+No se crean tablas automáticamente. Alembic crea la tabla `users`, su índice
+único sobre `lower(email)` y la restricción de semestre positivo.
+
+## Configuración de autenticación
+
+`JWT_SECRET` es obligatorio, sin valor predeterminado, con al menos 32 bytes.
+Generar un valor local aleatorio con
+`python -c "import secrets; print(secrets.token_urlsafe(48))"` y guardarlo en `.env`.
+`JWT_ALGORITHM=HS256` y `JWT_EXPIRE_MINUTES=60` son los valores predeterminados.
+No se aceptan algoritmos enviados por el cliente ni tokens sin expiración.
+Usar HTTPS en despliegue para proteger contraseñas y tokens en tránsito.
+
+Las contraseñas usan [Argon2id](https://argon2-cffi.readthedocs.io/en/stable/api.html)
+y los tokens [PyJWT](https://pyjwt.readthedocs.io/en/stable/usage.html).
+El contrato público vive en [AUTH_CONTRACT.md](docs/AUTH_CONTRACT.md).
+El modelo y los componentes de seguridad están preparados; integración HTTP en curso.
 
 Las pruebas unitarias no necesitan un servidor. Para probar una conexión real,
 definir `TEST_DATABASE_URL` con una base de pruebas PostgreSQL y ejecutar pytest.

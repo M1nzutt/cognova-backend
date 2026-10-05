@@ -5,6 +5,9 @@ Base: `/api/v1`
 ## Auth
 - POST `/auth/register`
 - POST `/auth/login`
+- GET `/auth/me`
+
+Requests, respuestas y errores: [Contrato de autenticación](AUTH_CONTRACT.md).
 
 ## Questionnaire
 - GET `/questionnaire`

@@ -29,3 +29,17 @@
 - Tema claro y oscuro.
 - Seed demo obligatorio.
 - Aplicación desplegada y funcional con IA real.
+
+## Autenticación — 2026-10-05
+- AUTH_CONTRACT.md define registro, login y usuario autenticado; prevalece sobre
+  el listado abreviado de rutas de API_CONTRACT.md.
+- IDs de usuario enteros generados por PostgreSQL; email normalizado a minúsculas
+  en registro/login e índice único sobre lower(email) para evitar duplicados.
+- Contraseñas con Argon2id (equivalente seguro permitido por el contrato), sin
+  recortes ni cambios de espacios. JWT HS256 con secreto aleatorio de al menos
+  32 bytes, expiración configurable y claims sub, email, exp.
+- Los campos de texto obligatorios del registro no aceptan solo espacios;
+  semester acepta únicamente enteros positivos. No se aceptan campos adicionales.
+- /auth/me identifica al usuario por el sub del JWT validado y consulta su fila;
+  no acepta un ID del cliente como autorización. No hay logout ni refresh token.
+- Alembic administra el esquema; la aplicación no ejecuta create_all al arrancar.

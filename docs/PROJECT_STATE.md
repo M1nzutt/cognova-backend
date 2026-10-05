@@ -2,6 +2,15 @@
 
 **Estado:** fase inicial implementada (2026-10-05); funcionalidades pendientes.
 
+## Autenticación en curso — 2026-10-05
+- AUTH_CONTRACT.md disponible en `980669f`; alcance: User, migración, schemas,
+  hashing, JWT, register/login/me y pruebas. No se agregan otras funcionalidades.
+- Base verificada antes de editar: 9 tests aprobados, 1 omitido por falta de
+  TEST_DATABASE_URL. Se conserva la separación de clases y capas.
+- Primer bloque implementado: User, Alembic, schemas, Argon2id y JWT HS256.
+- Validación: 30 tests aprobados y 1 omitido en la suite; prueba adicional de SQL
+  PostgreSQL de migración aprobada. Ruff y git diff --check correctos.
+
 ## Avance backend
 - Factory FastAPI, router reservado `/api/v1`, configuración Pydantic desde `.env`.
 - CORS configurable, paquetes por capa y pruebas de arranque/OpenAPI/CORS.
