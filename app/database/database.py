@@ -15,6 +15,10 @@ class Database:
             settings.database_url.get_secret_value(),
             pool_pre_ping=True,
             hide_parameters=True,
+            pool_size=settings.database_pool_size,
+            max_overflow=settings.database_max_overflow,
+            pool_timeout=5,
+            pool_recycle=300,
             connect_args={"connect_timeout": 5},
         )
         self._session_factory = sessionmaker(

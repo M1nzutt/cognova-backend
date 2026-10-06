@@ -4,6 +4,16 @@
 
 **Estado general:** backend en desarrollo. La autenticación quedó interrumpida durante una migración de alcance; hay fundamentos implementados, pero el flujo de producción NO está terminado.
 
+## Reconciliación verificada — fase 0
+- HEAD al reanudar: `3c2da2d`; árbol limpio, sin modificaciones parciales.
+- Fundamentos de auth confirmados en `96facf3`: se conservan User, Argon2id,
+  schemas y migración `0001_create_users`.
+- Diferencias a migrar: JWT de 60 minutos con email y sin sid; sin AuthSession,
+  cookies, CSRF, rutas auth ni limitador. No existe flujo HTTP que deba preservarse.
+- Migración requerida: `0002_auth_sessions`, con User.updated_at, AuthSession y
+  contadores persistentes de rate limiting. No reescribir 0001.
+- Preparación PostgreSQL local en curso; no declarar integración hasta ejecutarla.
+
 ## Regla crítica al reanudar
 
 Antes de tocar código:

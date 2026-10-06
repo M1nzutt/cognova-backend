@@ -20,8 +20,10 @@ def upgrade() -> None:
         sa.Column("semester", sa.Integer(), nullable=False),
         sa.Column("academic_goal", sa.Text(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(timezone=True),
-            server_default=sa.func.now(), nullable=False,
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
         ),
         sa.CheckConstraint("semester > 0", name="ck_users_semester_positive"),
     )

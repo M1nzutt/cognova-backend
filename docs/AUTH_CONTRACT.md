@@ -95,7 +95,7 @@ Name=cognova_csrf
 HttpOnly=false
 Secure=true          # producción
 SameSite=Lax
-Path=/api/v1/auth
+Path=/
 ```
 
 El frontend lee esta cookie y la refleja en:
@@ -111,6 +111,12 @@ El backend valida:
 4. hash asociado a la sesión cuando corresponda.
 
 El token CSRF no es una credencial de autenticación.
+
+Decisión confirmada: Netlify proxyea `/api/*` a Render conservando el prefijo;
+el navegador usa un mismo origen lógico. Cookies sin atributo Domain (host-only).
+CSRF usa Path=/ para poder leerse desde /login y las demás páginas; refresh
+permanece HttpOnly con Path=/api/v1/auth. Nunca llamar a Render directamente
+desde el frontend para autenticar usuarios.
 
 ---
 
@@ -309,6 +315,9 @@ El frontend elimina el access token de memoria.
 
 Logout debe ser idempotente desde la perspectiva del usuario.
 
+Detalle de idempotencia: sin refresh cookie responde 204 y limpia cookies. Si hay
+cookie, exige CSRF; repetir una petición válida ya revocada también devuelve 204.
+
 ---
 
 ## 8. Sesiones activas
@@ -344,6 +353,9 @@ Nunca devolver:
 Requiere access token.
 
 Solo puede revocar una sesión perteneciente al usuario autenticado.
+
+Respuesta: `204 No Content`. Una sesión ajena se trata como no encontrada (`404`)
+para no revelar su existencia. `session_id` tiene formato UUID; malformado da 422.
 
 Si se revoca la sesión actual:
 - revocar;

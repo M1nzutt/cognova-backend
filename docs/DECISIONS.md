@@ -86,6 +86,29 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Cambios a decisiones congeladas
 
+### Implementación de auth revocable — 2026-10-05
+- Se conserva la migración 0001; 0002 agrega sesiones UUID, updated_at y contadores
+  de abuso. Los JWT antiguos sin sid/type/iat se rechazan; se requiere nuevo login.
+- JWT: 15 minutos por defecto, máximo 15; refresh: 30 días absolutos, sin extender
+  expiración al rotar. Se incluye jti aleatorio para distinguir emisiones.
+- Refresh/CSRF: 48/32 bytes aleatorios respectivamente, SHA-256 de los secretos
+  en DB y comparaciones constantes. No se requiere hashing lento para secretos
+  aleatorios de alta entropía. Argon2id se mantiene para contraseñas humanas.
+- Rotación y revocación serializadas con SELECT FOR UPDATE. CSRF se valida antes
+  del secreto conforme al contrato: replay con CSRF antiguo da 403; secreto
+  antiguo con CSRF vigente revoca de forma persistente y da 401.
+- Rate limiting compartido en PostgreSQL: ventana por IP y adicional por email
+  en login, 20 intentos/60 segundos por defecto, configurable. Las claves usan
+  HMAC-SHA256, nunca IP/email plano. Intentos fallidos también consumen cuota.
+- No se confía directamente en X-Forwarded-For; configurar proxies confiables en
+  Uvicorn al desplegar. El limitador falla cerrado si PostgreSQL no está disponible.
+- Registro/login verifican Origin cuando existe, para impedir login CSRF.
+- Logout sin refresh cookie es no-op 204; con cookie exige CSRF asociado. Revocar
+  una sesión ajena devuelve 404 sin revelar existencia. DELETE devuelve 204.
+- Decisión confirmada por el usuario: CSRF Path=/; refresh HttpOnly Path=/api/v1/auth.
+  Netlify proxyea /api/* hacia Render conservando /api/*; mismo origen lógico,
+  cookies host-only, Secure y SameSite=Lax. No hace falta SameSite=None.
+
 Solo mediante:
 1. motivo claro;
 2. impacto documentado;

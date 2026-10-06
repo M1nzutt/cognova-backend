@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import uuid4
 
 import jwt
 import pytest
@@ -29,35 +30,62 @@ def test_tokens_include_contract_claims_and_expiration():
     settings = Settings(_env_file=None)
     service = TokenService(settings)
     now = datetime.now(timezone.utc).timestamp()
-    token = service.create(7, "sara@example.com")
+    session_id = uuid4()
+    token = service.create(7, session_id)
     claims = jwt.decode(
         token, settings.jwt_secret.get_secret_value(), algorithms=["HS256"]
     )
-    assert service.verify(token) == (7, "sara@example.com")
-    assert set(claims) == {"sub", "email", "exp"}
-    assert now + 3598 < claims["exp"] <= now + 3601
+    assert service.verify(token).sub == "7"
+    assert service.verify(token).sid == session_id
+    assert set(claims) == {"sub", "sid", "type", "iat", "exp", "jti"}
+    assert now + 898 < claims["exp"] <= now + 901
 
 
 @pytest.mark.parametrize(
-    "change", [
-        {"exp": 1}, {"exp": None}, {"exp": "tomorrow"}, {"exp": float("inf")},
-        {"sub": "0"}, {"sub": "-1"}, {"sub": "01"}, {"sub": "2147483648"},
-        {"sub": "1 OR 1=1"}, {"sub": 1}, {"email": []}, {"email": ""},
+    "change",
+    [
+        {"exp": 1},
+        {"exp": None},
+        {"exp": "tomorrow"},
+        {"exp": float("inf")},
+        {"sub": "0"},
+        {"sub": "-1"},
+        {"sub": "01"},
+        {"sub": "2147483648"},
+        {"sub": "1 OR 1=1"},
+        {"sub": 1},
+        {"sid": []},
+        {"sid": ""},
+        {"type": "refresh"},
+        {"iat": 4102444800},
+        {"iat": True},
     ],
 )
 def test_rejects_invalid_claims(change):
     settings = Settings(_env_file=None)
-    claims = {"sub": "1", "email": "sara@example.com", "exp": 4102444800}
+    claims = {
+        "sub": "1",
+        "sid": str(uuid4()),
+        "type": "access",
+        "iat": 1,
+        "exp": 4102444800,
+    }
     claims.update(change)
     token = jwt.encode(claims, settings.jwt_secret.get_secret_value(), "HS256")
     with pytest.raises(AuthError, match="La sesión expiró"):
         TokenService(settings).verify(token)
 
 
-@pytest.mark.parametrize("missing", ["sub", "email", "exp"])
+@pytest.mark.parametrize("missing", ["sub", "sid", "type", "iat", "exp"])
 def test_rejects_missing_claims(missing):
     settings = Settings(_env_file=None)
-    claims = {"sub": "1", "email": "sara@example.com", "exp": 4102444800}
+    claims = {
+        "sub": "1",
+        "sid": str(uuid4()),
+        "type": "access",
+        "iat": 1,
+        "exp": 4102444800,
+    }
     del claims[missing]
     token = jwt.encode(claims, settings.jwt_secret.get_secret_value(), "HS256")
     with pytest.raises(AuthError):
@@ -68,7 +96,13 @@ def test_rejects_missing_claims(missing):
 def test_rejects_unapproved_algorithm(algorithm):
     settings = Settings(_env_file=None)
     token = jwt.encode(
-        {"sub": "1", "email": "sara@example.com", "exp": 4102444800},
+        {
+            "sub": "1",
+            "sid": str(uuid4()),
+            "type": "access",
+            "iat": 1,
+            "exp": 4102444800,
+        },
         None if algorithm == "none" else settings.jwt_secret.get_secret_value(),
         algorithm=algorithm,
     )
@@ -83,7 +117,7 @@ def test_requires_strong_secret_and_valid_configuration(monkeypatch):
     for overrides in (
         {"jwt_secret": "short"},
         {"jwt_secret": "x" * 32, "jwt_algorithm": "none"},
-        {"jwt_secret": "x" * 32, "jwt_expire_minutes": 0},
+        {"jwt_secret": "x" * 32, "access_token_expire_minutes": 0},
     ):
         with pytest.raises(ValidationError):
             Settings(_env_file=None, **overrides)
@@ -91,8 +125,12 @@ def test_requires_strong_secret_and_valid_configuration(monkeypatch):
 
 def test_registration_preserves_password_and_normalizes_email():
     payload = RegisterRequest(
-        name="Sara", email="SARA@EXAMPLE.COM", password=" secret12 ",
-        degree_program="Software", semester=4, academic_goal="Estudiar",
+        name="Sara",
+        email="SARA@EXAMPLE.COM",
+        password=" secret12 ",
+        degree_program="Software",
+        semester=4,
+        academic_goal="Estudiar",
     )
     assert payload.email == "sara@example.com"
     assert payload.password.get_secret_value() == " secret12 "

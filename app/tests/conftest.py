@@ -9,7 +9,10 @@ def isolated_environment(monkeypatch):
     monkeypatch.setenv(
         "DATABASE_URL", "postgresql+psycopg://test:test@localhost:5432/cognova_test"
     )
-    monkeypatch.setenv("CORS_ORIGINS", "[]")
+    monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "[]")
+    monkeypatch.setenv("ENVIRONMENT", "test")
+    monkeypatch.setenv("COOKIE_SECURE", "true")
     monkeypatch.setenv("JWT_SECRET", secrets.token_urlsafe(48))
     monkeypatch.setenv("JWT_ALGORITHM", "HS256")
-    monkeypatch.setenv("JWT_EXPIRE_MINUTES", "60")
+    monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15")
+    monkeypatch.setenv("AUTH_RATE_LIMIT", "20")

@@ -9,11 +9,21 @@ def test_openapi_does_not_advertise_unimplemented_endpoints():
         response = client.get("/openapi.json")
     assert response.status_code == 200
     assert response.json()["info"]["title"] == "Cognova API"
-    assert response.json()["paths"] == {}
+    assert set(response.json()["paths"]) == {
+        "/api/v1/auth/register",
+        "/api/v1/auth/login",
+        "/api/v1/auth/me",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/logout",
+        "/api/v1/auth/sessions",
+        "/api/v1/auth/sessions/{session_id}",
+        "/api/v1/health",
+        "/api/v1/ready",
+    }
 
 
 def test_cors_allows_configured_origin_and_bearer_header():
-    settings = Settings(_env_file=None, cors_origins=["http://localhost:5173"])
+    settings = Settings(_env_file=None, cors_allowed_origins=["http://localhost:5173"])
     with TestClient(create_app(settings)) as client:
         response = client.options(
             "/api/v1/subjects",

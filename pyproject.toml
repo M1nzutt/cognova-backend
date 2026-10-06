@@ -21,7 +21,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3,<10", "httpx>=0.28,<1", "ruff>=0.11,<1"]
+dev = ["pytest>=8.3,<10", "httpx>=0.28,<1", "ruff>=0.11,<1", "mypy>=1.15,<2"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+files = ["app"]
+exclude = ["app/tests/"]
+check_untyped_defs = true
+ignore_missing_imports = true
 
 [tool.setuptools.packages.find]
 include = ["app*"]

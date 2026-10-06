@@ -3,6 +3,8 @@ from sqlalchemy import create_engine, pool
 
 from app.core.settings import Settings
 from app.database.base import Base
+from app.models.auth_session import AuthSession  # noqa: F401
+from app.models.rate_limit_bucket import RateLimitBucket  # noqa: F401
 from app.models.user import User  # noqa: F401
 
 config = context.config
@@ -37,6 +39,7 @@ def run_migrations_online() -> None:
         settings.database_url.get_secret_value(),
         poolclass=pool.NullPool,
         hide_parameters=True,
+        connect_args={"connect_timeout": 10},
     )
     try:
         with engine.connect() as connection:

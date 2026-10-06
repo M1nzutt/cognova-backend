@@ -21,6 +21,14 @@ Fechas y horas: ISO 8601.
 
 Los recursos privados requieren autenticación salvo indicación contraria.
 
+## Operación
+
+- GET `/health`: público, `200 {"status":"ok"}`; liveness del proceso, no consulta DB.
+- GET `/ready`: público, `200 {"status":"ready"}` si `SELECT 1` funciona y Alembic
+  está en la revisión esperada; `503 {"error":{"code":"SERVICE_UNAVAILABLE",
+  "message":"Servicio temporalmente no disponible."}}` si falla. No expone hosts,
+  credenciales, versiones ni detalles internos. Ambos usan Cache-Control: no-store.
+
 ## Auth
 
 Fuente de verdad detallada: `AUTH_CONTRACT.md`.
