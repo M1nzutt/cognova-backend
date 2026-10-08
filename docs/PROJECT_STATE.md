@@ -1,149 +1,88 @@
-# Cognova — Estado del Proyecto (Backend)
+﻿# Cognova — Estado del Proyecto (Backend)
 
-**Fecha de referencia:** 2026-10-05
+Fecha de reconciliación: 2026-10-08.
 
-**Estado general:** backend en desarrollo. La autenticación quedó interrumpida durante una migración de alcance; hay fundamentos implementados, pero el flujo de producción NO está terminado.
+## Estado confirmado
 
-## Reconciliación verificada — fase 0
-- HEAD al reanudar: `3c2da2d`; árbol limpio, sin modificaciones parciales.
-- Fundamentos de auth confirmados en `96facf3`: se conservan User, Argon2id,
-  schemas y migración `0001_create_users`.
-- Diferencias a migrar: JWT de 60 minutos con email y sin sid; sin AuthSession,
-  cookies, CSRF, rutas auth ni limitador. No existe flujo HTTP que deba preservarse.
-- Migración requerida: `0002_auth_sessions`, con User.updated_at, AuthSession y
-  contadores persistentes de rate limiting. No reescribir 0001.
-- Preparación PostgreSQL local en curso; no declarar integración hasta ejecutarla.
+Al iniciar esta fase, `main` estaba limpio y sincronizado con `origin/main`, en
+`06c3d2a feat: finalize production auth and deployment setup`. El documento anterior
+estaba desactualizado: auth NO está limitada a fundamentos ni requiere rehacerse.
 
-## Regla crítica al reanudar
+Código inspeccionado: User, AuthSession, RateLimitBucket, Argon2id, JWT corto,
+registro/login/me, refresh rotativo, CSRF, logout real, sesiones/revocación,
+ownership, rate limiting PostgreSQL, errores globales, security middleware,
+health/readiness, ORM/conexiones, Alembic, CI, Render, launcher y smoke auth.
 
-Antes de tocar código:
+Commits base:
+- `06c3d2a`: auth avanzada y preparación del despliegue.
+- `96facf3`: modelo User y fundamentos de autenticación.
+- `98e12bb`: configuración PostgreSQL.
+- `a633870`: infraestructura FastAPI.
 
-```bash
-git status
-git diff
-git log --oneline -15
-```
+El usuario confirmó despliegue existente en Render, Render Postgres y Netlify:
+[backend](https://cognova-backend-1psi.onrender.com) y
+[frontend](https://cognova-frontend.netlify.app). Esta fase no ha comprobado tráfico,
+revisión de producción ni grants, ni ha modificado o recreado esos recursos.
 
-No asumir que un archivo quedó guardado/commiteado solo porque fue mencionado en una sesión anterior.
+## Fase actual: preparar separación de database
 
-## Lo confirmado antes de la interrupción
+Decisión vigente: tres repositorios, cognova-frontend, cognova-backend y
+cognova-database. Este agente solo modifica documentación de cognova-backend.
 
-Base backend:
-- FastAPI factory;
-- `/api/v1`;
-- Pydantic settings;
-- CORS configurable;
-- SQLAlchemy 2;
-- psycopg 3;
-- PostgreSQL como DB objetivo;
-- sesiones DB por request;
-- Alembic;
-- tests de infraestructura.
+Diagnóstico y contrato de entrega: [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
 
-Commits confirmados de fase inicial:
-- `a633870 chore: initialize FastAPI backend`
-- `98e12bb feat: add database configuration`
+- Backend conserva ORM SQLAlchemy, consultas, conexión, API, auth y lógica de negocio.
+- Database es propietario definitivo de Alembic, historial, DDL, índices/constraints,
+  seeds físicos, documentación del esquema y backup/restauración.
+- La copia local de Alembic sigue operativa temporalmente para preservar deployment
+  y pruebas; el traspaso físico NO se ha ejecutado ni se presenta como completado.
+- Revisiones intactas: `0001_create_users` → `0002_auth_sessions`.
+- Startup sigue migrando con advisory lock; readiness sigue exigiendo conectividad
+  y la revisión exacta 0002. No se quitaron controles ni se introdujeron bypasses.
+- El futuro runner database requiere configuración independiente de `app`, una
+  versión fija, pruebas reales y coordinación antes de retirar la ejecución local.
+- No se modificaron modelos, auth, DTOs, runtime, dependencias, CI ni Render.
+- `academic_goal` continúa en User/auth. Corresponde conceptualmente a la pregunta 1
+  del cuestionario; resolver después, con contrato y migración de datos coordinados.
 
-Autenticación — primer bloque implementado antes del corte:
-- `User`;
-- migración Alembic inicial;
-- schemas de auth;
-- Argon2id;
-- JWT HS256;
-- tests de hashing/JWT/migración;
-- documentación parcial.
+## Validaciones
 
-En la última validación conocida de ese bloque se reportaron:
-- 30 tests aprobados;
-- 1 omitido por no disponer de PostgreSQL real;
-- Ruff correcto;
-- SQL de migración validado.
+Referencia anterior informada por el usuario: Ruff correcto; pytest 55 passed,
+40 skipped, 1 warning; build --no-isolation correcto. No equivale a integración
+PostgreSQL desplegada verificada en esta fase.
 
-El hash del commit posterior de fundamentos de auth no está fijado en esta documentación; Git debe confirmarlo.
-
-## Lo que NO debe darse por terminado
-
-El trabajo se interrumpió antes de completar la autenticación.
-
-No asumir completos:
-- `POST /auth/register`;
-- `POST /auth/login`;
-- `GET /auth/me`;
-- refresh;
-- logout;
-- AuthSession;
-- CSRF;
-- rate limiting;
-- gestión/revocación de sesiones;
-- endpoint tests finales;
-- integración PostgreSQL real.
-
-Además, el diseño anterior de auth (JWT largo + localStorage + logout local) quedó obsoleto.
-
-## Nueva decisión de producción
-
-Debe migrarse a `AUTH_CONTRACT.md` vigente:
-- access token corto;
-- access token solo en memoria;
-- refresh token opaco rotativo HttpOnly;
-- `AuthSession`;
-- CSRF;
-- logout/revocación;
-- rate limiting;
-- ownership.
-
-Preservar código útil existente; no rehacer Argon2id/User/migraciones sin motivo.
-
-## PostgreSQL
-
-A la última comprobación conocida:
-- no había `psql`/Docker/servicio PostgreSQL local disponible;
-- prueba real con `TEST_DATABASE_URL` estaba omitida.
-
-Antes de producción se requiere integración real con PostgreSQL.
-
-## Gaps de contrato detectados
-
-Antes de implementar funcionalidades posteriores:
-- DTOs exactos de varios endpoints aún deben completarse;
-- paginación/filtros de historial deben definirse;
-- `QUESTIONNAIRE.md` tiene preguntas pero no contiene las opciones completas;
-- el modelo de temporizador y dependencias fue ampliado en `DATA_MODEL.md`, pero código/migraciones aún deben implementarlo.
+Validación ejecutada en esta fase:
+- `python -m pytest -q`: 55 passed, 40 skipped, 1 warning. Las omisiones requieren
+  `TEST_DATABASE_URL`; la advertencia es deprecación httpx de Starlette TestClient.
+- `ruff check app migrations scripts`: correcto.
+- `ruff format --check app migrations scripts`: 63 archivos conformes.
+- `git diff --check`: correcto; revisión del diff confirma cambios documentales.
+- Blobs Git de ambas migraciones idénticos a `06c3d2a`, registrados en el handoff.
+- El runner del editor no descubrió tests; se usó pytest directamente. El sandbox
+  bloqueó inicialmente el intérprete externo; la ejecución autorizada sí completó.
+- No se repitió build: ningún archivo ejecutable ni de empaquetado cambió.
+No se usa SQLite ni se ejecutan tests que creen datos contra producción.
 
 ## Próximo paso exacto
 
-1. Leer toda la documentación actualizada.
-2. Inspeccionar Git.
-3. Identificar cambios de auth existentes y no rehacerlos.
-4. Completar migración a autenticación de producción.
-5. Ejecutar suite completa.
-6. Actualizar este archivo con archivos modificados, pruebas y commits.
-7. Continuar por fases del prompt definitivo.
+1. El responsable de cognova-database recibe el historial de `06c3d2a`, verifica
+   blobs/IDs y prepara configuración/runner independientes; detalles y pruebas
+   de aceptación en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+2. Database valida base vacía, upgrade desde 0001 con datos, repetición segura,
+   constraints/índices, grants y recuperación; publica commit/artefacto inmutable.
+3. Backend consume esa versión en CI/fixtures, mantiene sus modelos y verifica
+   auth/ORM con PostgreSQL real. Solo entonces preparar el cambio coordinado de
+   startup sin DDL y el retiro del historial/dependencia local de Alembic.
+4. Operación confirma propiedad de recursos Render existentes y coordina el corte
+   sin crear otra base. Ver [DEPLOYMENT.md](DEPLOYMENT.md).
 
-## Funcionalidades posteriores pendientes
+No avanzar ahora a cuestionario, materias, objetivos, actividades, sesiones,
+temporizador, estructuras, analytics, Gemini ni retos. No tocar frontend/database
+ni resolver fallos funcionales ajenos a esta separación.
 
-- cuestionario;
-- materias;
-- objetivos;
-- actividades;
-- dependencias;
-- sesiones/temporizador;
-- estructuras de datos;
-- analytics;
-- historial;
-- racha;
-- IA real;
-- observaciones;
-- reflexiones;
-- retos;
-- seed;
-- seguridad final;
-- despliegue.
+## Reanudar
 
-## Continuidad
-
-Si se interrumpe otra vez:
-- actualizar este documento antes de terminar;
-- indicar siguiente paso exacto;
-- dejar repo estable;
-- no borrar trabajo no commiteado.
+Leer Git y documentos antes de editar. Conservar cambios válidos. Esta fase prepara
+la separación y deja dependencias explícitas; no afirma que el corte ya ocurrió ni
+que el checklist global de producción está aprobado. Los commits documentales de
+esta fase se identifican en `git log`; los cambios ejecutables base son `06c3d2a`.

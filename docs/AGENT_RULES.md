@@ -12,6 +12,21 @@
 
 Nunca asumir que una tarea interrumpida quedó terminada.
 
+## Alcance de repositorio y base de datos
+
+- Este agente trabaja únicamente en `cognova-backend`.
+- La arquitectura vigente tiene tres repositorios: frontend, backend y database.
+- Backend conserva modelos ORM SQLAlchemy, queries y conexión PostgreSQL.
+- Database es propietario de Alembic, revisiones, schema lifecycle, índices,
+  constraints físicos, seeds DB y backup/restauración.
+- No modificar otros repositorios; documentar exactamente los cambios que requieren.
+- El historial local y la migración en startup son transitorios. No eliminarlos ni
+  añadir revisiones nuevas aquí sin resolver antes el corte descrito en
+  [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+- Prohibido recrear esquema, borrar/squash historial, cambiar revision IDs o usar
+  `create_all`/`stamp` como sustituto del traspaso.
+- No rehacer auth ni despliegue por un PROJECT_STATE antiguo: contrastar Git/código.
+
 ## Fuente de verdad
 
 Los documentos compartidos definen el producto y los contratos.
@@ -72,7 +87,7 @@ No usar “es solo un proyecto académico” para justificar:
 
 Antes de implementar una funcionalidad cuyo request/response no esté definido:
 1. completar el contrato;
-2. actualizar ambos repos cuando sea compartido;
+2. actualizar el contrato local y documentar sincronización con los repos afectados;
 3. luego implementar.
 
 No inferir DTO público directamente desde tablas.

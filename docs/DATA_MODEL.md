@@ -1,6 +1,13 @@
 # Cognova — Modelo de Datos
 
-Este documento describe el modelo conceptual. Los detalles exactos de tipos, índices, constraints y cascadas deben reflejarse en Alembic.
+Este documento describe el modelo conceptual. `cognova-database` será la fuente
+de verdad del esquema físico, Alembic, constraints, índices y cascadas.
+El ORM utilizado para consultas permanece en `cognova-backend/app/models/`.
+La copia local de migraciones se conserva temporalmente hasta el traspaso validado
+de [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md), sin modificar revisiones existentes.
+
+Estado implementado: User, AuthSession y RateLimitBucket. Las entidades posteriores
+son especificación de producto, no tablas que deban crearse en esta fase.
 
 ## Identidad y autenticación
 
@@ -18,6 +25,9 @@ Este documento describe el modelo conceptual. Los detalles exactos de tipos, ín
 Reglas:
 - email único case-insensitive;
 - password_hash nunca se expone.
+- `academic_goal` permanece por compatibilidad con auth y la migración 0001.
+  Conceptualmente pertenece a la pregunta 1 del cuestionario; su traslado requiere
+  una tarea posterior con contrato y migración de datos, fuera de esta separación.
 
 ### AuthSession
 - id
@@ -33,6 +43,14 @@ Reglas:
 - una User tiene muchas AuthSession;
 - refresh token plano nunca se persiste;
 - sesión revocada no puede renovar ni validar access tokens ligados a su `sid`.
+
+### RateLimitBucket (infraestructura implementada)
+- key_hash (HMAC, clave primaria)
+- hits
+- expires_at (indexado)
+
+Contadores compartidos de abuso en PostgreSQL; no almacenar IP/email en plano.
+El modelo y las consultas permanecen en backend; el DDL de 0002 pasa a database.
 
 ## Onboarding
 

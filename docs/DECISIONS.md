@@ -16,8 +16,9 @@
 - Frontend: React + TypeScript + Vite.
 - DB: PostgreSQL.
 - API REST.
-- Dos repositorios separados; no monolito.
-- Backend es el único que accede a PostgreSQL y al proveedor de IA.
+- Tres repositorios: cognova-frontend, cognova-backend y cognova-database.
+- Backend es el único acceso de la aplicación a PostgreSQL y Gemini. Database
+  accede con herramientas operativas para migraciones/recuperación; frontend nunca.
 
 ## Código
 
@@ -78,13 +79,33 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Persistencia y despliegue
 
-- Alembic administra esquema.
+- Alembic administra esquema bajo ownership de cognova-database. Su alojamiento
+  y ejecución actuales en backend son transitorios hasta completar el traspaso.
 - No `create_all` automático en producción.
 - Entornos dev/test/prod separados.
 - Backups y procedimiento de restauración antes de declarar producción estable.
 - CI con pruebas, build y controles de seguridad.
 
 ## Cambios a decisiones congeladas
+
+### Tres repositorios y separación DB — 2026-10-08
+
+- Sustituye la decisión de dos repositorios. Backend conserva ORM SQLAlchemy,
+  conexiones, queries, servicios, API, auth y ownership; database posee Alembic,
+  historial, DDL, índices/constraints, seeds físicos y backup/restauración.
+- No mover automáticamente modelos ORM ni sustituir migraciones por `create_all`.
+- Conservar exactamente `0001_create_users` → `0002_auth_sessions`, sin squash,
+  renumerar, recrear esquema ni marcar revisiones como aplicadas artificialmente.
+- Se prepara el traspaso en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). Esta fase
+  no modifica startup, readiness, CI, Render ni dependencias ejecutables: el runner
+  externo y su release aún requieren validación por el repositorio database.
+- El backend dejará de ejecutar migraciones al arrancar tras ese corte coordinado;
+  mantendrá verificación de DB y compatibilidad. No basta comprobar `SELECT 1`.
+- Mantener el despliegue existente. No crear otra DB ni aplicar de nuevo el Blueprint.
+- `academic_goal` corresponde conceptualmente a la pregunta 1 del cuestionario;
+  permanece en User y auth hasta un refactor posterior con migración y contratos.
+- Cada agente modifica solo su repositorio. Las dependencias con los otros se
+  documentan; no se editan archivos externos para sincronizar unilateralmente.
 
 ### Implementación de auth revocable — 2026-10-05
 - Se conserva la migración 0001; 0002 agrega sesiones UUID, updated_at y contadores
