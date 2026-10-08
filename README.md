@@ -1,7 +1,12 @@
 # Cognova Backend
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
-Fase inicial: infraestructura; las funcionalidades de producto están pendientes.
+Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
+La fase actual prepara la arquitectura de tres repositorios, sin nuevas funcionalidades.
+Consultar [estado real](docs/PROJECT_STATE.md),
+[traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
+ORM, consultas y conexiones permanecen en backend; Alembic y su historial se
+conservan temporalmente aquí hasta que database valide su recepción y ejecución.
 
 ## Entorno local
 
@@ -18,10 +23,10 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-No hay endpoints de negocio implementados ni endpoints provisionales.
-El prefijo reservado es `/api/v1`, según [el contrato](docs/API_CONTRACT.md).
+Están implementados los siete endpoints de autenticación, health y readiness
+bajo `/api/v1`, según [el contrato](docs/API_CONTRACT.md).
 
-`CORS_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
+`CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
 deniega el acceso entre orígenes; el ejemplo habilita Vite local.
 Los secretos deben quedar en `.env`, excluido de Git.
 
@@ -33,32 +38,37 @@ en `.env`; codificar los caracteres especiales del usuario/password para una URL
 No hay credenciales predeterminadas en el código. No se admite SQLite.
 
 El motor se crea durante el lifespan de FastAPI y se libera al apagar.
-Las conexiones son diferidas: iniciar el servidor no verifica disponibilidad de
-PostgreSQL. La dependencia `get_session` abre una sesión por petición, revierte
+Las conexiones de la factory son diferidas: iniciar Uvicorn directamente no verifica
+disponibilidad PostgreSQL; el launcher de Render sí conecta para migrar antes de servir.
+La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
-No se crean tablas automáticamente. Alembic crea la tabla `users`, su índice
-único sobre `lower(email)` y la restricción de semestre positivo.
+No se usa `create_all`. Alembic conserva las revisiones `0001_create_users` y
+`0002_auth_sessions`: users, sesiones revocables y contadores de rate limiting.
+El launcher de Render todavía aplica migraciones antes de iniciar Uvicorn;
+su retiro exige completar el [traspaso coordinado](docs/DATABASE_HANDOFF.md).
 
 ## Configuración de autenticación
 
 `JWT_SECRET` es obligatorio, sin valor predeterminado, con al menos 32 bytes.
 Generar un valor local aleatorio con
 `python -c "import secrets; print(secrets.token_urlsafe(48))"` y guardarlo en `.env`.
-`JWT_ALGORITHM=HS256` y `JWT_EXPIRE_MINUTES=60` son los valores predeterminados.
+`JWT_ALGORITHM=HS256` y `ACCESS_TOKEN_EXPIRE_MINUTES=15` son los valores predeterminados.
 No se aceptan algoritmos enviados por el cliente ni tokens sin expiración.
 Usar HTTPS en despliegue para proteger contraseñas y tokens en tránsito.
 
 Las contraseñas usan [Argon2id](https://argon2-cffi.readthedocs.io/en/stable/api.html)
 y los tokens [PyJWT](https://pyjwt.readthedocs.io/en/stable/usage.html).
 El contrato público vive en [AUTH_CONTRACT.md](docs/AUTH_CONTRACT.md).
-El modelo y los componentes de seguridad están preparados; integración HTTP en curso.
+Registro/login/me, refresh rotativo, logout, sesiones y revocación están implementados.
 
 Las pruebas unitarias no necesitan un servidor. Para probar una conexión real,
 definir `TEST_DATABASE_URL` con una base de pruebas PostgreSQL y ejecutar pytest.
-La prueba de integración ejecuta únicamente `SELECT 1`; se omite si falta esa
-variable. Nunca utiliza automáticamente la base configurada en `.env`.
+La suite de integración crea y elimina esquemas aislados con Alembic y prueba auth
+contra PostgreSQL real; se omite si falta esa variable. Nunca utilizar producción.
+No utiliza automáticamente la base configurada en `.env`.
 
-JWT, hashing, integración IA, seed y despliegue están pendientes de próximas fases.
+IA, seed y demás módulos de producto están fuera de la fase actual. El despliegue
+existente fue confirmado por el usuario; no se recrea durante la separación DB.
 
 ## Validación
 

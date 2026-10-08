@@ -18,6 +18,11 @@ Commits base:
 - `96facf3`: modelo User y fundamentos de autenticación.
 - `98e12bb`: configuración PostgreSQL.
 - `a633870`: infraestructura FastAPI.
+- `687100c`: diagnóstico, ownership de tres repositorios y contrato de entrega DB.
+
+El bloque documental de operación complementa ese diagnóstico con README,
+DEPLOYMENT, referencias de API y seguridad; no cambia el despliegue. Los enlaces
+Markdown relativos fueron comprobados y no hay destinos inexistentes.
 
 El usuario confirmó despliegue existente en Render, Render Postgres y Netlify:
 [backend](https://cognova-backend-1psi.onrender.com) y

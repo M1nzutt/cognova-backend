@@ -87,6 +87,13 @@ Responder `429` de forma consistente.
 - Backups automáticos en producción.
 - Procedimiento de restauración documentado y probado antes de considerar producción estable.
 
+Ownership desde 2026-10-08: cognova-database administra DDL, migraciones y
+recuperación; backend conserva ORM, acceso autorizado y transacciones. El corte
+debe separar rol migrador y runtime sin quitar la comprobación de compatibilidad.
+La copia local de Alembic sigue operativa temporalmente; ver
+[DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). Esta asignación no marca el checklist
+como completado ni acredita backups o pruebas de producción todavía no verificadas.
+
 ## 10. Logging
 
 Logs estructurados.
