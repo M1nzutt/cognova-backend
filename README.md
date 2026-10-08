@@ -1,4 +1,4 @@
-# Cognova Backend
+#  Cognova Backend
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
