@@ -40,6 +40,14 @@ El controlador JUnit ahora rechaza también suite vacía, fallos y ausencia de
 integración. Ruff y formato correctos; pruebas completas pendientes del runner CI
 por el bloqueo local de DLL, sin afirmar resultado verde anticipadamente.
 
+CI backend 38184259226 ejecutó PostgreSQL real: 103 passed, 1 failed. La única
+aserción fallida esperaba ruta de log absoluta; FastAPI entrega plantilla relativa
+al router. Se ajusta esa aserción preservando verificación HTTP y ausencia de
+secretos. El CI previo detectó una reasignación `Insert`/`ReturningInsert` en el
+limitador: se separa el nombre de variable, sin cambiar SQL ni política auth.
+Pruebas de esquema externo/ORM/startup read-only sí pasaron. Falta repetir la suite
+completa y controles tras estos dos ajustes, antes del retiro del historial.
+
 ## Estado confirmado
 
 Al iniciar esta fase, `main` estaba limpio y sincronizado con `origin/main`, en

@@ -29,7 +29,7 @@ class RateLimitService:
         bucket = RateLimitBucket
         expired = bucket.expires_at <= now
         statement = insert(bucket).values(key_hash=digest, hits=1, expires_at=expiry)
-        statement = statement.on_conflict_do_update(
+        returning_statement = statement.on_conflict_do_update(
             index_elements=[bucket.key_hash],
             set_={
                 "hits": case((expired, 1), else_=bucket.hits + 1),
@@ -40,7 +40,7 @@ class RateLimitService:
             db.execute(
                 delete(bucket).where(bucket.expires_at < now - timedelta(days=1))
             )
-            hits = db.scalar(statement)
+            hits = db.scalar(returning_statement)
             db.commit()
         if hits is not None and hits > self._limit:
             raise AuthError("TOO_MANY_REQUESTS")
