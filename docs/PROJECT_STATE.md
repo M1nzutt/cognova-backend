@@ -30,6 +30,16 @@ Fecha de reconciliación: 2026-10-11.
 Las secciones siguientes conservan la referencia de la fase 1; esta sección
 prevalece para el avance de fase 2.
 
+Segundo bloque preparado: startup valida settings/PORT y ejecuta la misma
+comprobación de compatibilidad de readiness antes de Uvicorn, liberando el pool
+en éxito/error. Ya no importa ni ejecuta Alembic; falta desplegar ese cambio.
+Readiness conserva explícitamente 0002 y rechaza ausencia/revisión desconocida o
+múltiples heads. Se agregó prueba online con conexión read-only y pruebas de
+fallo seguro/disposal. CI debe ejecutarlas antes del retiro del historial local.
+El controlador JUnit ahora rechaza también suite vacía, fallos y ausencia de
+integración. Ruff y formato correctos; pruebas completas pendientes del runner CI
+por el bloqueo local de DLL, sin afirmar resultado verde anticipadamente.
+
 ## Estado confirmado
 
 Al iniciar esta fase, `main` estaba limpio y sincronizado con `origin/main`, en

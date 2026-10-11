@@ -6,6 +6,8 @@ from app.database.database import Database
 class ReadinessService:
     """Check connectivity and schema before accepting production traffic."""
 
+    # Schema contract, not ownership of Alembic. Never accept arbitrary heads
+    # from an environment variable; new heads require a tested backend release.
     expected_revision = "0002_auth_sessions"
 
     def __init__(self, database: Database) -> None:

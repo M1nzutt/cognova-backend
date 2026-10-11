@@ -52,9 +52,9 @@ jobs:
           persist-credentials: false
       - run: ruff check app migrations scripts
       - run: ruff format --check app migrations scripts
-      - run: mypy app --exclude app/tests
       - run: python -m pytest -q --junitxml=test-results.xml
       - run: python scripts/check_test_results.py test-results.xml
+      - run: mypy app --exclude app/tests
       - run: python -m build
       - run: pip-audit -r requirements.lock
       - uses: actions/upload-artifact@v4
