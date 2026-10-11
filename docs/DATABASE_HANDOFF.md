@@ -19,7 +19,10 @@ El esquema requerido sigue siendo `0002_auth_sessions`.
 - [Backend CI 38184426616](https://github.com/M1nzutt/cognova-backend/actions/runs/38184426616)
   aprobó fixtures externas, auth/ownership, concurrencia, ORM, startup read-only,
   readiness, Ruff, mypy, build y audit antes de retirar los archivos locales.
-- La validación posterior al retiro se registra en [PROJECT_STATE.md](PROJECT_STATE.md).
+- [Backend CI final 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858)
+  aprobó el retiro completo en `842f2a4`: 103 tests sin skips, 40 de integración,
+  instalación runtime sin Alembic/database, Ruff/mypy/build/auditoría y secretos.
+  Detalle en [PROJECT_STATE.md](PROJECT_STATE.md).
 
 El checkout hermano y sus documentos registraban resultados locales omitidos;
 no se tomaron como certificación. La compuerta se superó con evidencia remota.

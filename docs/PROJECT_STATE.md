@@ -37,8 +37,16 @@ success antes del retiro local. Auth/ownership/concurrencia, fixtures externas,
 compatibilidad ORM y startup read-only ejecutados con PostgreSQL real, sin skips;
 Ruff, formato, mypy, build, auditoría y escaneo de secretos aprobados.
 
-Validación posterior al retiro del historial y lock runtime: pendiente de CI de
-este bloque. No declarar la rama final aprobada hasta registrar ese resultado.
+Validación final tras el retiro, commit `842f2a4fad54d0e553f98c7d864da92db64fa2af`:
+[Backend CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858)
+completado success. **103 passed, 0 skipped, 1 warning**, incluidos 40 casos de
+integración PostgreSQL según el control JUnit. Mypy: sin problemas en 41 archivos.
+Ruff/formato, build, escaneo de secretos y auditoría aprobados (sin vulnerabilidades
+conocidas). La instalación runtime aislada confirma ausencia de Alembic y
+cognova_database y permite importar factory/launcher. La advertencia pendiente
+es deprecación httpx de Starlette TestClient; no hay fallos de tests.
+El commit posterior a esa validación solo registra evidencia documental, sin
+cambios de código/dependencias. No requiere repetir el CI ya aprobado.
 Ruff/formato local: correctos, 62 archivos. Build --no-isolation genera sdist y
 wheel correctamente. El diff del lock solo retira Alembic/Mako/MarkupSafe y sus
 referencias; no cambia versiones de otras dependencias.
@@ -71,18 +79,15 @@ real de suite completa, en vez de presentar skips o mocks como integración.
 - `b170b1a`: tooling database fijado, fixtures externas y comparación ORM.
 - `9a9d818`: startup sin DDL y pruebas de fallo seguro/read-only.
 - `e8e0bd8`: correcciones mínimas de tipado y aserción de ruta de log.
-- El siguiente bloque retira historial/runtime Alembic y sincroniza documentación;
-  identificar su hash mediante git log.
+- `842f2a4`: retiro de historial/runtime Alembic, lock y documentación; CI final verde.
 
 ## Próximo paso exacto
 
-1. Completar CI de la retirada final, incluidas instalación runtime sin Alembic,
-   tests PostgreSQL completos, Ruff/mypy/build/auditoría y revisión del diff.
-2. Revisar la rama antes de merge; no desplegar automáticamente en esta fase.
-3. Operación/database deben verificar 0002 efectiva, grants con rol runtime sin
+1. Revisar la rama validada antes de merge; no desplegar automáticamente en esta fase.
+2. Operación/database deben verificar 0002 efectiva, grants con rol runtime sin
    DDL, backup/restauración y ownership de recursos Render existentes. Solo entonces
    coordinar rollout y retirar launchers antiguos capaces de migrar. No crear otra DB.
-4. El responsable de database puede actualizar su checkout/documentación local con
+3. El responsable de database puede actualizar su checkout/documentación local con
    la evidencia remota. No hay cambios de código database requeridos detectados.
 
 [DEPLOYMENT](DEPLOYMENT.md) describe el despliegue informado existente y el corte

@@ -43,6 +43,8 @@ durante ejecución. El proceso API usará credencial runtime sin permisos DDL.
 El runner externo y la compatibilidad backend se validaron en PostgreSQL de CI,
 permitiendo retirar Alembic local del runtime. Esto no acredita permisos o
 recuperación de producción. El corte en código no es un rollout.
+Evidencia final: [CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858),
+103 tests aprobados sin omisiones y runtime sin herramientas de migración.
 La secuencia exacta y la política para futuras revisiones están en
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). No se usa una comparación de strings
 «mayor o igual» ni se acepta cualquier head por variable de entorno.
