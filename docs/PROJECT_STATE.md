@@ -1,6 +1,34 @@
 ﻿# Cognova — Estado del Proyecto (Backend)
 
-Fecha de reconciliación: 2026-10-08.
+Fecha de reconciliación: 2026-10-11.
+
+## Fase 2 — evidencia nueva y adaptación en curso
+
+- Backend inicial: `5fa90a3`, main limpio/sincronizado.
+- Database hermano: `325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio; solo lectura.
+- Database remoto validado: `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`.
+  [CI 38001623290](https://github.com/M1nzutt/cognova-database/actions/runs/38001623290)
+  finalizó success, con PostgreSQL 17, pytest y verificación obligatoria sin skips.
+  Respecto del checkout hermano solo cambia el título de README; no hay divergencia
+  de código/historial. Los blobs de 0001/0002 coinciden también en una copia local
+  del SHA remoto bajo `.local/`, dentro del backend.
+- La compuerta database está superada por CI remoto. Esto no certifica grants,
+  restauración o rollout de producción ni la suite backend modificada.
+- Windows Application Control bloquea PostgreSQL local. No se intenta eludirlo;
+  la validación online del backend se realizará en CI con base desechable.
+- Preparadas fixtures externas con checkout limpio y SHA fijo declarado en
+  `tools/database-ref.json`, guardas de destino local/DDL explícito y comparación
+  ORM contra esquema externo. CI deja de aplicar el historial backend.
+- En este primer bloque se conserva startup y copia local de migraciones hasta
+  adaptar sus pruebas. No se toca producción ni el repositorio hermano.
+- Verificación inicial: Ruff correcto (66 archivos); pytest no recopila la suite
+  porque Windows Application Control bloquea `_processors_cy` de SQLAlchemy.
+  No se interpreta como fallo de auth ni se desactiva la política del sistema.
+  Se prepara una rama de revisión para ejecutar CI con PostgreSQL desechable;
+  sin merge a main ni redeploy. Resultado remoto pendiente.
+
+Las secciones siguientes conservan la referencia de la fase 1; esta sección
+prevalece para el avance de fase 2.
 
 ## Estado confirmado
 

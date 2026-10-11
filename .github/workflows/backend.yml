@@ -24,6 +24,8 @@ jobs:
       DATABASE_URL: postgresql+psycopg://cognova_test:ci-only-ephemeral-password@localhost:5432/cognova_test
       JWT_SECRET: ci-only-placeholder-secret-at-least-32-bytes
       ENVIRONMENT: test
+      TEST_DATABASE_ALLOW_DDL: 'yes'
+      REQUIRE_POSTGRES_TESTS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,13 +40,21 @@ jobs:
           cache-dependency-path: requirements.lock
       - run: pip install --require-hashes -r requirements.lock
       - run: pip install -e '.[dev]' pip-audit build
+      - name: Read immutable database reference
+        id: database
+        run: |
+          python -c "import json; r=json.load(open('tools/database-ref.json')); print('commit='+r['commit']); print('repository='+r['repository'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.database.outputs.repository }}
+          ref: ${{ steps.database.outputs.commit }}
+          path: .local/database-handoff
+          persist-credentials: false
       - run: ruff check app migrations scripts
       - run: ruff format --check app migrations scripts
       - run: mypy app --exclude app/tests
       - run: python -m pytest -q --junitxml=test-results.xml
       - run: python scripts/check_test_results.py test-results.xml
-      - run: alembic upgrade head
-      - run: alembic check
       - run: python -m build
       - run: pip-audit -r requirements.lock
       - uses: actions/upload-artifact@v4

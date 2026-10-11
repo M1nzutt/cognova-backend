@@ -1,10 +1,7 @@
 import os
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
-from alembic import command
-from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.engine import make_url
@@ -13,14 +10,23 @@ from sqlalchemy.schema import CreateSchema, DropSchema
 from app.core.settings import Settings
 from app.database.database import Database
 from app.main import create_app
+from app.tests.database_tooling import database_checkout, migrate_test_schema
 
 
 @pytest.fixture
 def pg_settings():
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
+        if os.environ.get("REQUIRE_POSTGRES_TESTS") == "1":
+            pytest.fail("CI requires TEST_DATABASE_URL")
         pytest.skip("TEST_DATABASE_URL is required for PostgreSQL integration")
+    if os.environ.get("TEST_DATABASE_ALLOW_DDL") != "yes":
+        pytest.fail("Explicit TEST_DATABASE_ALLOW_DDL=yes required for disposable DB")
     Settings(_env_file=None, database_url=url)  # Reject non-PostgreSQL URLs.
+    parsed = make_url(url)
+    if parsed.host not in {"localhost", "127.0.0.1", "::1"} or parsed.query:
+        pytest.fail("Use local disposable PostgreSQL without URL options or tunnels")
+    checkout = database_checkout()
     schema = "test_" + uuid4().hex
     admin = create_engine(
         url, hide_parameters=True, connect_args={"connect_timeout": 5}
@@ -32,10 +38,7 @@ def pg_settings():
         scoped_url, hide_parameters=True, connect_args={"connect_timeout": 5}
     )
     try:
-        config = Config(str(Path(__file__).resolve().parents[3] / "alembic.ini"))
-        with engine.begin() as connection:
-            config.attributes["connection"] = connection
-            command.upgrade(config, "head")
+        migrate_test_schema(checkout, scoped_url.render_as_string(hide_password=False))
         yield Settings(
             _env_file=None,
             database_url=scoped_url.render_as_string(hide_password=False),
