@@ -24,9 +24,9 @@ cognova-database (operación, no API de producto)
   físicos, documentación del esquema y backup/restauración. No reemplaza la API.
 - Los modelos ORM permanecen en backend; sus declaraciones reflejan el esquema,
   pero no autorizan creación automática de tablas.
-- Transición: Alembic aún reside y se ejecuta en backend por compatibilidad con el
-  despliegue actual. Es una dependencia temporal congelada, no el ownership final.
-  No retirarla hasta cumplir [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+- Fase 2: historial y ejecución DDL retirados del código backend tras validar CI
+  database y compatibilidad backend con PostgreSQL. El rollout productivo sigue
+  pendiente; consultar [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
 
 ## Capas esperadas
 
@@ -63,7 +63,8 @@ Reglas:
 - User, AuthSession y RateLimitBucket;
 - auth HTTP completa implementada: Argon2id/JWT, refresh, CSRF y revocación;
 - middleware de seguridad, errores, rate limiting y health/readiness;
-- Alembic local y launcher con migración, pendientes de transferencia coordinada.
+- launcher sin DDL que exige DB disponible y esquema compatible antes de escuchar;
+- tooling database fijado por commit para CI, fuera del runtime API.
 
 El estado exacto vive en `PROJECT_STATE.md` y Git.
 
@@ -151,10 +152,10 @@ Producción debe contar con:
 - Database administra migraciones Alembic, constraints, índices y recuperación.
 - Backend conserva el ORM, consultas, transacciones y autorización por usuario.
 - Rol migrador con DDL y rol runtime con DML deben separarse durante el corte.
-- Hoy el launcher aplica `head` antes de Uvicorn; readiness exige conectividad y
-  `0002_auth_sessions`. No depende del paquete Alembic para consultar la revisión.
-- Destino: database migra antes del release; backend comprueba compatibilidad,
-  inicia FastAPI y mantiene readiness. No migra ni repara el esquema al arrancar.
+- El launcher de esta rama exige conectividad y `0002_auth_sessions` antes de
+  Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
+- Database migra antes del release; backend no migra ni repara esquema al arrancar.
+  Esta separación ya existe en código, pero no se ha desplegado desde esta fase.
 - Una revisión futura requiere coordinación de compatibilidad antes de aplicarse;
   consultar la secuencia de corte en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md)
   y el estado operativo en [DEPLOYMENT.md](DEPLOYMENT.md).

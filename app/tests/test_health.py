@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
 
@@ -42,3 +43,15 @@ def test_readiness_requires_current_migration():
     assert not ReadinessService(database).check()
     session.scalars.return_value.all.return_value = ["0002_auth_sessions"]
     assert ReadinessService(database).check()
+
+
+@pytest.mark.parametrize(
+    "revisions",
+    [[], ["0003_unknown"], ["0002_auth_sessions", "another_head"]],
+)
+def test_missing_unknown_or_multiple_heads_fail_closed(revisions):
+    database = MagicMock()
+    session = database.session.return_value.__enter__.return_value
+    session.scalar.return_value = 1
+    session.scalars.return_value.all.return_value = revisions
+    assert not ReadinessService(database).check()

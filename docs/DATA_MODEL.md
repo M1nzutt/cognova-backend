@@ -1,10 +1,10 @@
 # Cognova — Modelo de Datos
 
-Este documento describe el modelo conceptual. `cognova-database` será la fuente
+Este documento describe el modelo conceptual. `cognova-database` es la fuente
 de verdad del esquema físico, Alembic, constraints, índices y cascadas.
 El ORM utilizado para consultas permanece en `cognova-backend/app/models/`.
-La copia local de migraciones se conserva temporalmente hasta el traspaso validado
-de [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md), sin modificar revisiones existentes.
+El historial local se retiró tras el traspaso validado de
+[DATABASE_HANDOFF.md](DATABASE_HANDOFF.md), sin modificar revisiones existentes.
 
 Estado implementado: User, AuthSession y RateLimitBucket. Las entidades posteriores
 son especificación de producto, no tablas que deban crearse en esta fase.
@@ -50,7 +50,7 @@ Reglas:
 - expires_at (indexado)
 
 Contadores compartidos de abuso en PostgreSQL; no almacenar IP/email en plano.
-El modelo y las consultas permanecen en backend; el DDL de 0002 pasa a database.
+El modelo y las consultas permanecen en backend; el DDL de 0002 vive en database.
 
 ## Onboarding
 

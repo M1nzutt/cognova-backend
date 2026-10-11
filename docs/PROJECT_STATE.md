@@ -1,93 +1,95 @@
-﻿# Cognova — Estado del Proyecto (Backend)
+﻿# Cognova — Estado del backend
 
-Fecha de reconciliación: 2026-10-08.
+Reconciliación: 2026-10-11. Fase 2 del handoff database → backend.
 
-## Estado confirmado
+## Estado real y alcance
 
-Al iniciar esta fase, `main` estaba limpio y sincronizado con `origin/main`, en
-`06c3d2a feat: finalize production auth and deployment setup`. El documento anterior
-estaba desactualizado: auth NO está limitada a fundamentos ni requiere rehacerse.
+Backend inició limpio en `5fa90a3`, main sincronizado. Auth avanzada y deploy
+existían desde `06c3d2a`; no se rehicieron. El trabajo actual está en
+`chore/database-handoff-phase2`, sin merge a main ni redeploy.
 
-Código inspeccionado: User, AuthSession, RateLimitBucket, Argon2id, JWT corto,
-registro/login/me, refresh rotativo, CSRF, logout real, sesiones/revocación,
-ownership, rate limiting PostgreSQL, errores globales, security middleware,
-health/readiness, ORM/conexiones, Alembic, CI, Render, launcher y smoke auth.
+- Separación física: database existe y recibió 0001/0002 sin cambios de IDs/contenido.
+- Validación PostgreSQL database: confirmada en CI remoto con rechazo obligatorio
+  de omisiones; no se usó PostgreSQL productivo.
+- Adaptación backend: fixtures externas, compatibilidad ORM y startup sin DDL.
+- Retiro en código: alembic.ini, migrations/ y test SQL offline transferido; Alembic
+  deja runtime/lock y permanece en dev para tooling de tests/compare_metadata.
+- Corte operativo productivo: PENDIENTE. No cambios Render, grants, datos, recursos,
+  frontend o repo hermano database. El Blueprint histórico no se ha reaplicado.
 
-Commits base:
-- `06c3d2a`: auth avanzada y preparación del despliegue.
-- `96facf3`: modelo User y fundamentos de autenticación.
-- `98e12bb`: configuración PostgreSQL.
-- `a633870`: infraestructura FastAPI.
-- `687100c`: diagnóstico, ownership de tres repositorios y contrato de entrega DB.
+## Referencia database y evidencia
 
-El bloque documental de operación complementa ese diagnóstico con README,
-DEPLOYMENT, referencias de API y seguridad; no cambia el despliegue. Los enlaces
-Markdown relativos fueron comprobados y no hay destinos inexistentes.
+Checkout hermano inspeccionado solo en lectura:
+`325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio. Su documentación de pruebas
+locales estaba atrasada respecto al remoto; no se hizo fetch ni se escribió allí.
 
-El usuario confirmó despliegue existente en Render, Render Postgres y Netlify:
-[backend](https://cognova-backend-1psi.onrender.com) y
-[frontend](https://cognova-frontend.netlify.app). Esta fase no ha comprobado tráfico,
-revisión de producción ni grants, ni ha modificado o recreado esos recursos.
+Referencia adoptada: `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`, declarada en
+[tools/database-ref.json](../tools/database-ref.json). Respecto del checkout hermano
+solo cambia el título README. Se verificaron blobs y SHA-256 de ambas revisiones
+antes de retirarlas; valores y contrato en [DATABASE_HANDOFF](DATABASE_HANDOFF.md).
 
-## Fase actual: preparar separación de database
+[Database CI 38001623290](https://github.com/M1nzutt/cognova-database/actions/runs/38001623290):
+success con PostgreSQL 17. Cubre vacío→head, 0001→0002 con datos, revisión,
+repetición, constraints/índices, cascada, rollback y search_path.
 
-Decisión vigente: tres repositorios, cognova-frontend, cognova-backend y
-cognova-database. Este agente solo modifica documentación de cognova-backend.
+[Backend CI 38184426616](https://github.com/M1nzutt/cognova-backend/actions/runs/38184426616):
+success antes del retiro local. Auth/ownership/concurrencia, fixtures externas,
+compatibilidad ORM y startup read-only ejecutados con PostgreSQL real, sin skips;
+Ruff, formato, mypy, build, auditoría y escaneo de secretos aprobados.
 
-Diagnóstico y contrato de entrega: [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+Validación final tras el retiro, commit `842f2a4fad54d0e553f98c7d864da92db64fa2af`:
+[Backend CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858)
+completado success. **103 passed, 0 skipped, 1 warning**, incluidos 40 casos de
+integración PostgreSQL según el control JUnit. Mypy: sin problemas en 41 archivos.
+Ruff/formato, build, escaneo de secretos y auditoría aprobados (sin vulnerabilidades
+conocidas). La instalación runtime aislada confirma ausencia de Alembic y
+cognova_database y permite importar factory/launcher. La advertencia pendiente
+es deprecación httpx de Starlette TestClient; no hay fallos de tests.
+El commit posterior a esa validación solo registra evidencia documental, sin
+cambios de código/dependencias. No requiere repetir el CI ya aprobado.
+Ruff/formato local: correctos, 62 archivos. Build --no-isolation genera sdist y
+wheel correctamente. El diff del lock solo retira Alembic/Mako/MarkupSafe y sus
+referencias; no cambia versiones de otras dependencias.
 
-- Backend conserva ORM SQLAlchemy, consultas, conexión, API, auth y lógica de negocio.
-- Database es propietario definitivo de Alembic, historial, DDL, índices/constraints,
-  seeds físicos, documentación del esquema y backup/restauración.
-- La copia local de Alembic sigue operativa temporalmente para preservar deployment
-  y pruebas; el traspaso físico NO se ha ejecutado ni se presenta como completado.
-- Revisiones intactas: `0001_create_users` → `0002_auth_sessions`.
-- Startup sigue migrando con advisory lock; readiness sigue exigiendo conectividad
-  y la revisión exacta 0002. No se quitaron controles ni se introdujeron bypasses.
-- El futuro runner database requiere configuración independiente de `app`, una
-  versión fija, pruebas reales y coordinación antes de retirar la ejecución local.
-- No se modificaron modelos, auth, DTOs, runtime, dependencias, CI ni Render.
-- `academic_goal` continúa en User/auth. Corresponde conceptualmente a la pregunta 1
-  del cuestionario; resolver después, con contrato y migración de datos coordinados.
+## Cambios preservados y límites
 
-## Validaciones
+User, AuthSession, RateLimitBucket, ORM, queries y API permanecen. Auth conserva
+Argon2id, JWT corto, refresh opaco rotativo, CSRF, revocación/logout y ownership.
+`academic_goal` no cambia; su traslado conceptual a cuestionario pregunta 1 es
+posterior. No hay nueva revisión ni módulos de producto.
 
-Referencia anterior informada por el usuario: Ruff correcto; pytest 55 passed,
-40 skipped, 1 warning; build --no-isolation correcto. No equivale a integración
-PostgreSQL desplegada verificada en esta fase.
+Startup verifica DB/esquema antes de escuchar y libera el pool. Readiness exige
+explícitamente una única revisión 0002. Database no es servicio HTTP ni import
+runtime. Tests usan su CLI desde checkout limpio fijado, con credenciales solo por
+env y esquemas desechables; backend CI ya no ejecuta migraciones locales.
 
-Validación ejecutada en esta fase:
-- `python -m pytest -q`: 55 passed, 40 skipped, 1 warning. Las omisiones requieren
-  `TEST_DATABASE_URL`; la advertencia es deprecación httpx de Starlette TestClient.
-- `ruff check app migrations scripts`: correcto.
-- `ruff format --check app migrations scripts`: 63 archivos conformes.
-- `git diff --check`: correcto; revisión del diff confirma cambios documentales.
-- Blobs Git de ambas migraciones idénticos a `06c3d2a`, registrados en el handoff.
-- El runner del editor no descubrió tests; se usó pytest directamente. El sandbox
-  bloqueó inicialmente el intérprete externo; la ejecución autorizada sí completó.
-- No se repitió build: ningún archivo ejecutable ni de empaquetado cambió.
-No se usa SQLite ni se ejecutan tests que creen datos contra producción.
+Dos incidencias detectadas al activar CI se corrigieron sin cambio funcional:
+- Mypy: nombre separado para ReturningInsert en rate limiting; misma consulta SQL.
+- Test de privacidad del log: acepta plantilla estática relativa del router, además
+  de absoluta; mantiene comprobación del endpoint HTTP y ausencia de secretos.
+
+Localmente Windows Application Control bloquea PostgreSQL y DLL de SQLAlchemy:
+pytest completo no logra recopilar (9 errores de importación en el primer intento).
+No se eludió esa política ni se confundió con un fallo de auth. Dos tests aislados
+del adaptador sí pasaron. Ruff y formato locales pasan. CI Linux es la evidencia
+real de suite completa, en vez de presentar skips o mocks como integración.
+
+## Commits de esta fase
+
+- `b170b1a`: tooling database fijado, fixtures externas y comparación ORM.
+- `9a9d818`: startup sin DDL y pruebas de fallo seguro/read-only.
+- `e8e0bd8`: correcciones mínimas de tipado y aserción de ruta de log.
+- `842f2a4`: retiro de historial/runtime Alembic, lock y documentación; CI final verde.
 
 ## Próximo paso exacto
 
-1. El responsable de cognova-database recibe el historial de `06c3d2a`, verifica
-   blobs/IDs y prepara configuración/runner independientes; detalles y pruebas
-   de aceptación en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
-2. Database valida base vacía, upgrade desde 0001 con datos, repetición segura,
-   constraints/índices, grants y recuperación; publica commit/artefacto inmutable.
-3. Backend consume esa versión en CI/fixtures, mantiene sus modelos y verifica
-   auth/ORM con PostgreSQL real. Solo entonces preparar el cambio coordinado de
-   startup sin DDL y el retiro del historial/dependencia local de Alembic.
-4. Operación confirma propiedad de recursos Render existentes y coordina el corte
-   sin crear otra base. Ver [DEPLOYMENT.md](DEPLOYMENT.md).
+1. Revisar la rama validada antes de merge; no desplegar automáticamente en esta fase.
+2. Operación/database deben verificar 0002 efectiva, grants con rol runtime sin
+   DDL, backup/restauración y ownership de recursos Render existentes. Solo entonces
+   coordinar rollout y retirar launchers antiguos capaces de migrar. No crear otra DB.
+3. El responsable de database puede actualizar su checkout/documentación local con
+   la evidencia remota. No hay cambios de código database requeridos detectados.
 
-No avanzar ahora a cuestionario, materias, objetivos, actividades, sesiones,
-temporizador, estructuras, analytics, Gemini ni retos. No tocar frontend/database
-ni resolver fallos funcionales ajenos a esta separación.
-
-## Reanudar
-
-Leer Git y documentos antes de editar. Conservar cambios válidos. Esta fase prepara
-la separación y deja dependencias explícitas; no afirma que el corte ya ocurrió ni
-que el checklist global de producción está aprobado. Los commits documentales de
-esta fase se identifican en `git log`; los cambios ejecutables base son `06c3d2a`.
+[DEPLOYMENT](DEPLOYMENT.md) describe el despliegue informado existente y el corte
+pendiente. No se certifican permisos, recuperación ni tráfico productivo aquí.
+No avanzar a cuestionario, materias, sesiones, estructuras, IA ni otros módulos.

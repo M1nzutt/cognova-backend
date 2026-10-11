@@ -12,36 +12,39 @@ El usuario confirmó el 2026-10-08 estos recursos ya desplegados:
 No recrear recursos ni ejecutar smoke con registro de usuarios por esta tarea.
 La existencia informada del despliegue no equivale a una prueba funcional reciente.
 
-## Arranque versionado actual
+## Arranque de la rama de handoff (sin desplegar)
 
 [render.yaml](../render.yaml) usa `python scripts/start.py` y readiness
 `/api/v1/ready`. El [launcher](../scripts/start.py):
 
 1. valida settings y PORT;
-2. abre transacción PostgreSQL con TLS según configuración de producción;
-3. establece lock_timeout de 30 s y statement_timeout de 120 s;
-4. adquiere advisory lock transaccional `1943187001`;
-5. ejecuta Alembic `upgrade head` con conexión inyectada;
-6. si falla, sale sin iniciar Uvicorn ni imprimir secretos;
-7. inicia Uvicorn con un worker y access log desactivado.
+2. abre un pool PostgreSQL con TLS según configuración de producción;
+3. ejecuta la misma comprobación de disponibilidad/versión que readiness;
+4. libera ese pool antes de iniciar el servidor, también ante error;
+5. si falla, sale sin iniciar Uvicorn ni imprimir secretos;
+6. inicia Uvicorn con un worker y access log desactivado.
 
-Este comportamiento sigue intacto durante la preparación del traspaso. Arrancar
-con Uvicorn directamente no ejecuta esa migración. No cambiar comandos manualmente
-para eludir el control mientras se coordina la separación.
+No importa Alembic, no toma advisory locks ni ejecuta DDL. El proceso anterior
+desplegado puede seguir migrando hasta que operación haga rollout y retire las
+instancias antiguas. No arrancar con Uvicorn directo para eludir el preflight:
+en desarrollo es posible, pero producción debe conservar `python scripts/start.py`.
 
 `/api/v1/health` no consulta DB. `/api/v1/ready` comprueba `SELECT 1` y que
 `alembic_version` contenga solo `0002_auth_sessions`; si falla responde 503 sin
 exponer detalles. No invoca Alembic, no aplica DDL y no verifica drift físico.
 
-## Arranque después del corte (pendiente)
+## Operación de migraciones después del rollout (pendiente)
 
 Database ejecutará el job de migración con un release inmutable, en la base
 existente, antes del rollout backend. Un fallo cancela el rollout. Backend
 verificará conexión/compatibilidad antes de escuchar y conservará readiness
 durante ejecución. El proceso API usará credencial runtime sin permisos DDL.
 
-Antes de retirar Alembic local deben estar validados el runner externo, sus
-permisos, aislamiento de fixtures y todos los tests de auth contra PostgreSQL real.
+El runner externo y la compatibilidad backend se validaron en PostgreSQL de CI,
+permitiendo retirar Alembic local del runtime. Esto no acredita permisos o
+recuperación de producción. El corte en código no es un rollout.
+Evidencia final: [CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858),
+103 tests aprobados sin omisiones y runtime sin herramientas de migración.
 La secuencia exacta y la política para futuras revisiones están en
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). No se usa una comparación de strings
 «mayor o igual» ni se acepta cualquier head por variable de entorno.
@@ -70,6 +73,11 @@ Variables runtime existentes, sin cambiar valores en esta fase:
 El job database tendrá su propia credencial migradora en el gestor de secretos,
 sin transmitirla al backend o frontend. No cambiar nombres de variables runtime
 como parte de una separación documental.
+
+No hay nuevo endpoint de database ni variable para saltar la revisión requerida.
+La referencia database fija para tooling se declara en
+[tools/database-ref.json](../tools/database-ref.json); no es una configuración
+runtime ni un mecanismo de ejecución automática de migraciones al desplegar API.
 
 ## Frontend y autenticación
 

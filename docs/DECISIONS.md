@@ -79,14 +79,28 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Persistencia y despliegue
 
-- Alembic administra esquema bajo ownership de cognova-database. Su alojamiento
-  y ejecución actuales en backend son transitorios hasta completar el traspaso.
+- Alembic administra esquema bajo ownership exclusivo de cognova-database.
+  Backend conserva Alembic solo como herramienta dev de compatibilidad ORM/CI.
 - No `create_all` automático en producción.
 - Entornos dev/test/prod separados.
 - Backups y procedimiento de restauración antes de declarar producción estable.
 - CI con pruebas, build y controles de seguridad.
 
 ## Cambios a decisiones congeladas
+
+### Corte en código y validación del handoff — 2026-10-11
+
+- Compuerta superada con CI PostgreSQL real de database en
+  `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`; referencia fija en
+  `tools/database-ref.json`. Backend también validó auth/ORM/startup read-only en CI.
+- Se retiran Alembic runtime, historial/config locales y test DDL transferido.
+  La dependencia Alembic dev se conserva para tooling y comparación de metadata.
+- Startup/readiness consultan el esquema y exigen exactamente 0002, sin DDL.
+- No se modifica auth, sus DTOs ni academic_goal. Un ajuste de variable en el
+  limitador resuelve mypy sin cambiar SQL; un test admite plantilla de log relativa
+  del router además de absoluta, sin alterar el logging del servicio.
+- No se modifican los repos hermanos ni PostgreSQL/Render. Corte productivo
+  pendiente de merge/rollout coordinado, roles, grants y recuperación verificada.
 
 ### Tres repositorios y separación DB — 2026-10-08
 

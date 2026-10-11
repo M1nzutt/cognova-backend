@@ -2,11 +2,12 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-La fase actual prepara la arquitectura de tres repositorios, sin nuevas funcionalidades.
+La fase actual separa el esquema database del runtime backend, sin nuevas funcionalidades.
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
-ORM, consultas y conexiones permanecen en backend; Alembic y su historial se
-conservan temporalmente aquí hasta que database valide su recepción y ejecución.
+ORM, consultas y conexiones permanecen en backend; Alembic y su historial viven
+en cognova-database. El corte en código está preparado en la rama de revisión;
+el rollout de producción no se ha ejecutado.
 
 ## Entorno local
 
@@ -17,7 +18,7 @@ python -m venv .venv
 .venv\Scripts\python -m pip install -e ".[dev]"
 Copy-Item .env.example .env
 # Editar DATABASE_URL y JWT_SECRET en .env antes de iniciar el servidor.
-.venv\Scripts\python -m alembic upgrade head
+# El operador de cognova-database debe haber aplicado el esquema compatible.
 .venv\Scripts\python -m uvicorn app.main:create_app --factory --reload
 ```
 
@@ -39,13 +40,13 @@ No hay credenciales predeterminadas en el código. No se admite SQLite.
 
 El motor se crea durante el lifespan de FastAPI y se libera al apagar.
 Las conexiones de la factory son diferidas: iniciar Uvicorn directamente no verifica
-disponibilidad PostgreSQL; el launcher de Render sí conecta para migrar antes de servir.
+disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de servir.
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
-No se usa `create_all`. Alembic conserva las revisiones `0001_create_users` y
+No se usa `create_all`. Database conserva `0001_create_users` →
 `0002_auth_sessions`: users, sesiones revocables y contadores de rate limiting.
-El launcher de Render todavía aplica migraciones antes de iniciar Uvicorn;
-su retiro exige completar el [traspaso coordinado](docs/DATABASE_HANDOFF.md).
+`python scripts/start.py` valida disponibilidad y revisión 0002 antes de escuchar,
+sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación
 
@@ -63,9 +64,29 @@ Registro/login/me, refresh rotativo, logout, sesiones y revocación están imple
 
 Las pruebas unitarias no necesitan un servidor. Para probar una conexión real,
 definir `TEST_DATABASE_URL` con una base de pruebas PostgreSQL y ejecutar pytest.
-La suite de integración crea y elimina esquemas aislados con Alembic y prueba auth
-contra PostgreSQL real; se omite si falta esa variable. Nunca utilizar producción.
+La suite de integración crea y elimina esquemas aislados usando el CLI de database
+y prueba auth contra PostgreSQL real; se omite si falta esa variable. Nunca utilizar
+producción, incluso mediante un túnel local. Requiere URL local sin opciones y
+`TEST_DATABASE_ALLOW_DDL=yes`. CI impide omisiones.
 No utiliza automáticamente la base configurada en `.env`.
+
+Preparar una copia de tooling dentro del backend, fijada por
+[tools/database-ref.json](tools/database-ref.json), sin tocar el checkout hermano:
+
+```powershell
+$databaseRef = Get-Content tools/database-ref.json | ConvertFrom-Json
+git clone "https://github.com/$($databaseRef.repository).git" .local/database-handoff
+git -C .local/database-handoff checkout --detach $databaseRef.commit
+# Configurar TEST_DATABASE_URL con una base LOCAL desechable, nunca producción.
+$env:TEST_DATABASE_ALLOW_DDL = 'yes'
+$env:REQUIRE_POSTGRES_TESTS = '1'
+.venv\Scripts\python -m pytest -q
+```
+
+El adaptador exige SHA exacto y checkout limpio; `COGNOVA_DATABASE_PATH` permite
+seleccionar otra copia de tooling, siempre del mismo SHA. El CLI recibe el destino
+por entorno sin JWT y con search_path del esquema aislado. Las dependencias dev
+incluyen Alembic para tooling y comparación ORM; runtime y lock no lo incluyen.
 
 IA, seed y demás módulos de producto están fuera de la fase actual. El despliegue
 existente fue confirmado por el usuario; no se recrea durante la separación DB.

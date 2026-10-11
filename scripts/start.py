@@ -1,35 +1,22 @@
-"""Migrate before listening; never serve an unmigrated deployment."""
+"""Check the externally managed schema before listening; never execute DDL."""
 
 import logging
 import os
 
 import uvicorn
-from alembic import command
-from alembic.config import Config
-from sqlalchemy import create_engine, text
-from sqlalchemy.pool import NullPool
 
 from app.core.settings import Settings
+from app.database.database import Database
+from app.services.readiness_service import ReadinessService
 
 
-def migrate(settings: Settings) -> None:
-    engine = create_engine(
-        settings.database_url.get_secret_value(),
-        poolclass=NullPool,
-        hide_parameters=True,
-        connect_args={"connect_timeout": 10},
-    )
+def require_compatible_database(settings: Settings) -> None:
+    database = Database(settings)
     try:
-        with engine.begin() as connection:
-            connection.execute(text("SET LOCAL lock_timeout = '30s'"))
-            connection.execute(text("SET LOCAL statement_timeout = '120s'"))
-            # Serialize migrations when two instances start concurrently.
-            connection.execute(text("SELECT pg_advisory_xact_lock(1943187001)"))
-            config = Config("alembic.ini")
-            config.attributes["connection"] = connection
-            command.upgrade(config, "head")
+        if not ReadinessService(database).check():
+            raise RuntimeError("Database schema unavailable or incompatible")
     finally:
-        engine.dispose()
+        database.dispose()
 
 
 def main() -> None:
@@ -39,7 +26,7 @@ def main() -> None:
         port = int(os.environ.get("PORT", "8000"))
         if not 1 <= port <= 65535:
             raise ValueError("Invalid port")
-        migrate(settings)
+        require_compatible_database(settings)
     except Exception as exc:
         # Configuration/DB exceptions can contain credentials; omit their text.
         logging.error("startup_failed exception_type=%s", type(exc).__name__)

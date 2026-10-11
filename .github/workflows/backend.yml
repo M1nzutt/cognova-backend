@@ -24,6 +24,8 @@ jobs:
       DATABASE_URL: postgresql+psycopg://cognova_test:ci-only-ephemeral-password@localhost:5432/cognova_test
       JWT_SECRET: ci-only-placeholder-secret-at-least-32-bytes
       ENVIRONMENT: test
+      TEST_DATABASE_ALLOW_DDL: 'yes'
+      REQUIRE_POSTGRES_TESTS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,14 +40,28 @@ jobs:
           cache-dependency-path: requirements.lock
       - run: pip install --require-hashes -r requirements.lock
       - run: pip install -e '.[dev]' pip-audit build
-      - run: ruff check app migrations scripts
-      - run: ruff format --check app migrations scripts
-      - run: mypy app --exclude app/tests
+      - name: Read immutable database reference
+        id: database
+        run: |
+          python -c "import json; r=json.load(open('tools/database-ref.json')); print('commit='+r['commit']); print('repository='+r['repository'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.database.outputs.repository }}
+          ref: ${{ steps.database.outputs.commit }}
+          path: .local/database-handoff
+          persist-credentials: false
+      - run: ruff check app scripts
+      - run: ruff format --check app scripts
       - run: python -m pytest -q --junitxml=test-results.xml
       - run: python scripts/check_test_results.py test-results.xml
-      - run: alembic upgrade head
-      - run: alembic check
+      - run: mypy app --exclude app/tests
       - run: python -m build
+      - name: Verify runtime without migration tooling
+        run: |
+          python -m venv .local/runtime-check
+          .local/runtime-check/bin/python -m pip install --require-hashes -r requirements.lock
+          .local/runtime-check/bin/python -m pip install --no-deps dist/*.whl
+          .local/runtime-check/bin/python -c "import importlib.util; from app.main import create_app; from scripts.start import require_compatible_database; assert importlib.util.find_spec('alembic') is None; assert importlib.util.find_spec('cognova_database') is None; create_app()"
       - run: pip-audit -r requirements.lock
       - uses: actions/upload-artifact@v4
         if: always()

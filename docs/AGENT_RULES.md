@@ -20,9 +20,10 @@ Nunca asumir que una tarea interrumpida quedó terminada.
 - Database es propietario de Alembic, revisiones, schema lifecycle, índices,
   constraints físicos, seeds DB y backup/restauración.
 - No modificar otros repositorios; documentar exactamente los cambios que requieren.
-- El historial local y la migración en startup son transitorios. No eliminarlos ni
-  añadir revisiones nuevas aquí sin resolver antes el corte descrito en
-  [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+- Desde fase 2 no crear ni restaurar historial Alembic o DDL en startup backend.
+  CI consume el commit database fijado en `tools/database-ref.json`; actualizarlo
+  requiere evidencia PostgreSQL y compatibilidad ORM/auth. Alembic dev no concede
+  ownership de migraciones. Ver [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
 - Prohibido recrear esquema, borrar/squash historial, cambiar revision IDs o usar
   `create_all`/`stamp` como sustituto del traspaso.
 - No rehacer auth ni despliegue por un PROJECT_STATE antiguo: contrastar Git/código.
