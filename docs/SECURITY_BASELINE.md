@@ -90,7 +90,8 @@ Responder `429` de forma consistente.
 Ownership desde 2026-10-08: cognova-database administra DDL, migraciones y
 recuperación; backend conserva ORM, acceso autorizado y transacciones. El corte
 debe separar rol migrador y runtime sin quitar la comprobación de compatibilidad.
-La copia local de Alembic sigue operativa temporalmente; ver
+El código backend ya no ejecuta DDL ni conserva historial Alembic. La compatibilidad
+con database se validó en PostgreSQL de CI; falta el rollout operativo. Ver
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). Esta asignación no marca el checklist
 como completado ni acredita backups o pruebas de producción todavía no verificadas.
 

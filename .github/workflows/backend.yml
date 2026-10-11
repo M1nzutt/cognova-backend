@@ -50,12 +50,18 @@ jobs:
           ref: ${{ steps.database.outputs.commit }}
           path: .local/database-handoff
           persist-credentials: false
-      - run: ruff check app migrations scripts
-      - run: ruff format --check app migrations scripts
+      - run: ruff check app scripts
+      - run: ruff format --check app scripts
       - run: python -m pytest -q --junitxml=test-results.xml
       - run: python scripts/check_test_results.py test-results.xml
       - run: mypy app --exclude app/tests
       - run: python -m build
+      - name: Verify runtime without migration tooling
+        run: |
+          python -m venv .local/runtime-check
+          .local/runtime-check/bin/python -m pip install --require-hashes -r requirements.lock
+          .local/runtime-check/bin/python -m pip install --no-deps dist/*.whl
+          .local/runtime-check/bin/python -c "import importlib.util; from app.main import create_app; from scripts.start import require_compatible_database; assert importlib.util.find_spec('alembic') is None; assert importlib.util.find_spec('cognova_database') is None; create_app()"
       - run: pip-audit -r requirements.lock
       - uses: actions/upload-artifact@v4
         if: always()
