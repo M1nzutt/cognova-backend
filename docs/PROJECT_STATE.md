@@ -28,6 +28,12 @@ Reconciliación: 2026-10-11. Incidente de rutas públicas en Render.
 Siguiente paso inmediato: ejecutar CI de la reproducción y contrastar URL/config
 del servicio Render existente. No crear recursos ni modificar DDL/auth por hipótesis.
 
+Actualización: Render ya es accesible. Servicio srv-db2j6nqj9qps73crqa0g, main
+3e3ed95 Live; URL real `https://cognova-backend-lpsi.onrender.com`, letra ele en
+lpsi. La URL con número uno era incorrecta. Smoke directo: OpenAPI/health/ready
+200 y me sin token 401. No hace falta redeploy ni cambio runtime. Se corrige la
+URL documentada y el ejemplo de proxy backend. CI de la nueva prueba HTTP en curso.
+
 ## Estado real y alcance
 
 Backend inició limpio en `5fa90a3`, main sincronizado. Auth avanzada y deploy
