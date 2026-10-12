@@ -62,6 +62,8 @@ jobs:
           .local/runtime-check/bin/python -m pip install --require-hashes -r requirements.lock
           .local/runtime-check/bin/python -m pip install --no-deps dist/*.whl
           .local/runtime-check/bin/python -c "import importlib.util; from app.main import create_app; from scripts.start import require_compatible_database; assert importlib.util.find_spec('alembic') is None; assert importlib.util.find_spec('cognova_database') is None; create_app()"
+      - name: Verify installed wheel and real launcher over HTTP
+        run: COGNOVA_RUNTIME_PYTHON="$PWD/.local/runtime-check/bin/python" python -m pytest -q -s app/tests/integration/test_runtime_routing.py
       - run: pip-audit -r requirements.lock
       - uses: actions/upload-artifact@v4
         if: always()

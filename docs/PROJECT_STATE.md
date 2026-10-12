@@ -1,6 +1,32 @@
 ﻿# Cognova — Estado del backend
 
-Reconciliación: 2026-10-11. Fase 2 del handoff database → backend.
+Reconciliación: 2026-10-11. Incidente de rutas públicas en Render.
+
+## Incidente actual — diagnóstico en curso
+
+- Main inicial: `3e3ed95e74ff57c194767e717e374c7fbe118f2a`, limpio, 19 commits.
+  Handoff ya mergeado; el usuario confirmó deploy Live con preflight/Uvicorn correctos.
+  Las referencias a rollout pendiente más abajo corresponden al cierre histórico
+  de la fase anterior y no deben usarse para reiniciar el handoff.
+- Rama de diagnóstico: `fix/render-runtime-routing`.
+- GET directo a la URL informada `https://cognova-backend-1psi.onrender.com`:
+  OpenAPI, health, ready y me devuelven 404. Captura con curl: cuerpo `Not Found`,
+  Content-Type text/plain, `x-render-routing: no-server`, sin X-Request-ID Cognova.
+  Este 404 observado está en la capa de routing Render; aún falta inspeccionar el
+  servicio real para determinar la causa de no-server. No atribuirlo a imports.
+- El wheel local coincide con source para app/__init__, app/main, api/router y
+  api/health. Solo la distribución cognova-backend declara top-level app.
+- La inspección Python local sigue bloqueada por Windows Application Control en
+  SQLAlchemy; se valida en CI, sin eludir políticas ni usar producción para tests.
+- Añadidos diagnóstico seguro de imports/rutas y prueba TCP del launcher real,
+  repetida en CI desde un wheel aislado, cwd temporal y sin PYTHONPATH del source.
+  Así se distingue TestClient de Uvicorn/packaging. No cambia runtime ni auth.
+- Render accesible al agente muestra login, sin otras pestañas compartidas ni
+  RENDER_API_KEY configurada. Se pidió acceso a la sesión que indicó el usuario;
+  configuración efectiva, commit/logs Render y cualquier redeploy siguen pendientes.
+
+Siguiente paso inmediato: ejecutar CI de la reproducción y contrastar URL/config
+del servicio Render existente. No crear recursos ni modificar DDL/auth por hipótesis.
 
 ## Estado real y alcance
 
