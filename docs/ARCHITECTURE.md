@@ -25,8 +25,8 @@ cognova-database (operación, no API de producto)
 - Los modelos ORM permanecen en backend; sus declaraciones reflejan el esquema,
   pero no autorizan creación automática de tablas.
 - Fase 2: historial y ejecución DDL retirados del código backend tras validar CI
-  database y compatibilidad backend con PostgreSQL. El rollout productivo sigue
-  pendiente; consultar [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md).
+  database y compatibilidad backend con PostgreSQL. El merge 3e3ed95 está desplegado
+  y verificado en Render; consultar [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Capas esperadas
 
@@ -155,7 +155,7 @@ Producción debe contar con:
 - El launcher de esta rama exige conectividad y `0002_auth_sessions` antes de
   Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
 - Database migra antes del release; backend no migra ni repara esquema al arrancar.
-  Esta separación ya existe en código, pero no se ha desplegado desde esta fase.
+  Esta separación ya está desplegada en Render con el merge 3e3ed95.
 - Una revisión futura requiere coordinación de compatibilidad antes de aplicarse;
   consultar la secuencia de corte en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md)
   y el estado operativo en [DEPLOYMENT.md](DEPLOYMENT.md).

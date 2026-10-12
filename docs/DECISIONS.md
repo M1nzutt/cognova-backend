@@ -88,6 +88,16 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Cambios a decisiones congeladas
 
+### Estabilización de URL productiva — 2026-10-11
+
+- Handoff mergeado en main (`3e3ed95`) y desplegado automáticamente en Render.
+- Hostname confirmado: cognova-backend-lpsi.onrender.com, con letra ele en lpsi.
+  La URL con número uno devolvía 404 de Render/no-server, antes de llegar a Cognova.
+- OpenAPI/health/ready 200 y me sin token 401 en el host correcto. No se cambia
+  factory, seguridad ni import path; no se requiere redeploy para corregir la URL.
+- La prueba nueva usa el launcher TCP real y wheel aislado para verificar imports,
+  rutas y empaquetado más allá de TestClient. No se crean cuentas para este smoke.
+
 ### Corte en código y validación del handoff — 2026-10-11
 
 - Compuerta superada con CI PostgreSQL real de database en

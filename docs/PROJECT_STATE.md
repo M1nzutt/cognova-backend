@@ -1,127 +1,114 @@
 ﻿# Cognova — Estado del backend
 
-Reconciliación: 2026-10-11. Incidente de rutas públicas en Render.
+Fecha local: 2026-10-11. Incidente 404 cerrado; backend operativo en Render.
 
-## Incidente actual — diagnóstico en curso
+## Estado Git y despliegue
 
-- Main inicial: `3e3ed95e74ff57c194767e717e374c7fbe118f2a`, limpio, 19 commits.
-  Handoff ya mergeado; el usuario confirmó deploy Live con preflight/Uvicorn correctos.
-  Las referencias a rollout pendiente más abajo corresponden al cierre histórico
-  de la fase anterior y no deben usarse para reiniciar el handoff.
-- Rama de diagnóstico: `fix/render-runtime-routing`.
-- GET directo a la URL informada `https://cognova-backend-1psi.onrender.com`:
-  OpenAPI, health, ready y me devuelven 404. Captura con curl: cuerpo `Not Found`,
-  Content-Type text/plain, `x-render-routing: no-server`, sin X-Request-ID Cognova.
-  Este 404 observado está en la capa de routing Render; aún falta inspeccionar el
-  servicio real para determinar la causa de no-server. No atribuirlo a imports.
-- El wheel local coincide con source para app/__init__, app/main, api/router y
-  api/health. Solo la distribución cognova-backend declara top-level app.
-- La inspección Python local sigue bloqueada por Windows Application Control en
-  SQLAlchemy; se valida en CI, sin eludir políticas ni usar producción para tests.
-- Añadidos diagnóstico seguro de imports/rutas y prueba TCP del launcher real,
-  repetida en CI desde un wheel aislado, cwd temporal y sin PYTHONPATH del source.
-  Así se distingue TestClient de Uvicorn/packaging. No cambia runtime ni auth.
-- Render accesible al agente muestra login, sin otras pestañas compartidas ni
-  RENDER_API_KEY configurada. Se pidió acceso a la sesión que indicó el usuario;
-  configuración efectiva, commit/logs Render y cualquier redeploy siguen pendientes.
+- Handoff ya integrado en main: `3e3ed95e74ff57c194767e717e374c7fbe118f2a`.
+- Render desplegó automáticamente ese commit; estado Live verificado en dashboard.
+- Servicio existente: `srv-db2j6nqj9qps73crqa0g`; no se creó otro servicio o base.
+- URL correcta: https://cognova-backend-lpsi.onrender.com — letra ele en `lpsi`.
+- Rama de esta sesión: `fix/render-runtime-routing`; main/runtime no se modificaron.
+- Inicio: árbol limpio, 19 commits. Cierre documental: aproximadamente 22 commits;
+  verificar siempre con `git rev-list --count HEAD`.
 
-Siguiente paso inmediato: ejecutar CI de la reproducción y contrastar URL/config
-del servicio Render existente. No crear recursos ni modificar DDL/auth por hipótesis.
+La separación frontend/backend/database está realizada. No reiniciar handoff,
+restaurar migraciones backend, ejecutar create_all ni usar CI como base del producto.
+Database fijado en [database-ref.json](../tools/database-ref.json), commit
+`0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`. ORM/queries/auth permanecen en backend.
 
-Actualización: Render ya es accesible. Servicio srv-db2j6nqj9qps73crqa0g, main
-3e3ed95 Live; URL real `https://cognova-backend-lpsi.onrender.com`, letra ele en
-lpsi. La URL con número uno era incorrecta. Smoke directo: OpenAPI/health/ready
-200 y me sin token 401. No hace falta redeploy ni cambio runtime. Se corrige la
-URL documentada y el ejemplo de proxy backend. CI de la nueva prueba HTTP en curso.
+## Causa raíz demostrada
 
-## Estado real y alcance
+La URL del prompt/documentación usaba `1psi` (número uno). Ese hostname devuelve
+404 text/plain, cuerpo `Not Found` y `x-render-routing: no-server`, sin request ID
+Cognova. La petición no llega al middleware de la aplicación.
 
-Backend inició limpio en `5fa90a3`, main sincronizado. Auth avanzada y deploy
-existían desde `06c3d2a`; no se rehicieron. El trabajo actual está en
-`chore/database-handoff-phase2`, sin merge a main ni redeploy.
+El dashboard y el log de deploy publican `lpsi` (letra ele). En ese host las rutas
+funcionan sobre el mismo commit ya desplegado. No hubo que modificar imports,
+factory=True, seguridad, DB o configuración Render; no se hizo redeploy innecesario.
+Los logs históricos unmatched no contienen URL y no demuestran ausencia de rutas
+API. No se añadió una ruta raíz artificial para esconder esos 404.
 
-- Separación física: database existe y recibió 0001/0002 sin cambios de IDs/contenido.
-- Validación PostgreSQL database: confirmada en CI remoto con rechazo obligatorio
-  de omisiones; no se usó PostgreSQL productivo.
-- Adaptación backend: fixtures externas, compatibilidad ORM y startup sin DDL.
-- Retiro en código: alembic.ini, migrations/ y test SQL offline transferido; Alembic
-  deja runtime/lock y permanece en dev para tooling de tests/compare_metadata.
-- Corte operativo productivo: PENDIENTE. No cambios Render, grants, datos, recursos,
-  frontend o repo hermano database. El Blueprint histórico no se ha reaplicado.
+## Producción verificada
 
-## Referencia database y evidencia
+Smoke GET sin cuentas ni credenciales, 2026-10-11 23:26–23:29 America/Bogota:
 
-Checkout hermano inspeccionado solo en lectura:
-`325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio. Su documentación de pruebas
-locales estaba atrasada respecto al remoto; no se hizo fetch ni se escribió allí.
+| Ruta | Resultado |
+| --- | --- |
+| `/openapi.json` | 200, Cognova API y sus nueve paths documentados |
+| `/api/v1/health` | 200, `{"status":"ok"}` |
+| `/api/v1/ready` | 200, `{"status":"ready"}`; conexión/revisión DB compatible |
+| `/api/v1/auth/me` | 401 INVALID_OR_EXPIRED_TOKEN sin token |
+| `/api/v1/auth/sessions` | 401 sin token |
+| GET de register/login/refresh/logout | 405, rutas existentes que requieren POST |
 
-Referencia adoptada: `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`, declarada en
-[tools/database-ref.json](../tools/database-ref.json). Respecto del checkout hermano
-solo cambia el título README. Se verificaron blobs y SHA-256 de ambas revisiones
-antes de retirarlas; valores y contrato en [DATABASE_HANDOFF](DATABASE_HANDOFF.md).
+Las respuestas correctas incluyen X-Request-ID y headers de seguridad. Se conserva
+Argon2id, JWT corto, refresh rotativo HttpOnly, CSRF, ownership y revocación. No se
+crearon usuarios ni se hicieron escrituras de negocio o DDL productivos. Login,
+restore y logout completos siguen requiriendo el smoke coordinado de frontend.
 
-[Database CI 38001623290](https://github.com/M1nzutt/cognova-database/actions/runs/38001623290):
-success con PostgreSQL 17. Cubre vacío→head, 0001→0002 con datos, revisión,
-repetición, constraints/índices, cascada, rollback y search_path.
+Configuración Render leída: repo M1nzutt/cognova-backend, branch main, Root Directory
+vacío, build `pip install --require-hashes -r requirements.lock && pip install
+--no-deps .`, start `python scripts/start.py`, región Virginia, Auto-Deploy On Commit,
+Health Check Path vacío y PR previews Off. No se cambió configuración. El log confirma
+wheel 0.1.0 desde `/opt/render/project/src`, preflight superado y Uvicorn en puerto10000.
+Health Check Path `/api/v1/ready` es un ajuste de monitorización pendiente separado;
+no fue la causa del typo. No reaplicar el Blueprint histórico para resolverlo.
 
-[Backend CI 38184426616](https://github.com/M1nzutt/cognova-backend/actions/runs/38184426616):
-success antes del retiro local. Auth/ownership/concurrencia, fixtures externas,
-compatibilidad ORM y startup read-only ejecutados con PostgreSQL real, sin skips;
-Ruff, formato, mypy, build, auditoría y escaneo de secretos aprobados.
+## Cambios y evidencia
 
-Validación final tras el retiro, commit `842f2a4fad54d0e553f98c7d864da92db64fa2af`:
-[Backend CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858)
-completado success. **103 passed, 0 skipped, 1 warning**, incluidos 40 casos de
-integración PostgreSQL según el control JUnit. Mypy: sin problemas en 41 archivos.
-Ruff/formato, build, escaneo de secretos y auditoría aprobados (sin vulnerabilidades
-conocidas). La instalación runtime aislada confirma ausencia de Alembic y
-cognova_database y permite importar factory/launcher. La advertencia pendiente
-es deprecación httpx de Starlette TestClient; no hay fallos de tests.
-El commit posterior a esa validación solo registra evidencia documental, sin
-cambios de código/dependencias. No requiere repetir el CI ya aprobado.
-Ruff/formato local: correctos, 62 archivos. Build --no-isolation genera sdist y
-wheel correctamente. El diff del lock solo retira Alembic/Mako/MarkupSafe y sus
-referencias; no cambia versiones de otras dependencias.
+- `3c1ed8f`: diagnóstico [inspect_runtime.py](../scripts/inspect_runtime.py), prueba
+  TCP de launcher y paso CI adicional para wheel aislado, cwd temporal/sin PYTHONPATH.
+- `5dcc263`: URL documentada y [ejemplo proxy Netlify](../deploy/netlify.toml.example)
+  corregidos. Ningún archivo frontend fue modificado.
+- Cierre documental: actualiza estado, despliegue/arquitectura y decisiones obsoletas;
+  el hash de ese commit aparece en git log.
 
-## Cambios preservados y límites
+[CI 38203767353](https://github.com/M1nzutt/cognova-backend/actions/runs/38203767353)
+verde: **104 passed, 0 skipped**, incluidos 41 casos PostgreSQL; prueba adicional
+sobre wheel instalado: **1 passed**. Ruff/formato, mypy (41 archivos), build,
+auditoría y escaneo de secretos correctos. Una advertencia deprecación httpx de
+Starlette TestClient sigue presente; no hay fallos.
 
-User, AuthSession, RateLimitBucket, ORM, queries y API permanecen. Auth conserva
-Argon2id, JWT corto, refresh opaco rotativo, CSRF, revocación/logout y ownership.
-`academic_goal` no cambia; su traslado conceptual a cuestionario pregunta 1 es
-posterior. No hay nueva revisión ni módulos de producto.
+El [CI de 5dcc263](https://github.com/M1nzutt/cognova-backend/actions/runs/38203945271)
+también terminó en success. El último commit de esta sesión solo corrige estado
+documental; no necesita repetir los controles del mismo código ya validado.
 
-Startup verifica DB/esquema antes de escuchar y libera el pool. Readiness exige
-explícitamente una única revisión 0002. Database no es servicio HTTP ni import
-runtime. Tests usan su CLI desde checkout limpio fijado, con credenciales solo por
-env y esquemas desechables; backend CI ya no ejecuta migraciones locales.
+El diagnóstico en CI confirmó físicamente imports desde
+`.local/runtime-check/lib/python3.14/site-packages/app/`, hashes de módulos iguales
+al source, sys.path empezando en scripts/ y factory registrando los nueve paths.
+Versiones: FastAPI0.142.2, Starlette1.7.0, Uvicorn0.54.0, distribución backend0.1.0.
+Esto prueba el wheel/launcher; no se afirma haber ejecutado ese diagnóstico por
+shell dentro de Render. El smoke productivo y logs sí se inspeccionaron directamente.
 
-Dos incidencias detectadas al activar CI se corrigieron sin cambio funcional:
-- Mypy: nombre separado para ReturningInsert en rate limiting; misma consulta SQL.
-- Test de privacidad del log: acepta plantilla estática relativa del router, además
-  de absoluta; mantiene comprobación del endpoint HTTP y ausencia de secretos.
+Local: Ruff/formato y build --no-isolation correctos; wheel coincide con source.
+La inspección de imports local sigue bloqueada por Application Control en una DLL
+SQLAlchemy. Se usó CI Linux, sin falsificar integración ni eludir la política.
+No se modificaron repos hermanos, modelos, auth, contratos públicos, DB ni runtime.
 
-Localmente Windows Application Control bloquea PostgreSQL y DLL de SQLAlchemy:
-pytest completo no logra recopilar (9 errores de importación en el primer intento).
-No se eludió esa política ni se confundió con un fallo de auth. Dos tests aislados
-del adaptador sí pasaron. Ruff y formato locales pasan. CI Linux es la evidencia
-real de suite completa, en vez de presentar skips o mocks como integración.
+## DEPENDENCY FRONTEND
 
-## Commits de esta fase
+Repo: cognova-frontend. Área: Netlify redirects/cliente REST y PROJECT_STATE.
+Verificar `/api/v1/*` → `https://cognova-backend-lpsi.onrender.com/api/v1/*`
+(con letra ele), ejecutar smoke real de login/restore/logout y actualizar su estado.
+Si el proxy aún usa `1psi`, corregirlo allí con la URL verificada; este agente no lo
+edita. Mantener mismo origen lógico, CSRF Path=/, refresh HttpOnly Path=/api/v1/auth,
+Secure/Lax y access token solo en memoria. No rehacer auth frontend.
 
-- `b170b1a`: tooling database fijado, fixtures externas y comparación ORM.
-- `9a9d818`: startup sin DDL y pruebas de fallo seguro/read-only.
-- `e8e0bd8`: correcciones mínimas de tipado y aserción de ruta de log.
-- `842f2a4`: retiro de historial/runtime Alembic, lock y documentación; CI final verde.
+## Siguiente bloque funcional exacto
 
-## Próximo paso exacto
+Tras el smoke frontend, coordinar academic_goal: sigue requerido en registro y User,
+pero corresponde conceptualmente a pregunta1 del cuestionario. Antes de cambiarlo,
+acordar compatibilidad DTO y transición de datos entre database/backend/frontend.
+No se mueve aquí ni se crea una revisión nueva.
 
-1. Revisar la rama validada antes de merge; no desplegar automáticamente en esta fase.
-2. Operación/database deben verificar 0002 efectiva, grants con rol runtime sin
-   DDL, backup/restauración y ownership de recursos Render existentes. Solo entonces
-   coordinar rollout y retirar launchers antiguos capaces de migrar. No crear otra DB.
-3. El responsable de database puede actualizar su checkout/documentación local con
-   la evidencia remota. No hay cambios de código database requeridos detectados.
+Cuestionario sigue bloqueado puntualmente: faltan opciones/IDs/valores aprobados,
+cardinalidad single/multi, DTOs GET/POST/PUT, estado onboarding, errores y destino
+tras completar. Las diez preguntas están aprobadas; no inventar el resto. Cerrar
+esas decisiones antes del formulario definitivo. Si siguen pendientes, preparar
+el contrato detallado de materias para revisión, sin implementar módulos con DTOs
+supuestos. Conservar el roadmap funcional y avanzar en commits pequeños reales;
+objetivo 300 commits por repo sin inflar ni sacrificar calidad.
 
-[DEPLOYMENT](DEPLOYMENT.md) describe el despliegue informado existente y el corte
-pendiente. No se certifican permisos, recuperación ni tráfico productivo aquí.
-No avanzar a cuestionario, materias, sesiones, estructuras, IA ni otros módulos.
+Antes de reanudar: Git status/diff/log, referencia main real y documentación vigente.
+El incidente 404 está cerrado; no seguir rediseñando infraestructura por él.

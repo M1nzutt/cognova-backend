@@ -7,7 +7,10 @@ Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic y su historial viven
 en cognova-database. El corte en código está preparado en la rama de revisión;
-el rollout de producción no se ha ejecutado.
+el merge `3e3ed95` ya está desplegado en producción.
+
+API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
+ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
 
 ## Entorno local
 

@@ -1,7 +1,8 @@
 ﻿# Handoff database → backend
 
-Fecha: 2026-10-11. Fase 2: separación aplicada en rama de revisión; rollout de
-producción pendiente. El diagnóstico de fase 1 se conserva en `687100c`/`5fa90a3`.
+Fecha: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
+ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
+conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
 ## Referencia y evidencia
 
@@ -102,12 +103,13 @@ con sus dependencias exclusivas. CI prueba además instalación runtime separada
 sin Alembic/cognova_database. No usar un wheel database aislado: requiere checkout
 completo con migraciones. Instrucciones reproducibles en [README](../README.md).
 
-## Corte operativo pendiente
+## Rollout realizado y controles operativos restantes
 
-Código separado no significa despliegue aplicado. No se hizo merge a main,
-redeploy, creación de DB ni modificación de PostgreSQL productivo.
+Al cerrar fase 2 no se había desplegado. Posteriormente se mergeó 3e3ed95 y Render
+lo desplegó automáticamente; durante el incidente de URL se verificaron Live,
+OpenAPI/health/ready 200 y auth protegida. No se recreó DB ni se ejecutó DDL backend.
 
-Antes del rollout, operación/database deben:
+Operación/database aún deben acreditar los controles no verificados aquí:
 
 1. Confirmar recursos Render existentes y quién administra el Blueprint; no
    aplicar otro que duplique o elimine PostgreSQL. El YAML backend se conserva
@@ -115,8 +117,8 @@ Antes del rollout, operación/database deben:
 2. Verificar revisión efectiva 0002 y backup/restauración probada.
 3. Ejecutar migraciones desde el runner database fijado, con rol migrador; runtime
    recibe solo DML/secuencias/USAGE y SELECT de alembic_version, sin DDL.
-4. Desplegar backend compatible y comprobar health/readiness/auth; retirar todas
-   las instancias antiguas capaces de migrar antes de permitir revisiones nuevas.
+4. Mantener backend compatible (3e3ed95 ya desplegado y comprobado); verificar que
+   no queden instancias antiguas capaces de migrar antes de permitir revisiones nuevas.
 5. Mantener serialización de jobs DDL (advisory lock 1943187001 en database), abortar
    rollout ante fallo y nunca hacer downgrade automático para revertir backend.
 
