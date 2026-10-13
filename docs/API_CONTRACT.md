@@ -129,7 +129,7 @@ Resultados:
 - GET `/analytics/by-duration`
 - GET `/analytics/by-subject`
 
-Con menos de 5 sesiones:
+Con menos de 5 sesiones válidas:
 - puede devolver datos descriptivos;
 - no debe presentar patrones como concluyentes.
 
