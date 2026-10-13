@@ -107,7 +107,7 @@ No considerar “funciona en mi máquina” como validación suficiente.
 
 ## Git
 
-Objetivo de evolución: mínimo 300 commits útiles por repositorio. No crear commits
+Objetivo de evolución: superar 500 commits útiles por repositorio. No crear commits
 vacíos/falsos ni dividir cambios artificialmente; no hacer squash que destruya
 historial útil. Registrar `git rev-list --count HEAD` cuando ayude a la continuidad,
 sin priorizar el conteo sobre correctitud o estabilidad. Este agente solo aporta

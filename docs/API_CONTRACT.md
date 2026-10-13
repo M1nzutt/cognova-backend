@@ -47,10 +47,12 @@ Fuente de verdad detallada: `AUTH_CONTRACT.md`.
 - POST `/questionnaire`
 - PUT `/questionnaire`
 
-Reglas:
-- onboarding obligatorio después de registro;
-- las preguntas/opciones salen de `QUESTIONNAIRE.md`;
-- no inventar opciones desde frontend.
+Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDING_CONTRACT.md).
+Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
+PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
+Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
+sobre el usuario autenticado. No reciben user_id. No se implementan aún los
+módulos académicos listados más abajo.
 
 ## Subjects
 
