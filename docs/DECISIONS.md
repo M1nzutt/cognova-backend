@@ -30,7 +30,8 @@
 
 ## Funcionalidad
 
-- Perfil: nombre, carrera, semestre, objetivo académico.
+- Registro: nombre/email/password. Carrera y semestre se completan en onboarding;
+  objetivo académico vigente corresponde a q1 del cuestionario versionado.
 - Materias personalizables.
 - Actividad genérica con `type`.
 - Prioridades manuales y deadlines.
@@ -88,6 +89,20 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Cambios a decisiones congeladas
 
+### Registro mínimo y onboarding versionado — 2026-10-12
+
+- Sustituye el registro de seis campos. Name/email/password con límites30/50/8–12.
+- Database fijado exactamente a 232c43130c0fb3eddd32e1dd3707368ba0d87d4c;
+  el código nuevo exige 0003_onboarding_questionnaire sin ejecutar DDL.
+- Estado explícito centralizado en UserResponse: perfil válido + inicial completa;
+  auth disponible con estado incomplete. Perfil y cuestionario en cualquier orden.
+- Catálogo1 con las diez preguntas/opciones aprobadas, IDs en QUESTIONNAIRE.md.
+- POST crea baseline1; PUT con expected_revision agrega snapshot y conserva historia.
+  Bloquear User antes de comparar versión protege concurrencia; DB añade triggers.
+- q1 es objetivo vigente; archivo legacy preservado literal, no rellena respuestas.
+- No desplegar esta rama sobre 0002: operación/database coordinan migración y release.
+  No modificar infraestructura, auth de sesión ni implementar módulos posteriores.
+
 ### Estabilización de URL productiva — 2026-10-11
 
 - Handoff mergeado en main (`3e3ed95`) y desplegado automáticamente en Render.
@@ -126,8 +141,8 @@ Reemplaza el diseño anterior de JWT persistido.
 - El backend dejará de ejecutar migraciones al arrancar tras ese corte coordinado;
   mantendrá verificación de DB y compatibilidad. No basta comprobar `SELECT 1`.
 - Mantener el despliegue existente. No crear otra DB ni aplicar de nuevo el Blueprint.
-- `academic_goal` corresponde conceptualmente a la pregunta 1 del cuestionario;
-  permanece en User y auth hasta un refactor posterior con migración y contratos.
+- Esa decisión histórica se completó con0003: academic_goal queda nullable legacy,
+  fuera de registro/DTO vigente; q1 se conserva en cuestionario inmutable versionado.
 - Cada agente modifica solo su repositorio. Las dependencias con los otros se
   documentan; no se editan archivos externos para sincronizar unilateralmente.
 

@@ -18,6 +18,12 @@ Obligatorio:
 
 La implementación detallada vive en `AUTH_CONTRACT.md`.
 
+Registro mínimo vigente: name<=30, email<=50, password8–12. El login admite
+credenciales históricas más largas; no cambiar hashing/tokens/CSRF por onboarding.
+Las rutas onboarding/questionnaire requieren Bearer y ownership derivado del token.
+Historial inmutable y PUT con expected_revision; no exponer user_id/hashes en DTO.
+Los módulos académicos futuros deben usar get_onboarded_user (403 incompleto).
+
 ## 2. Autorización
 
 Todos los recursos privados deben validar ownership en backend.
