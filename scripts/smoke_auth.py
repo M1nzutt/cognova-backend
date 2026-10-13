@@ -21,10 +21,7 @@ def main() -> None:
     payload = {
         "name": "Demo smoke test",
         "email": f"smoke-{secrets.token_hex(12)}@example.com",
-        "password": secrets.token_urlsafe(32),
-        "degree_program": "Software",
-        "semester": 1,
-        "academic_goal": "Verificar autenticación desplegada",
+        "password": secrets.token_urlsafe(9),
     }
     with httpx.Client(base_url=origin, timeout=90, follow_redirects=False) as client:
         require(client.get("/api/v1/ready"), 200, "readiness")

@@ -69,7 +69,4 @@ def registration():
         "name": "Sara",
         "email": "sara@example.com",
         "password": "Example123!",
-        "degree_program": "Ingeniería de Software",
-        "semester": 4,
-        "academic_goal": "Mejorar mi constancia",
     }

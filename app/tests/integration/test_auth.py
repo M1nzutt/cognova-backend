@@ -24,7 +24,17 @@ def test_register_login_me_and_hash_privacy(client, database, registration, capl
     assert result.status_code == 201, result.text
     body = result.json()
     assert set(body) == {"user", "access_token", "token_type"}
-    assert set(body["user"]) == set(registration) - {"password"} | {"id"}
+    assert set(body["user"]) == {
+        "id",
+        "name",
+        "email",
+        "degree_program",
+        "semester",
+        "onboarding",
+        "legacy_academic_goal",
+    }
+    assert body["user"]["onboarding"]["status"] == "incomplete"
+    assert body["user"]["degree_program"] is None
     assert body["token_type"] == "bearer"
     with database.session() as db:
         user = db.get(User, body["user"]["id"])
