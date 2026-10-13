@@ -44,7 +44,7 @@ def register(
     user, credentials = service.register(data)
     set_auth_cookies(response, credentials, request.app.state.settings)
     return AuthResponse(
-        user=UserResponse.model_validate(user),
+        user=service.public_user(user),
         access_token=request.app.state.tokens.create(user.id, credentials.session.id),
     )
 
@@ -57,14 +57,14 @@ def login(
     user, credentials = service.login(data)
     set_auth_cookies(response, credentials, request.app.state.settings)
     return AuthResponse(
-        user=UserResponse.model_validate(user),
+        user=service.public_user(user),
         access_token=request.app.state.tokens.create(user.id, credentials.session.id),
     )
 
 
 @router.get("/me", response_model=UserResponse)
-def me(user: CurrentUser) -> User:
-    return user
+def me(user: CurrentUser, service: Auth) -> UserResponse:
+    return service.public_user(user)
 
 
 @router.post("/refresh", response_model=RefreshResponse, dependencies=limited)
