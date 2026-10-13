@@ -41,7 +41,7 @@
 - Cuestionario obligatorio de 10 preguntas.
 - IA como acompañante académico.
 - IA automática con evidencia suficiente y manual bajo demanda.
-- Mínimo 5 sesiones antes de hablar de patrones.
+- Mínimo 5 sesiones válidas antes de hablar de patrones.
 - Retos: IA propone, usuario acepta/rechaza; aceptado no se edita.
 - Gamificación: únicamente racha.
 - Grafo: dependencias académicas.

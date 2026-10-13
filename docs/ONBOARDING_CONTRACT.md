@@ -67,7 +67,7 @@ No user_id ni datos de otros usuarios en responses.
 POST /questionnaire: request completo, crea revisión 1; 201 QuestionnaireResponse.
 Si ya existe: 409 QUESTIONNAIRE_ALREADY_EXISTS. No reemplaza el baseline.
 GET /questionnaire: 200 respuesta de mayor revisión; sin inicial=404 QUESTIONNAIRE_NOT_FOUND.
-PUT /questionnaire: request completo más expected_revision:integer estricto >0;
+PUT /questionnaire: request completo más expected_revision:integer estricto 1..2147483646;
 agrega revisión anterior+1 y responde 200. Sin inicial=404; revisión desactualizada
 =409 QUESTIONNAIRE_VERSION_CONFLICT. Incluso respuestas idénticas crean revisión:
 PUT expresa una nueva declaración; al reintentar con expected_revision vieja da409.
