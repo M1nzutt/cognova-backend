@@ -1,5 +1,13 @@
 # Despliegue existente y transición de base de datos
 
+## Release de onboarding (rama, sin desplegar)
+
+El código de feat/onboarding-questionnaire requiere exactamente 0003_onboarding_questionnaire
+y database232c43130c0fb3eddd32e1dd3707368ba0d87d4c. No merge/deploy automático sobre0002.
+Database/operación coordinan migración y permisos, luego el release compatible.
+Las observaciones de producción descritas abajo pertenecen al despliegue anterior;
+esta fase no toca Render, Netlify ni ejecuta DDL productivo.
+
 ## Estado conocido
 
 Servicio y configuración inspeccionados en Render el 2026-10-11:

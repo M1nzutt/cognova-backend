@@ -187,9 +187,10 @@ Un reto aceptado no se edita.
 
 ## Profile
 
-Si se necesita edición de perfil, documentar primero el contrato exacto y coordinar
-su sincronización con frontend y, si cambia el esquema, database. Cada agente
-modifica únicamente su repositorio.
+Datos académicos: PUT `/onboarding/academic-profile` según ONBOARDING_CONTRACT.md.
+Lectura y estado en `/auth/me`. Nombre/email no se editan en esta fase. Los futuros
+módulos académicos requieren get_onboarded_user, con403 ONBOARDING_REQUIRED cuando
+el perfil o cuestionario inicial no estén completos. Auth/onboarding no lo exigen.
 
 ## DTOs y paginación
 

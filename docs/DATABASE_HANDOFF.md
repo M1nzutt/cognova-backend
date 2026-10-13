@@ -7,8 +7,23 @@ conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del cor
 ## Referencia y evidencia
 
 Fuente de tooling fijada en [tools/database-ref.json](../tools/database-ref.json):
-`M1nzutt/cognova-database` @ `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`.
-El esquema requerido sigue siendo `0002_auth_sessions`.
+`M1nzutt/cognova-database` @ `232c43130c0fb3eddd32e1dd3707368ba0d87d4c`.
+Esta rama de onboarding requiere `0003_onboarding_questionnaire`. La evidencia
+de handoff 0002 siguiente es histórica; no cambia ni se repite esa fase.
+
+## Consumo 0003 — onboarding
+
+- ORM de campos académicos nullable, archivo legacy y snapshots inmutables.
+- Registro mínimo; q1 es el objetivo vigente. Legacy se conserva literalmente.
+- Perfil/cuestionario producen estado explícito sin persistir flags duplicados.
+- Backend inserta revisiones bajo bloqueo de User y expected_revision; no DDL.
+- Startup/readiness rechazan 0002/desconocidas/heads múltiples en esta rama.
+- Database/operación deben aplicar0003 y permisos sobre tablas nuevas antes del
+  release coordinado. No se ha migrado producción desde backend ni se ha modificado
+  el repositorio database. Anomalías históricas name/email fuera de límites requieren
+  remediación explícita antes de actualizarse; login/lectura siguen disponibles.
+- Contrato físico leído en el SHA exacto pedido, no en el commit documental28fa023.
+- Contrato público: [ONBOARDING_CONTRACT.md](ONBOARDING_CONTRACT.md).
 
 - Backend inició limpio en `5fa90a3`.
 - Checkout hermano leído: `325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio;
@@ -73,7 +88,7 @@ el pool en éxito/error; falla sin escuchar y sin imprimir secretos si DB no est
 lista. No hay imports Alembic/database, advisory locks ni upgrade en runtime.
 
 Readiness conserva SELECT 1 y lectura de alembic_version. Solo acepta una fila
-`0002_auth_sessions`; ausencia, revisión distinta o múltiples heads dan 503.
+`0003_onboarding_questionnaire`; ausencia, revisión distinta o múltiples heads dan503.
 No hay variable de entorno para eludir esa decisión ni dependencia HTTP con
 cognova-database, que no es un servicio. El identificador queda explícito en
 ReadinessService y la referencia de tooling declara el mismo contrato.
@@ -131,5 +146,5 @@ el remoto directamente. Rol migrador/runtime, grants, recuperación y operación
 Render sí bloquean declarar completado el rollout productivo. No se modificaron
 archivos database desde este agente.
 
-Frontend no cambia en esta fase. `academic_goal` permanece en User/auth; su
-correspondencia conceptual con pregunta 1 del cuestionario es un refactor posterior.
+Frontend debe consumir registro mínimo y UserResponse.onboarding. academic_goal
+no está en registro ni como objetivo vigente de User; q1 vive en el cuestionario.
