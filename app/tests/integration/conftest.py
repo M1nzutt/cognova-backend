@@ -14,7 +14,7 @@ from app.tests.database_tooling import database_checkout, migrate_test_schema
 
 
 @pytest.fixture
-def pg_settings():
+def pg_settings(request):
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
         if os.environ.get("REQUIRE_POSTGRES_TESTS") == "1":
@@ -38,7 +38,11 @@ def pg_settings():
         scoped_url, hide_parameters=True, connect_args={"connect_timeout": 5}
     )
     try:
-        migrate_test_schema(checkout, scoped_url.render_as_string(hide_password=False))
+        migrate_test_schema(
+            checkout,
+            scoped_url.render_as_string(hide_password=False),
+            getattr(request, "param", "head"),
+        )
         yield Settings(
             _env_file=None,
             database_url=scoped_url.render_as_string(hide_password=False),
