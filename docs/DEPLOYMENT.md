@@ -8,11 +8,17 @@ mínimos descritos en PROJECT_STATE. DATABASE_URL actualizada en el mismo servic
 sin cambiar base, JWT, cookies, CORS, build/start ni crear recursos Render.
 La conexión externa del mismo recurso se usó para comprobar el rol desde la
 estación; el servicio conserva su endpoint interno. No exponer ninguna URL.
-Falta integrar sin squash y desplegar; después ejecutar el smoke autorizado
-scripts/smoke_auth.py con origen de API y Origin del frontend autorizado.
+Integrado sin squash y desplegado SHA 9309effdd1b71acc3fe5e24bc8c19b70c3d8c0c8.
+Deploy dep-db9vrie7bikc73e676q0 confirmado Live. Smoke ejecutado sobre Render
+con Origin https://cognova-frontend.netlify.app.
 Este smoke sí crea una cuenta sintética con dos snapshots y revoca sus sesiones;
 la autorización actual sustituye la prohibición histórica de smoke documental.
-Evidencia final en INTEGRATION_VALIDATION.md. No desplegar frontend antes de éxito.
+Health/readiness/OpenAPI 200 y me sin sesión 401; flujo completo y seguridad pasan.
+Evidencia final en INTEGRATION_VALIDATION.md. Frontend compatible puede desplegarse.
+La rama sigue en autoDeploy=yes; commit final solo documental usa [skip render]
+para conservar el SHA probado. No se cambió healthCheckPath (sigue vacío).
+No rollback a 3e3ed95: ese launcher exige 0002 y ya no es compatible con la base.
+
 ## Historial: release de onboarding (rama, sin desplegar)
 
 El código de feat/onboarding-questionnaire requiere exactamente 0003_onboarding_questionnaire
@@ -21,7 +27,7 @@ Database/operación coordinan migración y permisos, luego el release compatible
 Las observaciones de producción descritas abajo pertenecen al despliegue anterior;
 esta fase no toca Render, Netlify ni ejecuta DDL productivo.
 
-## Estado conocido
+## Historial: estado conocido del despliegue anterior
 
 Servicio y configuración inspeccionados en Render el 2026-10-11:
 

@@ -1,13 +1,14 @@
 # Cognova — Estado backend
 
-Cierre de fase: 2026-10-13. Rama feat/onboarding-questionnaire.
+Release productivo: 2026-10-17. Rama main. Historial de implementación abajo.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
-No se modificaron main, Render, Netlify, repos hermanos ni DB productiva.
+Onboarding desplegado en el servicio Render existente. No se modificaron frontend ni database.
 
-## Release operativo 2026-10-17 — en curso
+## Release operativo 2026-10-17 — desplegado
 
 Database ya aplicó 0003 y preservó sus datos. Servicio Render existente confirmado:
-srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes, commit live 3e3ed95.
+srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes. Merge sin squash y SHA Live:
+9309effdd1b71acc3fe5e24bc8c19b70c3d8c0c8; deploy dep-db9vrie7bikc73e676q0.
 La DATABASE_URL efectiva usaba cognova_user propietario. Se creó cognova_runtime
 sin ownership/CREATE/superuser/CREATEDB/CREATEROLE; se actualizó solo DATABASE_URL
 en Render, manteniendo destino interno y configuración restante. Contraseña
@@ -18,8 +19,18 @@ questionnaire_responses SELECT,INSERT; secuencia users USAGE/SELECT y funciones
 EXECUTE. Sin UPDATE/DELETE de historia ni CREATE en public. Migrador sin cambios.
 Smoke ampliado en scripts/smoke_auth.py para onboarding/historial y no-store,
 Secure/HttpOnly/SameSite/host-only. 77 pruebas puras pasan y Ruff correcto.
-Merge/deploy/smoke real pendientes; no declarar frontend listo todavía.
-## Git y granularidad
+CI previo 39077069939 success: 226 tests sin skips, launcher adicional, mypy/build/
+audit/gitleaks aprobados. Smoke real completo aprobado: health/ready/OpenAPI 200,
+me sin sesión 401, registro mínimo, login, me, perfil, catálogo, POST/GET/PUT,
+historial, refresh, sesiones y logout. expected_revision viejo devuelve 409;
+baseline intacto. Cookies/CSRF/no-store correctos. Verificación DB READ ONLY:
+una cuenta sintética retenida, dos snapshots (1/2), dos sesiones revocadas, cero
+activas. No borrar historial sintético. Frontend puede desplegar su versión
+compatible con el contrato; su navegador/proxy/E2E sigue siendo validación propia.
+CI del merge 39077241478 también success, mismo resultado completo.
+Evidencia detallada: INTEGRATION_VALIDATION.md. Inicio 54 commits; cierre 57, faltan 444.
+
+## Historial: Git y granularidad de implementación
 
 Inicio: 4d99685, 22 commits, árbol limpio. Los contratos/catálogos del primer bloque
 se conservaron al reanudar. Conteo antes del cierre:53; con este cierre documental,
