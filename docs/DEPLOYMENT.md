@@ -1,6 +1,19 @@
 # Despliegue existente y transición de base de datos
 
-## Release de onboarding (rama, sin desplegar)
+## Release operativo autorizado — 2026-10-17
+
+Base productiva en 0003, verificada usando la conexión efectiva de Render.
+Rol previo cognova_user propietario; nuevo runtime cognova_runtime con permisos
+mínimos descritos en PROJECT_STATE. DATABASE_URL actualizada en el mismo servicio,
+sin cambiar base, JWT, cookies, CORS, build/start ni crear recursos Render.
+La conexión externa del mismo recurso se usó para comprobar el rol desde la
+estación; el servicio conserva su endpoint interno. No exponer ninguna URL.
+Falta integrar sin squash y desplegar; después ejecutar el smoke autorizado
+scripts/smoke_auth.py con origen de API y Origin del frontend autorizado.
+Este smoke sí crea una cuenta sintética con dos snapshots y revoca sus sesiones;
+la autorización actual sustituye la prohibición histórica de smoke documental.
+Evidencia final en INTEGRATION_VALIDATION.md. No desplegar frontend antes de éxito.
+## Historial: release de onboarding (rama, sin desplegar)
 
 El código de feat/onboarding-questionnaire requiere exactamente 0003_onboarding_questionnaire
 y database232c43130c0fb3eddd32e1dd3707368ba0d87d4c. No merge/deploy automático sobre0002.

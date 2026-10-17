@@ -1,9 +1,24 @@
-﻿# Cognova — Estado backend
+# Cognova — Estado backend
 
 Cierre de fase: 2026-10-13. Rama feat/onboarding-questionnaire.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
 No se modificaron main, Render, Netlify, repos hermanos ni DB productiva.
 
+## Release operativo 2026-10-17 — en curso
+
+Database ya aplicó 0003 y preservó sus datos. Servicio Render existente confirmado:
+srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes, commit live 3e3ed95.
+La DATABASE_URL efectiva usaba cognova_user propietario. Se creó cognova_runtime
+sin ownership/CREATE/superuser/CREATEDB/CREATEROLE; se actualizó solo DATABASE_URL
+en Render, manteniendo destino interno y configuración restante. Contraseña
+aleatoria SCRAM, únicamente en memoria y secret Render; nunca en Git/logs.
+Permisos verificados con esa credencial sobre 0003: users/auth_sessions SELECT,
+INSERT,UPDATE; buckets también DELETE; alembic_version/legacy solo SELECT;
+questionnaire_responses SELECT,INSERT; secuencia users USAGE/SELECT y funciones
+EXECUTE. Sin UPDATE/DELETE de historia ni CREATE en public. Migrador sin cambios.
+Smoke ampliado en scripts/smoke_auth.py para onboarding/historial y no-store,
+Secure/HttpOnly/SameSite/host-only. 77 pruebas puras pasan y Ruff correcto.
+Merge/deploy/smoke real pendientes; no declarar frontend listo todavía.
 ## Git y granularidad
 
 Inicio: 4d99685, 22 commits, árbol limpio. Los contratos/catálogos del primer bloque
