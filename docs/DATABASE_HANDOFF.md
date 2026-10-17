@@ -1,13 +1,29 @@
 ﻿# Handoff database → backend
 
-Fecha: 2026-10-11. Fase 2: separación aplicada en rama de revisión; rollout de
-producción pendiente. El diagnóstico de fase 1 se conserva en `687100c`/`5fa90a3`.
+Fecha: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
+ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
+conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
 ## Referencia y evidencia
 
 Fuente de tooling fijada en [tools/database-ref.json](../tools/database-ref.json):
-`M1nzutt/cognova-database` @ `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`.
-El esquema requerido sigue siendo `0002_auth_sessions`.
+`M1nzutt/cognova-database` @ `232c43130c0fb3eddd32e1dd3707368ba0d87d4c`.
+Esta rama de onboarding requiere `0003_onboarding_questionnaire`. La evidencia
+de handoff 0002 siguiente es histórica; no cambia ni se repite esa fase.
+
+## Consumo 0003 — onboarding
+
+- ORM de campos académicos nullable, archivo legacy y snapshots inmutables.
+- Registro mínimo; q1 es el objetivo vigente. Legacy se conserva literalmente.
+- Perfil/cuestionario producen estado explícito sin persistir flags duplicados.
+- Backend inserta revisiones bajo bloqueo de User y expected_revision; no DDL.
+- Startup/readiness rechazan 0002/desconocidas/heads múltiples en esta rama.
+- Database/operación deben aplicar0003 y permisos sobre tablas nuevas antes del
+  release coordinado. No se ha migrado producción desde backend ni se ha modificado
+  el repositorio database. Anomalías históricas name/email fuera de límites requieren
+  remediación explícita antes de actualizarse; login/lectura siguen disponibles.
+- Contrato físico leído en el SHA exacto pedido, no en el commit documental28fa023.
+- Contrato público: [ONBOARDING_CONTRACT.md](ONBOARDING_CONTRACT.md).
 
 - Backend inició limpio en `5fa90a3`.
 - Checkout hermano leído: `325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio;
@@ -72,7 +88,7 @@ el pool en éxito/error; falla sin escuchar y sin imprimir secretos si DB no est
 lista. No hay imports Alembic/database, advisory locks ni upgrade en runtime.
 
 Readiness conserva SELECT 1 y lectura de alembic_version. Solo acepta una fila
-`0002_auth_sessions`; ausencia, revisión distinta o múltiples heads dan 503.
+`0003_onboarding_questionnaire`; ausencia, revisión distinta o múltiples heads dan503.
 No hay variable de entorno para eludir esa decisión ni dependencia HTTP con
 cognova-database, que no es un servicio. El identificador queda explícito en
 ReadinessService y la referencia de tooling declara el mismo contrato.
@@ -102,12 +118,13 @@ con sus dependencias exclusivas. CI prueba además instalación runtime separada
 sin Alembic/cognova_database. No usar un wheel database aislado: requiere checkout
 completo con migraciones. Instrucciones reproducibles en [README](../README.md).
 
-## Corte operativo pendiente
+## Rollout realizado y controles operativos restantes
 
-Código separado no significa despliegue aplicado. No se hizo merge a main,
-redeploy, creación de DB ni modificación de PostgreSQL productivo.
+Al cerrar fase 2 no se había desplegado. Posteriormente se mergeó 3e3ed95 y Render
+lo desplegó automáticamente; durante el incidente de URL se verificaron Live,
+OpenAPI/health/ready 200 y auth protegida. No se recreó DB ni se ejecutó DDL backend.
 
-Antes del rollout, operación/database deben:
+Operación/database aún deben acreditar los controles no verificados aquí:
 
 1. Confirmar recursos Render existentes y quién administra el Blueprint; no
    aplicar otro que duplique o elimine PostgreSQL. El YAML backend se conserva
@@ -115,8 +132,8 @@ Antes del rollout, operación/database deben:
 2. Verificar revisión efectiva 0002 y backup/restauración probada.
 3. Ejecutar migraciones desde el runner database fijado, con rol migrador; runtime
    recibe solo DML/secuencias/USAGE y SELECT de alembic_version, sin DDL.
-4. Desplegar backend compatible y comprobar health/readiness/auth; retirar todas
-   las instancias antiguas capaces de migrar antes de permitir revisiones nuevas.
+4. Mantener backend compatible (3e3ed95 ya desplegado y comprobado); verificar que
+   no queden instancias antiguas capaces de migrar antes de permitir revisiones nuevas.
 5. Mantener serialización de jobs DDL (advisory lock 1943187001 en database), abortar
    rollout ante fallo y nunca hacer downgrade automático para revertir backend.
 
@@ -129,5 +146,5 @@ el remoto directamente. Rol migrador/runtime, grants, recuperación y operación
 Render sí bloquean declarar completado el rollout productivo. No se modificaron
 archivos database desde este agente.
 
-Frontend no cambia en esta fase. `academic_goal` permanece en User/auth; su
-correspondencia conceptual con pregunta 1 del cuestionario es un refactor posterior.
+Frontend debe consumir registro mínimo y UserResponse.onboarding. academic_goal
+no está en registro ni como objetivo vigente de User; q1 vive en el cuestionario.

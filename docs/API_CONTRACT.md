@@ -47,10 +47,12 @@ Fuente de verdad detallada: `AUTH_CONTRACT.md`.
 - POST `/questionnaire`
 - PUT `/questionnaire`
 
-Reglas:
-- onboarding obligatorio después de registro;
-- las preguntas/opciones salen de `QUESTIONNAIRE.md`;
-- no inventar opciones desde frontend.
+Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDING_CONTRACT.md).
+Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
+PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
+Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
+sobre el usuario autenticado. No reciben user_id. No se implementan aún los
+módulos académicos listados más abajo.
 
 ## Subjects
 
@@ -127,7 +129,7 @@ Resultados:
 - GET `/analytics/by-duration`
 - GET `/analytics/by-subject`
 
-Con menos de 5 sesiones:
+Con menos de 5 sesiones válidas:
 - puede devolver datos descriptivos;
 - no debe presentar patrones como concluyentes.
 
@@ -185,9 +187,10 @@ Un reto aceptado no se edita.
 
 ## Profile
 
-Si se necesita edición de perfil, documentar primero el contrato exacto y coordinar
-su sincronización con frontend y, si cambia el esquema, database. Cada agente
-modifica únicamente su repositorio.
+Datos académicos: PUT `/onboarding/academic-profile` según ONBOARDING_CONTRACT.md.
+Lectura y estado en `/auth/me`. Nombre/email no se editan en esta fase. Los futuros
+módulos académicos requieren get_onboarded_user, con403 ONBOARDING_REQUIRED cuando
+el perfil o cuestionario inicial no estén completos. Auth/onboarding no lo exigen.
 
 ## DTOs y paginación
 

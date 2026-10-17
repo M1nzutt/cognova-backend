@@ -19,6 +19,10 @@ def test_openapi_does_not_advertise_unimplemented_endpoints():
         "/api/v1/auth/sessions/{session_id}",
         "/api/v1/health",
         "/api/v1/ready",
+        "/api/v1/onboarding/academic-profile",
+        "/api/v1/questionnaire",
+        "/api/v1/questionnaire/catalog",
+        "/api/v1/questionnaire/history",
     }
 
 

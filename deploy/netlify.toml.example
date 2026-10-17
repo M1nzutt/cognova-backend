@@ -1,7 +1,7 @@
 # Incorporate BEFORE the SPA fallback in the frontend's existing netlify.toml.
-# Replace YOUR-RENDER-SERVICE with the actual Render service hostname.
+# Verified Render hostname: lpsi starts with lowercase letter l, not digit 1.
 [[redirects]]
   from = "/api/*"
-  to = "https://YOUR-RENDER-SERVICE.onrender.com/api/:splat"
+  to = "https://cognova-backend-lpsi.onrender.com/api/:splat"
   status = 200
   force = true

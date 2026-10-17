@@ -1,95 +1,134 @@
-﻿# Cognova — Estado del backend
+# Cognova — Estado backend
 
-Reconciliación: 2026-10-11. Fase 2 del handoff database → backend.
+Cierre de fase: 2026-10-13. Rama feat/onboarding-questionnaire.
+Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
+No se modificaron main, Render, Netlify, repos hermanos ni DB productiva.
 
-## Estado real y alcance
+## Release operativo 2026-10-17 — en curso
 
-Backend inició limpio en `5fa90a3`, main sincronizado. Auth avanzada y deploy
-existían desde `06c3d2a`; no se rehicieron. El trabajo actual está en
-`chore/database-handoff-phase2`, sin merge a main ni redeploy.
+Database ya aplicó 0003 y preservó sus datos. Servicio Render existente confirmado:
+srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes, commit live 3e3ed95.
+La DATABASE_URL efectiva usaba cognova_user propietario. Se creó cognova_runtime
+sin ownership/CREATE/superuser/CREATEDB/CREATEROLE; se actualizó solo DATABASE_URL
+en Render, manteniendo destino interno y configuración restante. Contraseña
+aleatoria SCRAM, únicamente en memoria y secret Render; nunca en Git/logs.
+Permisos verificados con esa credencial sobre 0003: users/auth_sessions SELECT,
+INSERT,UPDATE; buckets también DELETE; alembic_version/legacy solo SELECT;
+questionnaire_responses SELECT,INSERT; secuencia users USAGE/SELECT y funciones
+EXECUTE. Sin UPDATE/DELETE de historia ni CREATE en public. Migrador sin cambios.
+Smoke ampliado en scripts/smoke_auth.py para onboarding/historial y no-store,
+Secure/HttpOnly/SameSite/host-only. 77 pruebas puras pasan y Ruff correcto.
+Merge/deploy/smoke real pendientes; no declarar frontend listo todavía.
+## Git y granularidad
 
-- Separación física: database existe y recibió 0001/0002 sin cambios de IDs/contenido.
-- Validación PostgreSQL database: confirmada en CI remoto con rechazo obligatorio
-  de omisiones; no se usó PostgreSQL productivo.
-- Adaptación backend: fixtures externas, compatibilidad ORM y startup sin DDL.
-- Retiro en código: alembic.ini, migrations/ y test SQL offline transferido; Alembic
-  deja runtime/lock y permanece en dev para tooling de tests/compare_metadata.
-- Corte operativo productivo: PENDIENTE. No cambios Render, grants, datos, recursos,
-  frontend o repo hermano database. El Blueprint histórico no se ha reaplicado.
+Inicio: 4d99685, 22 commits, árbol limpio. Los contratos/catálogos del primer bloque
+se conservaron al reanudar. Conteo antes del cierre:53; con este cierre documental,
+54 totales y32 creados en la fase, sin squash. Restan447 para superar500 (501).
+Cada cambio corresponde a contrato, catálogo, DTO, validación, servicio o tests real.
+Rama publicada periódicamente. Confirmar números finales con git rev-list --count HEAD.
 
-## Referencia database y evidencia
+## Referencia de esquema
 
-Checkout hermano inspeccionado solo en lectura:
-`325e7ea6ec2981ed869a547c0c677fde1860e344`, limpio. Su documentación de pruebas
-locales estaba atrasada respecto al remoto; no se hizo fetch ni se escribió allí.
+[tools/database-ref.json](../tools/database-ref.json) fija exactamente:
+232c43130c0fb3eddd32e1dd3707368ba0d87d4c de M1nzutt/cognova-database.
+Startup/readiness solo aceptan 0003_onboarding_questionnaire; rechazan0002,
+revisiones desconocidas, ausencia y múltiples heads. No ejecutan migraciones.
+No se diseñó/copió0003 ni se modificaron0001/0002.
 
-Referencia adoptada: `0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1`, declarada en
-[tools/database-ref.json](../tools/database-ref.json). Respecto del checkout hermano
-solo cambia el título README. Se verificaron blobs y SHA-256 de ambas revisiones
-antes de retirarlas; valores y contrato en [DATABASE_HANDOFF](DATABASE_HANDOFF.md).
+ORM: User académico nullable; AcademicGoalLegacy de solo lectura;
+QuestionnaireResponseRecord con PK(user_id,revision), JSONB completo y timestamp.
+Modelo/esquema externo comparados en PostgreSQL, incluidos constraints relevantes.
 
-[Database CI 38001623290](https://github.com/M1nzutt/cognova-database/actions/runs/38001623290):
-success con PostgreSQL 17. Cubre vacío→head, 0001→0002 con datos, revisión,
-repetición, constraints/índices, cascada, rollback y search_path.
+## Contratos y comportamiento
 
-[Backend CI 38184426616](https://github.com/M1nzutt/cognova-backend/actions/runs/38184426616):
-success antes del retiro local. Auth/ownership/concurrencia, fixtures externas,
-compatibilidad ORM y startup read-only ejecutados con PostgreSQL real, sin skips;
-Ruff, formato, mypy, build, auditoría y escaneo de secretos aprobados.
+[ONBOARDING_CONTRACT](ONBOARDING_CONTRACT.md), [AUTH_CONTRACT](AUTH_CONTRACT.md),
+[QUESTIONNAIRE](QUESTIONNAIRE.md) y [API_CONTRACT](API_CONTRACT.md) son la referencia.
 
-Validación final tras el retiro, commit `842f2a4fad54d0e553f98c7d864da92db64fa2af`:
-[Backend CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858)
-completado success. **103 passed, 0 skipped, 1 warning**, incluidos 40 casos de
-integración PostgreSQL según el control JUnit. Mypy: sin problemas en 41 archivos.
-Ruff/formato, build, escaneo de secretos y auditoría aprobados (sin vulnerabilidades
-conocidas). La instalación runtime aislada confirma ausencia de Alembic y
-cognova_database y permite importar factory/launcher. La advertencia pendiente
-es deprecación httpx de Starlette TestClient; no hay fallos de tests.
-El commit posterior a esa validación solo registra evidencia documental, sin
-cambios de código/dependencias. No requiere repetir el CI ya aprobado.
-Ruff/formato local: correctos, 62 archivos. Build --no-isolation genera sdist y
-wheel correctamente. El diff del lock solo retira Alembic/Mako/MarkupSafe y sus
-referencias; no cambia versiones de otras dependencias.
+- POST /api/v1/auth/register recibe solo name/email/password; límites30/50/8–12.
+  Name trim, email normalizado/único case-insensitive, extra=forbid;201 autentica
+  con la seguridad previa y onboarding incomplete. Campos académicos NULL.
+- Login conserva credenciales antiguas, incluso passwords/email más largos;
+  no se reducen Argon2id/JWT/refresh/CSRF/logout/revocación/rate limiting/headers.
+- UserResponse (register/login/me y PUT académico) incluye datos académicos nullable,
+  onboarding explícito y legacy_academic_goal opcional. No objetivo vigente en User.
+- PUT /api/v1/onboarding/academic-profile guarda degree_program trim/no vacío y
+  semester entero positivo int32. No edita identidad ni objetivo histórico.
+- GET /api/v1/questionnaire/catalog entrega catálogo1 con textos/IDs exactos.
+- POST /api/v1/questionnaire crea inicial1; repetición409.
+- GET /api/v1/questionnaire devuelve vigente o404 sin inicial.
+- PUT /api/v1/questionnaire requiere expected_revision y agrega snapshot completo;
+  revisión desactualizada409; sin inicial404. Lock User antes de consultar head.
+- GET /api/v1/questionnaire/history pagina descendente, limit1..100 y cursor
+  before_revision exclusivo; conserva baseline y todas las revisiones posteriores.
+- Diez preguntas obligatorias, IDs/cardinalidades exactas, sin duplicados; Otro
+  requiere trim1..50 y solo se admite en q1/q6/q7 cuando esté seleccionado.
+- Codec traduce DTO choices/other_text a strings/arrays JSONB, prefijo reservado
+  other:<texto>, reversible; nunca UPDATE/DELETE de la percepción inicial.
+- OnboardingService concentra completitud: perfil válido + inicial completa válida.
+  Cualquiera puede llenarse primero; auth/restore/logout funcionan incomplete.
+- get_onboarded_user queda disponible para futuros módulos académicos (403
+  ONBOARDING_REQUIRED). No se implementaron materias, actividades, sesiones ni IA.
 
-## Cambios preservados y límites
+Usuarios migrados: archivo legacy conserva incluso blancos/Unicode literalmente;
+no fabrica cuestionarios ni cambia academic_goal original. Sesiones preexistentes
+siguen válidas. Identidad legacy fuera de los checks físicos30/50 sigue pudiendo
+iniciar sesión/leer; rehash se difiere y edición académica devuelve409
+LEGACY_PROFILE_REMEDIATION_REQUIRED hasta remediación explícita, sin truncar datos.
 
-User, AuthSession, RateLimitBucket, ORM, queries y API permanecen. Auth conserva
-Argon2id, JWT corto, refresh opaco rotativo, CSRF, revocación/logout y ownership.
-`academic_goal` no cambia; su traslado conceptual a cuestionario pregunta 1 es
-posterior. No hay nueva revisión ni módulos de producto.
+## Pruebas y controles
 
-Startup verifica DB/esquema antes de escuchar y libera el pool. Readiness exige
-explícitamente una única revisión 0002. Database no es servicio HTTP ni import
-runtime. Tests usan su CLI desde checkout limpio fijado, con credenciales solo por
-env y esquemas desechables; backend CI ya no ejecuta migraciones locales.
+CI de código completo: [38349589618](https://github.com/M1nzutt/cognova-backend/actions/runs/38349589618),
+commit9f7b31c; CI final con documentación sincronizada:
+[38349751140](https://github.com/M1nzutt/cognova-backend/actions/runs/38349751140),
+commite18b4de. Ambos success.
 
-Dos incidencias detectadas al activar CI se corrigieron sin cambio funcional:
-- Mypy: nombre separado para ReturningInsert en rate limiting; misma consulta SQL.
-- Test de privacidad del log: acepta plantilla estática relativa del router, además
-  de absoluta; mantiene comprobación del endpoint HTTP y ausencia de secretos.
+- **226 passed, 0 skipped**,84 casos de integración PostgreSQL17.
+- **1 passed adicional**: wheel instalado, imports físicos y launcher TCP real,
+  sin Alembic ni cognova_database en runtime.
+- Ruff check y format correctos; local109 archivos conformes.
+- Mypy sin problemas en76 archivos source.
+- Build sdist/wheel correcto; módulos catálogo incluidos.
+- pip-audit: sin vulnerabilidades conocidas; gitleaks aprobado.
+- OpenAPI prueba campos exactos, límites, seguridad, endpoints/status DTOs.
+- Registro bordes, auth completa, restore incomplete, ambos órdenes onboarding,
+  ownership, catálogo, validaciones, inicial/versionado/paginación/concurrencia.
+- Upgrade desde0002 para usuarios/sesiones reales de prueba; objetivos preservados,
+  login largo legacy, constraints de identidad y snapshots inmutables.
+- Localmente77 tests puros de schemas/catálogo/codec aprobados; PostgreSQL/stack
+  dependiente de DLL se certificó en CI Linux por restricciones previas de Windows.
 
-Localmente Windows Application Control bloquea PostgreSQL y DLL de SQLAlchemy:
-pytest completo no logra recopilar (9 errores de importación en el primer intento).
-No se eludió esa política ni se confundió con un fallo de auth. Dos tests aislados
-del adaptador sí pasaron. Ruff y formato locales pasan. CI Linux es la evidencia
-real de suite completa, en vez de presentar skips o mocks como integración.
+Dos warnings no fatales visibles: deprecación httpx/Starlette TestClient y warning
+SQLAlchemy/Alembic al reflejar dialect_options de checks NOT VALID. No se ocultan;
+la comparación ORM pasa y pruebas directas demuestran enforcement de constraints.
+No hay tests fallidos, omisiones de integración ni excepciones de seguridad aceptadas.
 
-## Commits de esta fase
+Último commit solo documentación/evidencia: no repite CI del mismo código validado.
+Antes de cierre se revisaron diff/check, links y estado Git; no secretos versionados.
 
-- `b170b1a`: tooling database fijado, fixtures externas y comparación ORM.
-- `9a9d818`: startup sin DDL y pruebas de fallo seguro/read-only.
-- `e8e0bd8`: correcciones mínimas de tipado y aserción de ruta de log.
-- `842f2a4`: retiro de historial/runtime Alembic, lock y documentación; CI final verde.
+## Commits principales de la fase
 
-## Próximo paso exacto
+fb9b002 contratos;3f02158..efc71c9 diez grupos de opciones;fe3c324 catálogo tipado;
+8f01920/f18bbbf validadores y tests;66c9dfd codec;38bfa59 ORM;5c017ae pin/readiness;
+e9c02da DTOs;59c3e87 versionado;6fb6c08 estado central; c38442d routers;
+4dc4dd3 registro mínimo;57fcac3 onboarding tests;6ffa2be historial/concurrencia;
+d4fd37b migración/legacy;8bb1ed4 límitesDB;9f7b31c OpenAPI;
+4982f25/144ea8a/0541fd7/e18b4de documentación y principio IA oficial.
+El hash del cierre figura en git log. No inflar historial ni squash posterior.
 
-1. Revisar la rama validada antes de merge; no desplegar automáticamente en esta fase.
-2. Operación/database deben verificar 0002 efectiva, grants con rol runtime sin
-   DDL, backup/restauración y ownership de recursos Render existentes. Solo entonces
-   coordinar rollout y retirar launchers antiguos capaces de migrar. No crear otra DB.
-3. El responsable de database puede actualizar su checkout/documentación local con
-   la evidencia remota. No hay cambios de código database requeridos detectados.
+## Dependencias externas reales y siguiente paso
 
-[DEPLOYMENT](DEPLOYMENT.md) describe el despliegue informado existente y el corte
-pendiente. No se certifican permisos, recuperación ni tráfico productivo aquí.
-No avanzar a cuestionario, materias, sesiones, estructuras, IA ni otros módulos.
+FRONTEND: consumir registro de3 campos y UserResponse.onboarding; usar next_step
+para perfil/cuestionario/completo sin adivinar por strings. Leer catálogo1, enviar
+las10 respuestas y Otro conforme DTO; guardar expected_revision para PUT, manejar
+409/releer, presentar historial paginado. Mantener auth actual, proxy/origen/cookies
+sin cambios y consultar /auth/me tras refresh/restauración. Ver contrato público.
+
+DATABASE/OPERACIÓN: release requiere0003 aplicado y permisos de nuevas tablas/funciones.
+Coordinar antes del merge/deploy; rama backend no aplica DDL. Identidades históricas
+no conformes requieren remediación explícita si existen en producción. No cambiar
+el SHA pedido por un commit documental ni reabrir handoff inicial.
+
+La IA observa, relaciona, cuestiona y pregunta. El usuario interpreta y decide.
+Mínimo5 sesiones válidas para patrones. No se implementa Gemini en esta fase.
+La fase de código está terminada; siguiente paso es integración frontend y release
+coordinado de este contrato, antes de desarrollar materias/otros módulos.

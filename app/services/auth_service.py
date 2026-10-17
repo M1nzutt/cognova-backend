@@ -6,12 +6,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.auth_error import AuthError
+from app.core.identity_limits import registration_identity_valid
 from app.models.auth_session import AuthSession
 from app.models.user import User
 from app.schemas.access_claims import AccessClaims
 from app.schemas.login_request import LoginRequest
 from app.schemas.register_request import RegisterRequest
 from app.schemas.session_response import SessionResponse
+from app.schemas.user_response import UserResponse
+from app.services.onboarding_service import OnboardingService
 from app.services.password_service import PasswordService
 from app.services.session_credentials import SessionCredentials
 from app.services.session_service import SessionService
@@ -55,11 +58,16 @@ class AuthService:
         )
         if user is None or not verified:
             raise AuthError("INVALID_CREDENTIALS")
-        if self._passwords.needs_rehash(user.password_hash):
+        if self._passwords.needs_rehash(
+            user.password_hash
+        ) and registration_identity_valid(user.name, user.email):
             user.password_hash = self._passwords.hash(password)
         credentials = self.sessions.create(user.id)
         self._db.commit()
         return user, credentials
+
+    def public_user(self, user: User) -> UserResponse:
+        return OnboardingService(self._db).user_response(user)
 
     def current_user(self, claims: AccessClaims) -> User:
         session = self._db.scalar(

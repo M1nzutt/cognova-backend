@@ -1,517 +1,123 @@
-# Cognova — Contrato de Autenticación de Producción
+﻿# Cognova — Contrato de autenticación
 
-## 1. Objetivo
+Vigente 2026-10-12. Base /api/v1. La seguridad de sesión se conserva; el registro
+se separa del onboarding. Contrato complementario: [ONBOARDING_CONTRACT](ONBOARDING_CONTRACT.md).
 
-Este contrato es la fuente de verdad compartida entre frontend y backend para autenticación y gestión de sesión.
+## Registro mínimo
 
-Principios obligatorios:
-
-- contraseñas con Argon2id;
-- access token JWT de corta duración;
-- access token guardado solo en memoria del frontend;
-- refresh token opaco y rotativo en cookie `HttpOnly`;
-- refresh token nunca en `localStorage` ni `sessionStorage`;
-- logout real con revocación de sesión;
-- protección CSRF para operaciones que dependen de cookies;
-- rate limiting;
-- HTTPS obligatorio en producción;
-- CORS restrictivo;
-- ownership estricto.
-
-Base:
-
-```text
-/api/v1
-```
-
----
-
-## 2. Convenciones
-
-### Access token
-
-- JWT firmado.
-- Duración objetivo: 10–15 minutos.
-- Se devuelve al frontend en el cuerpo de la respuesta.
-- El frontend lo conserva únicamente en memoria.
-- Se envía en:
-
-```http
-Authorization: Bearer <access_token>
-```
-
-Claims mínimas:
+POST /auth/register recibe exactamente:
 
 ```json
-{
-  "sub": "1",
-  "sid": "session-id",
-  "type": "access",
-  "iat": 0,
-  "exp": 0
-}
+{"name":"Sara","email":"sara@example.com","password":"Example123!"}
 ```
 
-No incluir información sensible innecesaria.
+Name obligatorio, trim/no vacío, máximo30 caracteres. Email obligatorio, formato
+válido, normalizado/minúsculas, máximo50 y único case-insensitive. Password mínimo8,
+máximo12 caracteres sin trim. Campos adicionales rechazados: degree_program,
+semester y academic_goal ya no pertenecen al registro.
 
-### Refresh token
+201 AuthResponse: {user:UserResponse,access_token:string,token_type:"bearer"}.
+Crea User con campos académicos NULL, AuthSession y cookies; onboarding=incomplete.
+Errores: 409 EMAIL_ALREADY_REGISTERED, 422 VALIDATION_ERROR, 429 TOO_MANY_REQUESTS,
+403 FORBIDDEN si Origin no permitido. Ningún password/hash se expone.
 
-Token opaco de alta entropía.
+## Usuario público y login
 
-Formato recomendado:
-
-```text
-<session_id>.<random_secret>
-```
-
-La base de datos guarda únicamente el hash de `random_secret`.
-
-Esto permite:
-- localizar la sesión por `session_id`;
-- verificar el secreto mediante hash;
-- rotar el secreto;
-- detectar presentación de un secreto antiguo/incorrecto para una sesión existente y revocar la sesión.
-
-Cookie:
-
-```text
-Name=cognova_refresh
-HttpOnly=true
-Secure=true          # producción
-SameSite=Lax
-Path=/api/v1/auth
-```
-
-En desarrollo local `Secure` puede desactivarse exclusivamente mediante configuración de entorno.
-
-### CSRF
-
-Cognova usa un token CSRF separado.
-
-Cookie:
-
-```text
-Name=cognova_csrf
-HttpOnly=false
-Secure=true          # producción
-SameSite=Lax
-Path=/
-```
-
-El frontend lee esta cookie y la refleja en:
-
-```http
-X-CSRF-Token: <csrf_token>
-```
-
-El backend valida:
-1. cookie CSRF presente;
-2. header presente;
-3. igualdad segura;
-4. hash asociado a la sesión cuando corresponda.
-
-El token CSRF no es una credencial de autenticación.
-
-Decisión confirmada: Netlify proxyea `/api/*` a Render conservando el prefijo;
-el navegador usa un mismo origen lógico. Cookies sin atributo Domain (host-only).
-CSRF usa Path=/ para poder leerse desde /login y las demás páginas; refresh
-permanece HttpOnly con Path=/api/v1/auth. Nunca llamar a Render directamente
-desde el frontend para autenticar usuarios.
-
----
-
-## 3. Registro
-
-### POST `/api/v1/auth/register`
-
-Request:
-
-```json
-{
-  "name": "Sara",
-  "email": "sara@example.com",
-  "password": "Example123!",
-  "degree_program": "Ingeniería de Software",
-  "semester": 4,
-  "academic_goal": "Mejorar mi constancia"
-}
-```
-
-Reglas:
-
-- `name`: requerido, no solo espacios;
-- `email`: requerido, válido, normalizado, único case-insensitive;
-- `password`: requerido, mínimo 8 caracteres, admitir contraseñas largas;
-- `degree_program`: requerido, no solo espacios;
-- `semester`: entero positivo;
-- `academic_goal`: requerido, no solo espacios;
-- rechazar campos extra si el esquema público no los permite.
-
-Response `201 Created`:
-
-```json
-{
-  "user": {
-    "id": 1,
-    "name": "Sara",
-    "email": "sara@example.com",
-    "degree_program": "Ingeniería de Software",
-    "semester": 4,
-    "academic_goal": "Mejorar mi constancia"
-  },
-  "access_token": "short_lived_access_token",
-  "token_type": "bearer"
-}
-```
-
-Además:
-- crea `AuthSession`;
-- establece `cognova_refresh`;
-- establece/rota `cognova_csrf`.
-
-Errores:
-- `409 EMAIL_ALREADY_REGISTERED`
-- `422 VALIDATION_ERROR`
-- `429 TOO_MANY_REQUESTS`
-
----
-
-## 4. Login
-
-### POST `/api/v1/auth/login`
-
-Request:
-
-```json
-{
-  "email": "sara@example.com",
-  "password": "Example123!"
-}
-```
-
-Response `200 OK`: mismo `AuthResponse` del registro.
-
-Además:
-- crea una nueva `AuthSession`;
-- establece refresh cookie;
-- establece CSRF cookie.
-
-Error de credenciales:
-
-```json
-{
-  "error": {
-    "code": "INVALID_CREDENTIALS",
-    "message": "Correo o contraseña incorrectos."
-  }
-}
-```
-
-No indicar cuál de los dos campos falló.
-
-Errores:
-- `401 INVALID_CREDENTIALS`
-- `422 VALIDATION_ERROR`
-- `429 TOO_MANY_REQUESTS`
-
----
-
-## 5. Usuario autenticado
-
-### GET `/api/v1/auth/me`
-
-Requiere access token Bearer.
-
-Validar:
-- firma;
-- expiración;
-- `type=access`;
-- `sub`;
-- `sid`;
-- sesión existente;
-- sesión no revocada;
-- sesión no expirada.
-
-Response `200 OK`:
+UserResponse compartido por registro, login, me y guardado académico:
 
 ```json
 {
   "id": 1,
   "name": "Sara",
   "email": "sara@example.com",
-  "degree_program": "Ingeniería de Software",
-  "semester": 4,
-  "academic_goal": "Mejorar mi constancia"
+  "degree_program": null,
+  "semester": null,
+  "onboarding": {
+    "status": "incomplete",
+    "academic_profile_complete": false,
+    "questionnaire_complete": false,
+    "next_step": "academic_profile"
+  },
+  "legacy_academic_goal": null
 }
 ```
 
-Errores:
-- `401 INVALID_OR_EXPIRED_TOKEN`
-- `401 SESSION_REVOKED`
-
----
-
-## 6. Renovación
-
-### POST `/api/v1/auth/refresh`
-
-No acepta refresh token por JSON.
-
-El navegador envía `cognova_refresh` automáticamente y el frontend envía `X-CSRF-Token`.
-
-Proceso:
-
-1. leer cookie;
-2. extraer `session_id` y secreto;
-3. obtener `AuthSession`;
-4. validar que no esté revocada ni expirada;
-5. validar CSRF;
-6. comprobar hash del secreto;
-7. si el secreto no coincide para una sesión existente, revocar esa sesión;
-8. generar nuevo secreto de refresh;
-9. reemplazar su hash;
-10. rotar CSRF;
-11. actualizar `last_used_at`;
-12. emitir nuevo access token;
-13. reemplazar cookies.
-
-Response `200 OK`:
-
-```json
-{
-  "access_token": "new_access_token",
-  "token_type": "bearer"
-}
-```
-
-Errores:
-- `401 INVALID_REFRESH_TOKEN`
-- `401 SESSION_REVOKED`
-- `403 CSRF_VALIDATION_FAILED`
-- `429 TOO_MANY_REQUESTS`
-
----
-
-## 7. Logout
-
-### POST `/api/v1/auth/logout`
-
-Requiere:
-- refresh cookie;
-- `X-CSRF-Token`.
-
-Proceso:
-- revocar `AuthSession`;
-- eliminar refresh cookie;
-- eliminar CSRF cookie.
-
-Response:
-
-```text
-204 No Content
-```
-
-El frontend elimina el access token de memoria.
-
-Logout debe ser idempotente desde la perspectiva del usuario.
-
-Detalle de idempotencia: sin refresh cookie responde 204 y limpia cookies. Si hay
-cookie, exige CSRF; repetir una petición válida ya revocada también devuelve 204.
-
----
-
-## 8. Sesiones activas
-
-### GET `/api/v1/auth/sessions`
-
-Requiere access token.
-
-Devuelve únicamente sesiones del usuario autenticado.
-
-Ejemplo:
-
-```json
-[
-  {
-    "id": "session-id",
-    "created_at": "2026-10-05T10:00:00-05:00",
-    "last_used_at": "2026-10-05T10:30:00-05:00",
-    "expires_at": "2026-11-04T10:00:00-05:00",
-    "current": true
-  }
-]
-```
-
-Nunca devolver:
-- refresh token;
-- refresh hash;
-- CSRF hash;
-- password hash.
-
-### DELETE `/api/v1/auth/sessions/{session_id}`
-
-Requiere access token.
-
-Solo puede revocar una sesión perteneciente al usuario autenticado.
-
-Respuesta: `204 No Content`. Una sesión ajena se trata como no encontrada (`404`)
-para no revelar su existencia. `session_id` tiene formato UUID; malformado da 422.
-
-Si se revoca la sesión actual:
-- revocar;
-- limpiar cookies si corresponden a esa sesión;
-- frontend debe cerrar sesión.
-
-Errores:
-- `404 SESSION_NOT_FOUND`
-- `403 FORBIDDEN`
-
----
-
-## 9. Restauración de sesión
-
-Al cargar o recargar la aplicación:
-
-```text
-Frontend inicia sin access token
-        ↓
-lee cognova_csrf
-        ↓
-POST /auth/refresh + X-CSRF-Token
-        ↓
-nuevo access token en memoria
-        ↓
-GET /auth/me
-        ↓
-sesión restaurada
-```
-
-Si refresh falla:
-- limpiar estado autenticado;
-- no entrar en bucle;
-- mostrar login.
-
----
-
-## 10. Manejo de 401 en frontend
-
-Cuando una petición protegida recibe `401` por access token expirado:
-
-1. ejecutar como máximo un refresh coordinado;
-2. si varias peticiones fallan simultáneamente, compartir el mismo refresh pendiente;
-3. actualizar access token en memoria;
-4. repetir una sola vez las peticiones originales;
-5. si refresh falla, cerrar sesión;
-6. nunca crear bucles infinitos.
-
----
-
-## 11. Contraseñas
-
-- Argon2id.
-- Nunca almacenar contraseña en texto plano.
-- Nunca registrar contraseña en logs.
-- Nunca devolver `password_hash`.
-- Soportar rehash cuando cambien parámetros recomendados.
-- Comparación segura.
-
----
-
-## 12. Rate limiting
-
-Aplicar al menos a:
-
-```text
-POST /auth/register
-POST /auth/login
-POST /auth/refresh
-```
-
-Debe:
-- ser configurable por entorno;
-- responder `429`;
-- tener pruebas;
-- evitar incluir datos sensibles en claves/logs.
-
-Los endpoints de IA también tendrán límites propios.
-
----
-
-## 13. CORS y cookies
-
-Producción:
-- lista explícita de orígenes permitidos;
-- credenciales habilitadas solo para orígenes concretos;
-- nunca `Access-Control-Allow-Origin: *` con credenciales.
-
-Si frontend y backend se despliegan realmente cross-site y `SameSite=Lax` no funciona, la decisión deberá documentarse antes de cambiar a:
-
-```text
-SameSite=None
-Secure=true
-```
-
-CSRF sigue siendo obligatorio.
-
----
-
-## 14. Errores de autenticación
-
-Formato:
-
-```json
-{
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Mensaje legible."
-  }
-}
-```
-
-Códigos:
-
-```text
-EMAIL_ALREADY_REGISTERED
-INVALID_CREDENTIALS
-INVALID_OR_EXPIRED_TOKEN
-INVALID_REFRESH_TOKEN
-SESSION_REVOKED
-SESSION_NOT_FOUND
-CSRF_VALIDATION_FAILED
-VALIDATION_ERROR
-TOO_MANY_REQUESTS
-UNAUTHORIZED
-FORBIDDEN
-```
-
----
-
-## 15. Variables de entorno
-
-Ejemplo conceptual:
-
-```env
-JWT_SECRET=
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=15
-REFRESH_TOKEN_EXPIRE_DAYS=30
-COOKIE_SECURE=true
-COOKIE_SAMESITE=lax
-CORS_ALLOWED_ORIGINS=
-AUTH_RATE_LIMIT=
-```
-
-No guardar secretos reales en Git.
-
----
-
-## 16. Regla de compatibilidad
-
-Este documento reemplaza cualquier decisión anterior que indique:
-
-- JWT persistido en `localStorage`;
-- logout solo local;
-- ausencia de refresh tokens;
-- autenticación stateless sin sesiones revocables.
-
-El código existente que siga ese modelo debe migrarse; no borrarse a ciegas.
+Legacy existente: legacy_academic_goal={value:string|null,captured_at:datetime},
+leído del archivo inmutable 0003. No es q1 vigente ni completa onboarding. El objetivo
+académico actual se consulta como q1 del cuestionario. No truncar datos históricos.
+
+POST /auth/login: {email,password}, extra=forbid. Email normalizado; no aplicar
+límites nuevos de registro a credenciales antiguas. 200 AuthResponse y nueva sesión.
+401 INVALID_CREDENTIALS: "Correo o contraseña incorrectos." Tanto usuario inexistente
+como clave incorrecta producen el mismo mensaje y ejecutan verificación Argon2.
+Login/restauración/logout funcionan aunque onboarding esté incomplete.
+
+GET /auth/me: Bearer requerido, 200 UserResponse; comprueba firma/expiración/type,
+sub/sid, ownership y sesión existente no expirada ni revocada. 401
+INVALID_OR_EXPIRED_TOKEN o SESSION_REVOKED. Estado onboarding centralizado en
+OnboardingService, sin flags duplicados en frontend o columna inferida de texto vacío.
+
+## Tokens y cookies
+
+Argon2id para contraseñas con salts y rehash. Si una identidad legacy viola checks
+NOT VALID de 0003, diferir rehash hasta remediación explícita para no romper login
+por UPDATE incompatible; no truncar name/email ni desactivar los checks DB.
+
+JWT HS256 access de 15 minutos por defecto, máximo15; solo memoria frontend.
+Claims requeridas: sub (ID positivo string), sid (UUID), type=access, iat, exp;
+jti aleatorio adicional. Sin email/datos sensibles. Algoritmo fijado en backend.
+
+Refresh opaco <session_uuid>.<secreto aleatorio>, 48 bytes aleatorios; solo SHA-256
+persistido. CSRF separado de32 bytes, hash asociado a sesión. Expiración absoluta
+refresh30 días por defecto; rotar no amplía lifetime. Comparaciones constantes.
+
+| Cookie | HttpOnly | Secure producción | SameSite | Path |
+| --- | --- | --- | --- | --- |
+| cognova_refresh | true | true | Lax | /api/v1/auth |
+| cognova_csrf | false | true | Lax | / |
+
+Host-only (sin Domain). Netlify proxyea /api/* a Render para un único origen lógico.
+Frontend lee CSRF y lo envía en X-CSRF-Token. Nunca guardar tokens de auth en Web
+Storage. CORS allowlist explícita con credenciales, nunca wildcard.
+
+## Refresh y logout
+
+POST /auth/refresh autentica únicamente por cookie refresh y X-CSRF-Token; no
+acepta credencial refresh en JSON. Bloquea AuthSession, verifica vigencia, valida
+cookie/header CSRF y hash asociado antes de comprobar hash refresh. Si CSRF antiguo
+no coincide:403, no revoca sesión válida. Si secreto refresh incorrecto con CSRF
+vigente: revoca persistentemente y devuelve401. Rotación atómica de ambos secretos,
+last_used_at y nuevo access. 200 {access_token,token_type:"bearer"}.
+Errores: INVALID_REFRESH_TOKEN/SESSION_REVOKED(401), CSRF_VALIDATION_FAILED(403),
+TOO_MANY_REQUESTS(429). No se altera este flujo por onboarding.
+
+POST /auth/logout: cookie refresh + CSRF; revoca sesión y limpia ambas cookies con
+sus paths correctos. 204 sin cuerpo. Sin refresh cookie es no-op204 y limpia cookies;
+con cookie exige CSRF. Repetir logout válido ya revocado devuelve204. Frontend borra
+access de memoria; los access asociados a sid revocado ya no autorizan.
+
+## Sesiones y autorización
+
+GET /auth/sessions: Bearer, 200 lista de sesiones activas únicamente del propietario:
+{id:UUID,created_at,last_used_at,expires_at,current}. Nunca hashes ni credenciales.
+DELETE /auth/sessions/{session_id}: Bearer, ownership comprobado, 204; sesión ajena
+/no encontrada=404 SESSION_NOT_FOUND, UUID inválido=422. Revocar sesión actual limpia
+cookies cuando corresponden a esa sesión. Ninguno exige onboarding completo.
+
+## Restauración y abuso
+
+Al cargar: un refresh coordinado, token en memoria y GET /auth/me para conocer estado.
+Ante401 repetir petición original solo una vez tras refresh; si falla, cerrar sesión,
+sin bucles. Frontend navega usando onboarding.next_step, no adivina por strings.
+
+Límites compartidos PostgreSQL: register/login/refresh por peer de red y además por
+email en login; 20/60s por defecto, HMAC de claves, sin IP/email plano. No confiar en
+X-Forwarded-For arbitrario. Contar fallos y devolver429 con Retry-After. Origin
+se verifica cuando existe en register/login/refresh/logout. No-store y headers
+seguros se mantienen en /api/*; errores no filtran payloads o secretos.
+
+Formato general: {error:{code,message}}. 422 sin valores de input, 503 sin datos DB,
+500 genérico. Domain errors de onboarding/cuestionario se definen en su contrato.
+Variables existentes: JWT_SECRET, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES,
+REFRESH_TOKEN_EXPIRE_DAYS, COOKIE_SECURE, COOKIE_SAMESITE, CORS_ALLOWED_ORIGINS,
+AUTH_RATE_LIMIT y AUTH_RATE_WINDOW_SECONDS. No versionar secretos.

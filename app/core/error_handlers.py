@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
 
 from app.core.auth_error import AuthError
+from app.core.domain_error import DomainError
 
 
 def error_response(
@@ -45,3 +46,8 @@ async def database_error_handler(request: Request, exc: Exception) -> JSONRespon
 
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     return error_response(500, "INTERNAL_ERROR", "Ocurrió un error interno.")
+
+
+async def domain_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    assert isinstance(exc, DomainError)
+    return error_response(exc.status_code, exc.code, exc.message)

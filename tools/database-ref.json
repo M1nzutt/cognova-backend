@@ -1,6 +1,5 @@
 {
   "repository": "M1nzutt/cognova-database",
-  "commit": "0fe2c9eafedf1c44b5cd8d1c9dc998fbd9a7d5a1",
-  "schema_revision": "0002_auth_sessions",
-  "validation_run": "https://github.com/M1nzutt/cognova-database/actions/runs/38001623290"
+  "commit": "232c43130c0fb3eddd32e1dd3707368ba0d87d4c",
+  "schema_revision": "0003_onboarding_questionnaire"
 }

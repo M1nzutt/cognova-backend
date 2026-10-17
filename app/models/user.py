@@ -15,9 +15,9 @@ class User(Base):
     name: Mapped[str] = mapped_column(Text)
     email: Mapped[str] = mapped_column(Text)
     password_hash: Mapped[str] = mapped_column(Text)
-    degree_program: Mapped[str] = mapped_column(Text)
-    semester: Mapped[int] = mapped_column(Integer)
-    academic_goal: Mapped[str] = mapped_column(Text)
+    degree_program: Mapped[str | None] = mapped_column(Text)
+    semester: Mapped[int | None] = mapped_column(Integer)
+    academic_goal: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -28,4 +28,12 @@ class User(Base):
     __table_args__ = (
         Index("uq_users_email_lower", func.lower(email), unique=True),
         CheckConstraint("semester > 0", name="ck_users_semester_positive"),
+        CheckConstraint(
+            "char_length(btrim(name)) > 0 AND char_length(name) <= 30",
+            name="ck_users_name_registration",
+        ),
+        CheckConstraint(
+            "char_length(btrim(email)) > 0 AND char_length(email) <= 50",
+            name="ck_users_email_registration",
+        ),
     )

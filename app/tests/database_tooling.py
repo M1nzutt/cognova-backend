@@ -37,7 +37,7 @@ def database_checkout() -> Path:
     return path
 
 
-def migrate_test_schema(path: Path, url: str) -> None:
+def migrate_test_schema(path: Path, url: str, revision: str = "head") -> None:
     # The fixture validates the disposable destination and creates its own schema.
     # Credentials go through environment, never argv or captured error messages.
     environment = {
@@ -52,7 +52,7 @@ def migrate_test_schema(path: Path, url: str) -> None:
         PYTHONPATH=str(path),
     )
     result = subprocess.run(
-        [sys.executable, "-m", "cognova_database", "upgrade", "head"],
+        [sys.executable, "-m", "cognova_database", "upgrade", revision],
         cwd=path,
         env=environment,
         capture_output=True,

@@ -128,9 +128,6 @@ def test_registration_preserves_password_and_normalizes_email():
         name="Sara",
         email="SARA@EXAMPLE.COM",
         password=" secret12 ",
-        degree_program="Software",
-        semester=4,
-        academic_goal="Estudiar",
     )
     assert payload.email == "sara@example.com"
     assert payload.password.get_secret_value() == " secret12 "

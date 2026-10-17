@@ -82,7 +82,7 @@ Si una implementación empieza a parecer cualquiera de estas cosas, se está ale
 
 La filosofía principal de Cognova es:
 
-> **La IA observa, compara y pregunta. El usuario interpreta y decide.**
+> **La IA observa, relaciona, cuestiona y pregunta. El usuario interpreta y decide.**
 
 La inteligencia artificial no debe decirle al usuario quién es.
 
@@ -368,7 +368,7 @@ Cognova no debe presentar un patrón como significativo con muy pocos datos.
 
 Regla aprobada:
 
-> **Mínimo 5 sesiones registradas antes de hablar de patrones.**
+> **Mínimo 5 sesiones válidas antes de hablar de patrones.**
 
 Con menos de 5 sesiones puede mostrar datos descriptivos, pero debe indicar que todavía no hay suficiente evidencia para hablar de una tendencia.
 

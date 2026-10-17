@@ -30,7 +30,8 @@
 
 ## Funcionalidad
 
-- Perfil: nombre, carrera, semestre, objetivo académico.
+- Registro: nombre/email/password. Carrera y semestre se completan en onboarding;
+  objetivo académico vigente corresponde a q1 del cuestionario versionado.
 - Materias personalizables.
 - Actividad genérica con `type`.
 - Prioridades manuales y deadlines.
@@ -40,7 +41,7 @@
 - Cuestionario obligatorio de 10 preguntas.
 - IA como acompañante académico.
 - IA automática con evidencia suficiente y manual bajo demanda.
-- Mínimo 5 sesiones antes de hablar de patrones.
+- Mínimo 5 sesiones válidas antes de hablar de patrones.
 - Retos: IA propone, usuario acepta/rechaza; aceptado no se edita.
 - Gamificación: únicamente racha.
 - Grafo: dependencias académicas.
@@ -88,6 +89,30 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Cambios a decisiones congeladas
 
+### Registro mínimo y onboarding versionado — 2026-10-12
+
+- Sustituye el registro de seis campos. Name/email/password con límites30/50/8–12.
+- Database fijado exactamente a 232c43130c0fb3eddd32e1dd3707368ba0d87d4c;
+  el código nuevo exige 0003_onboarding_questionnaire sin ejecutar DDL.
+- Estado explícito centralizado en UserResponse: perfil válido + inicial completa;
+  auth disponible con estado incomplete. Perfil y cuestionario en cualquier orden.
+- Catálogo1 con las diez preguntas/opciones aprobadas, IDs en QUESTIONNAIRE.md.
+- POST crea baseline1; PUT con expected_revision agrega snapshot y conserva historia.
+  Bloquear User antes de comparar versión protege concurrencia; DB añade triggers.
+- q1 es objetivo vigente; archivo legacy preservado literal, no rellena respuestas.
+- No desplegar esta rama sobre 0002: operación/database coordinan migración y release.
+  No modificar infraestructura, auth de sesión ni implementar módulos posteriores.
+
+### Estabilización de URL productiva — 2026-10-11
+
+- Handoff mergeado en main (`3e3ed95`) y desplegado automáticamente en Render.
+- Hostname confirmado: cognova-backend-lpsi.onrender.com, con letra ele en lpsi.
+  La URL con número uno devolvía 404 de Render/no-server, antes de llegar a Cognova.
+- OpenAPI/health/ready 200 y me sin token 401 en el host correcto. No se cambia
+  factory, seguridad ni import path; no se requiere redeploy para corregir la URL.
+- La prueba nueva usa el launcher TCP real y wheel aislado para verificar imports,
+  rutas y empaquetado más allá de TestClient. No se crean cuentas para este smoke.
+
 ### Corte en código y validación del handoff — 2026-10-11
 
 - Compuerta superada con CI PostgreSQL real de database en
@@ -116,8 +141,8 @@ Reemplaza el diseño anterior de JWT persistido.
 - El backend dejará de ejecutar migraciones al arrancar tras ese corte coordinado;
   mantendrá verificación de DB y compatibilidad. No basta comprobar `SELECT 1`.
 - Mantener el despliegue existente. No crear otra DB ni aplicar de nuevo el Blueprint.
-- `academic_goal` corresponde conceptualmente a la pregunta 1 del cuestionario;
-  permanece en User y auth hasta un refactor posterior con migración y contratos.
+- Esa decisión histórica se completó con0003: academic_goal queda nullable legacy,
+  fuera de registro/DTO vigente; q1 se conserva en cuestionario inmutable versionado.
 - Cada agente modifica solo su repositorio. Las dependencias con los otros se
   documentan; no se editan archivos externos para sincronizar unilateralmente.
 

@@ -9,9 +9,11 @@ from starlette.exceptions import HTTPException
 
 from app.api.router import api_router
 from app.core.auth_error import AuthError
+from app.core.domain_error import DomainError
 from app.core.error_handlers import (
     auth_error_handler,
     database_error_handler,
+    domain_error_handler,
     http_error_handler,
     internal_error_handler,
     validation_error_handler,
@@ -43,6 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.passwords = PasswordService()
     app.state.tokens = TokenService(settings)
     app.add_exception_handler(AuthError, auth_error_handler)
+    app.add_exception_handler(DomainError, domain_error_handler)
     app.add_exception_handler(RequestValidationError, validation_error_handler)
     app.add_exception_handler(HTTPException, http_error_handler)
     app.add_exception_handler(SQLAlchemyError, database_error_handler)

@@ -2,12 +2,15 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-La fase actual separa el esquema database del runtime backend, sin nuevas funcionalidades.
+Esta rama implementa registro mínimo, datos académicos y cuestionario versionado.
+Contrato frontend: [ONBOARDING_CONTRACT.md](docs/ONBOARDING_CONTRACT.md).
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
-ORM, consultas y conexiones permanecen en backend; Alembic y su historial viven
-en cognova-database. El corte en código está preparado en la rama de revisión;
-el rollout de producción no se ha ejecutado.
+ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
+cognova-database. Esta rama requiere 0003 y no se despliega automáticamente.
+
+API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
+ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
 
 ## Entorno local
 
@@ -24,7 +27,7 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-Están implementados los siete endpoints de autenticación, health y readiness
+Están implementados auth, health/readiness, perfil académico y cuestionario
 bajo `/api/v1`, según [el contrato](docs/API_CONTRACT.md).
 
 `CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
@@ -44,8 +47,9 @@ disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
 No se usa `create_all`. Database conserva `0001_create_users` →
-`0002_auth_sessions`: users, sesiones revocables y contadores de rate limiting.
-`python scripts/start.py` valida disponibilidad y revisión 0002 antes de escuchar,
+`0002_auth_sessions` → `0003_onboarding_questionnaire`.
+La referencia exacta requerida es 232c43130c0fb3eddd32e1dd3707368ba0d87d4c.
+`python scripts/start.py` valida disponibilidad y revisión 0003 antes de escuchar,
 sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación
@@ -61,6 +65,13 @@ Las contraseñas usan [Argon2id](https://argon2-cffi.readthedocs.io/en/stable/ap
 y los tokens [PyJWT](https://pyjwt.readthedocs.io/en/stable/usage.html).
 El contrato público vive en [AUTH_CONTRACT.md](docs/AUTH_CONTRACT.md).
 Registro/login/me, refresh rotativo, logout, sesiones y revocación están implementados.
+
+Registro solo name/email/password con límites 30/50/8–12. UserResponse expone
+onboarding y campos académicos nullable; el login conserva credenciales históricas.
+PUT /api/v1/onboarding/academic-profile guarda carrera/semestre. Cuestionario:
+GET catálogo, POST inicial, GET vigente, PUT con expected_revision, GET historial
+paginado. Revisión1 nunca se sobrescribe; el objetivo vigente es q1. Auth funciona
+con onboarding incompleto; los futuros módulos académicos exigirán completitud.
 
 Las pruebas unitarias no necesitan un servidor. Para probar una conexión real,
 definir `TEST_DATABASE_URL` con una base de pruebas PostgreSQL y ejecutar pytest.

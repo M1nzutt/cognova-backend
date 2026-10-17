@@ -13,7 +13,7 @@ No es:
 
 ## Principio
 
-> **La IA observa, compara y pregunta. El usuario interpreta y decide.**
+> **La IA observa, relaciona, cuestiona y pregunta. El usuario interpreta y decide.**
 
 ## Fuentes permitidas
 
@@ -38,7 +38,7 @@ No debe inventar registros faltantes.
 
 ## Evidencia
 
-- mínimo 5 sesiones antes de hablar de patrones;
+- mínimo 5 sesiones válidas antes de hablar de patrones;
 - indicar muestra cuando sea pequeña;
 - usar cantidades/proporciones cuando sea posible;
 - distinguir dato descriptivo de interpretación;

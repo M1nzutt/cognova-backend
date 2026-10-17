@@ -18,6 +18,12 @@ Obligatorio:
 
 La implementación detallada vive en `AUTH_CONTRACT.md`.
 
+Registro mínimo vigente: name<=30, email<=50, password8–12. El login admite
+credenciales históricas más largas; no cambiar hashing/tokens/CSRF por onboarding.
+Las rutas onboarding/questionnaire requieren Bearer y ownership derivado del token.
+Historial inmutable y PUT con expected_revision; no exponer user_id/hashes en DTO.
+Los módulos académicos futuros deben usar get_onboarded_user (403 incompleto).
+
 ## 2. Autorización
 
 Todos los recursos privados deben validar ownership en backend.
@@ -91,7 +97,9 @@ Ownership desde 2026-10-08: cognova-database administra DDL, migraciones y
 recuperación; backend conserva ORM, acceso autorizado y transacciones. El corte
 debe separar rol migrador y runtime sin quitar la comprobación de compatibilidad.
 El código backend ya no ejecuta DDL ni conserva historial Alembic. La compatibilidad
-con database se validó en PostgreSQL de CI; falta el rollout operativo. Ver
+con database se validó en PostgreSQL de CI y el merge está desplegado en Render.
+Health/readiness/OpenAPI se verificaron en producción; grants/recuperación son
+controles separados aún no acreditados. Ver
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). Esta asignación no marca el checklist
 como completado ni acredita backups o pruebas de producción todavía no verificadas.
 
