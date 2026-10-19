@@ -10,7 +10,10 @@ aprobadas. DTOs y catálogo: 19 pruebas propias aprobadas (normalización NFC,
 límites, tipos estrictos, campos prohibidos y todas las combinaciones de color).
 Servicio transaccional validado: 7 pruebas unitarias de rollback/reintento,
 traducción de constraints y rechazo de reintento ante commit ambiguo; 20 casos
-PostgreSQL de Materias aprobados. Rutas y evidencia se guardan por separado.
+PostgreSQL de Materias aprobados. Rutas y OpenAPI publicados: CRUD, catálogo,
+filtros/cursor, archivo/reactivación y DELETE con confirm=true; Bearer + onboarding
+completo. Prueba de rutas existentes actualizada para reconocer el módulo real.
+Suite ampliada completa y validaciones de empaquetado en curso.
 Sin cambios de auth,
 producción ni repositorios hermanos. El historial de onboarding sigue debajo.
 
