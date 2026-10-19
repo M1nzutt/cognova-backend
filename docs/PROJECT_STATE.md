@@ -8,7 +8,9 @@ c3394c38c55a8cd466d10f02fe7c80d7c1e1980f / 0004_subjects; ORM y DTOs separados.
 26 pruebas DTO/readiness y 3 PostgreSQL de compatibilidad ORM/startup/readiness
 aprobadas. DTOs y catálogo: 19 pruebas propias aprobadas (normalización NFC,
 límites, tipos estrictos, campos prohibidos y todas las combinaciones de color).
-Servicios/rutas y pruebas en el árbol de trabajo; commits por bloques.
+Servicio transaccional validado: 7 pruebas unitarias de rollback/reintento,
+traducción de constraints y rechazo de reintento ante commit ambiguo; 20 casos
+PostgreSQL de Materias aprobados. Rutas y evidencia se guardan por separado.
 Sin cambios de auth,
 producción ni repositorios hermanos. El historial de onboarding sigue debajo.
 
