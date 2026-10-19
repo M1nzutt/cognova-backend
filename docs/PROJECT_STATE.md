@@ -1,5 +1,16 @@
 # Cognova — Estado backend
 
+## Materias — 2026-10-18
+
+Rama feat/subjects-0004, inicio limpio dec1f73, 57 commits. Contrato definido en
+SUBJECTS_CONTRACT.md antes de implementación. Pin y readiness actualizados a
+c3394c38c55a8cd466d10f02fe7c80d7c1e1980f / 0004_subjects; ORM y DTOs separados.
+26 pruebas DTO/readiness y 3 PostgreSQL de compatibilidad ORM/startup/readiness
+aprobadas. Servicios/rutas y pruebas en el árbol de trabajo; commits por bloques.
+Sin cambios de auth,
+producción ni repositorios hermanos. El historial de onboarding sigue debajo.
+
+
 Release productivo: 2026-10-17. Rama main. Historial de implementación abajo.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
 Onboarding desplegado en el servicio Render existente. No se modificaron frontend ni database.

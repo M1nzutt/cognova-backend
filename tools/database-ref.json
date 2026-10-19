@@ -1,5 +1,5 @@
 {
   "repository": "M1nzutt/cognova-database",
-  "commit": "232c43130c0fb3eddd32e1dd3707368ba0d87d4c",
-  "schema_revision": "0003_onboarding_questionnaire"
+  "commit": "c3394c38c55a8cd466d10f02fe7c80d7c1e1980f",
+  "schema_revision": "0004_subjects"
 }

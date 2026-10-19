@@ -63,7 +63,7 @@ módulos académicos listados más abajo.
 - DELETE `/subjects/{id}`
 
 Contrato implementado de Materias: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
-Incluye cat?logo, filtros, paginaci?n, archivo/reactivaci?n y DELETE confirmado.
+Incluye catálogo, filtros, paginación, archivo/reactivación y DELETE confirmado.
 Ownership y onboarding completo obligatorios.
 
 ## Goals

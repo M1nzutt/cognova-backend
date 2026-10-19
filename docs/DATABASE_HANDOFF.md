@@ -4,7 +4,20 @@ Fecha: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
 ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
 conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
-## Referencia y evidencia
+## Consumo 0004 — Materias (2026-10-18)
+
+Referencia vigente: c3394c38c55a8cd466d10f02fe7c80d7c1e1980f,
+revisión exacta 0004_subjects. El checkout de pruebas aislado dentro de backend
+fue actualizado a ese SHA y se verificó limpio. No se modifica el repo hermano.
+ORM de Subject comparado contra PostgreSQL real sin drift; startup read-only y
+readiness pasan. El código de esta rama rechaza 0003 hasta release coordinado.
+Contrato público: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md). Operación debe aplicar
+0004 y conceder SELECT/INSERT/UPDATE/DELETE en subjects, USAGE/SELECT de su secuencia,
+y conservar permisos de lock users. DELETE explícito es parte del módulo pedido;
+no TRUNCATE ni DDL runtime. No se cambiaron grants ni producción aquí.
+Las referencias 0003 siguientes describen exclusivamente el handoff anterior.
+
+## Referencia y evidencia histórica
 
 Fuente de tooling fijada en [tools/database-ref.json](../tools/database-ref.json):
 `M1nzutt/cognova-database` @ `232c43130c0fb3eddd32e1dd3707368ba0d87d4c`.
