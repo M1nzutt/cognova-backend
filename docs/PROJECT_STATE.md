@@ -1,32 +1,52 @@
 # Cognova — Estado backend
 
-## Materias — 2026-10-18
+## Materias — entrega cerrada 2026-10-19
 
-Rama feat/subjects-0004, inicio limpio dec1f73, 57 commits. Contrato definido en
-SUBJECTS_CONTRACT.md antes de implementación. Pin y readiness actualizados a
-c3394c38c55a8cd466d10f02fe7c80d7c1e1980f / 0004_subjects; ORM y DTOs separados.
-26 pruebas DTO/readiness y 3 PostgreSQL de compatibilidad ORM/startup/readiness
-aprobadas. DTOs y catálogo: 19 pruebas propias aprobadas (normalización NFC,
-límites, tipos estrictos, campos prohibidos y todas las combinaciones de color).
-Servicio transaccional validado: 7 pruebas unitarias de rollback/reintento,
-traducción de constraints y rechazo de reintento ante commit ambiguo; 20 casos
-PostgreSQL de Materias aprobados. Rutas y OpenAPI publicados: CRUD, catálogo,
-filtros/cursor, archivo/reactivación y DELETE con confirm=true; Bearer + onboarding
-completo. Prueba de rutas existentes actualizada para reconocer el módulo real.
-Suite ampliada detectó que lower() en collation C no iguala É/é: comparación
-Unicode NFC+casefold bajo lock añadida; transacción READ COMMITTED explícita por
-mutación para evitar snapshots previos. No cambia 0004 ni auth. Revalidación dirigida: 30 pruebas aprobadas (23 PostgreSQL
-+7 unitarias), y 3 casos adicionales con abortos PostgreSQL 40001/40P01 y UNIQUE
-de posición prueban rollback/reintento reales. Cobertura PostgreSQL de Materias:
-26 casos, incluidas todas las rutas protegidas, ownership, Unicode, paginación,
-borrado con dependencias y upgrade 0003 con preservación. Readiness rechaza 0003.
-Suite completa local: 280 passed, 0 skipped; 110 casos PostgreSQL. JUnit validado
-en .local/subjects-results.xml. Cero esquemas test_* residuales e instancia local
-detenida. CI 39196997553 en curso sobre c62cde02bbeda0265e7723b604ac5f8abe099c72.
-Build sdist/wheel, mypy (86 archivos), Ruff, pip check y pip-audit aprobados.
-Sin cambios de auth,
-producción ni repositorios hermanos. El historial de onboarding sigue debajo.
+Rama feat/subjects-0004. Inicio limpio dec1f73 (57 commits); nueve commits de
+Materias dejan 66 totales, sin squash. Esta continuación aporta dos commits
+documentales: sincronización pendiente y evidencia final. No cambia funcionalidad.
 
+Database fijado a c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, revisión 0004_subjects.
+Contrato público: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
+ORM, schemas, servicio y rutas separados. Auth, frontend y Database sin cambios.
+
+CI final [39196997553](https://github.com/M1nzutt/cognova-backend/actions/runs/39196997553):
+**completed / success**, sobre c62cde02bbeda0265e7723b604ac5f8abe099c72.
+280 pruebas aprobadas, 0 omitidas, 110 casos PostgreSQL; además 1 prueba del wheel
+instalado y launcher HTTP real. Runtime sin Alembic/cognova_database comprobado.
+Ruff lint/formato, mypy (86 archivos), build sdist/wheel, pip-audit y gitleaks pasan.
+Los cierres posteriores solo documentales conservan ese código validado; se
+revisaron enlaces, diff y ausencia de cambios runtime antes de publicar.
+
+La suite local también pasó 280 pruebas; JUnit .local/subjects-results.xml validado.
+PostgreSQL desechable detenido y cero esquemas test_* residuales. Dos warnings
+existentes no fatales: Starlette/httpx y reflexión SQLAlchemy/Alembic de checks
+NOT VALID. Sin fallos ni omisiones aceptados.
+
+Nombre 1–20, NFC/strip y unicidad Unicode casefold por usuario, incluidas archivadas;
+índice DB lower(name) conservado. Catálogo de diez bases y shades 100/200/300/400/500.
+Máximo cinco activas mediante posiciones DB; archivo/reactivación conservan identidad.
+Mutaciones READ COMMITTED con lock de User y máximo tres intentos completos ante
+conflictos recuperables. El caso É/é en collation C quedó corregido y probado.
+
+Bearer y onboarding completo obligatorios; ownership en toda consulta, ajena e
+inexistente devuelven el mismo 404. DELETE requiere confirm=true y respeta FK:
+409 si hay dependencias. Los 26 casos PostgreSQL de Materias cubren concurrencia,
+rollback/reintentos reales, Unicode, paginación, permisos API, OpenAPI y upgrade
+desde 0003 conservando usuarios, sesiones, buckets y cuestionarios.
+
+**Siguiente dependencia real: Database/operación 0004 en producción**, con respaldo,
+migrador y grants SELECT/INSERT/UPDATE/DELETE de subjects más USAGE/SELECT de
+subjects_id_seq para runtime. Backend rechaza 0003; coordinar migración y release.
+No se aplicó DDL productivo, no se cambiaron grants, no hubo merge ni despliegue.
+Frontend puede integrar el contrato; consumo productivo espera ese corte.
+
+Commits: bee90dd contrato; 50b06ea pin/ORM; 540256c DTOs; 09a5cf5 servicio;
+34eed65 rutas/OpenAPI; 4162c53 Unicode/transacciones; c62cde0 integración;
+3c4e270 sincronización documental; el noveno commit incorpora esta evidencia final.
+Las referencias y cifras siguientes pertenecen al historial de onboarding.
+
+## Historial de onboarding
 
 Release productivo: 2026-10-17. Rama main. Historial de implementación abajo.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.

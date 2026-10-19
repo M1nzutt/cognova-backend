@@ -15,6 +15,11 @@ Contrato público: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md). Operación debe ap
 0004 y conceder SELECT/INSERT/UPDATE/DELETE en subjects, USAGE/SELECT de su secuencia,
 y conservar permisos de lock users. DELETE explícito es parte del módulo pedido;
 no TRUNCATE ni DDL runtime. No se cambiaron grants ni producción aquí.
+CI final de Materias: [39196997553](https://github.com/M1nzutt/cognova-backend/actions/runs/39196997553),
+completed/success sobre c62cde02bbeda0265e7723b604ac5f8abe099c72: 280 pruebas,
+110 PostgreSQL, sin omisiones; runtime aislado y launcher del wheel aprobados.
+Cierre 2026-10-19 solo documental; siguiente dependencia real es aplicar 0004 y
+sus grants antes del release. No se desplegó ni cambió funcionalidad al cerrar.
 Las referencias 0003 siguientes describen exclusivamente el handoff anterior.
 
 ## Referencia y evidencia histórica
