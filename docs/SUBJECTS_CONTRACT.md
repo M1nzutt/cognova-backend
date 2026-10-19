@@ -8,7 +8,9 @@ DB fija c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, revisión 0004_subjects.
 
 SubjectWrite: {name, difficulty, color_base, color_shade}, todos requeridos,
 extra=forbid. name se normaliza NFC y strip, 1–20 caracteres, sin controles;
-unicidad por usuario según lower(name) PostgreSQL, incluyendo archivadas.
+unicidad por usuario mediante comparación Unicode NFC + casefold en Backend,
+incluyendo archivadas; el índice lower(name) PostgreSQL refuerza la regla según
+la collation DB. Casefold también iguala ß/SS; se conserva el nombre de presentación.
 difficulty: easy (Fácil), medium (Media), hard (Difícil).
 color_base: blue, violet, pink, rose, orange, amber, green, teal, cyan, slate.
 color_shade: entero estricto 100, 200, 300, 400 o 500; todas las combinaciones
@@ -56,14 +58,20 @@ Nunca devolver mensajes nativos PostgreSQL, SQL ni valores internos.
 
 ## Transacciones y reglas DB / Backend
 
+El servicio termina la transacción de solo lectura de auth/onboarding y abre
+una transacción explícita READ COMMITTED en cada intento, incluso si la sesión
+heredó otro aislamiento; no debe recibir cambios pendientes de otros servicios.
+Esto permite releer nombres/posiciones tras esperar un lock sin snapshots viejos.
 Toda mutación bloquea primero users.id con SELECT FOR UPDATE y luego busca la
 materia filtrada por user_id. Así se serializan crear/editar/archivar/reactivar/
 eliminar por usuario y se mantiene el orden de bloqueos del cuestionario.
 Asignar la menor posición libre 1–5 para active; archived usa NULL. El check y
 UNIQUE(user_id,active_slot) de DB son garantía final, incluso ante SQL externo.
 
-Backend no hace SELECT previo para duplicados: traduce uq_subjects_user_name_lower
-a error 409. La restricción de capacidad justifica leer posiciones para asignarlas,
+Backend compara nombres del usuario bajo lock usando NFC + casefold porque
+lower() en collation C no iguala É/é. Esta comprobación Unicode complementa el
+índice; uq_subjects_user_name_lower también se traduce a 409 ante escritores SQL.
+La restricción de capacidad justifica leer posiciones para asignarlas,
 no reemplaza la garantía física por count(*). Reintentar la transacción completa
 tras rollback por slot UNIQUE, 40001 o 40P01, máximo tres intentos y pausa acotada.
 Cada reintento relee propiedad, estado y posiciones; no reintentar errores de

@@ -32,7 +32,7 @@ def test_retry_rolls_back_and_restarts_whole_transaction(state, constraint):
     with patch("app.services.subject_service.time.sleep"):
         assert SubjectService(db)._write(1, operation) == "result"
     assert db.scalar.call_count == 2  # Reacquire owner lock, not only INSERT retry.
-    db.rollback.assert_called_once()
+    assert db.rollback.call_count == 2
     db.commit.assert_called_once()
     assert operation.call_count == 2
 
@@ -46,7 +46,7 @@ def test_retry_is_bounded_and_does_not_expose_native_errors():
         SubjectService(db)._write(1, MagicMock(side_effect=failure("40001")))
     assert e.value.code == "SUBJECT_WRITE_CONFLICT"
     assert "SQL" not in str(e.value)
-    assert db.rollback.call_count == 3
+    assert db.rollback.call_count == 4
     db.commit.assert_not_called()
 
 
@@ -66,7 +66,7 @@ def test_expected_constraints_translate_without_retry(
         SubjectService(db)._write(1, operation, deleting=deleting)
     assert e.value.code == code
     assert operation.call_count == 1
-    db.rollback.assert_called_once()
+    assert db.rollback.call_count == 2
 
 
 def test_ambiguous_commit_is_not_retried():
@@ -76,4 +76,4 @@ def test_ambiguous_commit_is_not_retried():
     with pytest.raises(DBAPIError):
         SubjectService(db)._write(1, operation)
     operation.assert_called_once()
-    db.rollback.assert_called_once()
+    assert db.rollback.call_count == 2

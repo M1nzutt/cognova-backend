@@ -1,8 +1,9 @@
 import time
+import unicodedata
 from collections.abc import Callable
 from typing import TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
@@ -50,6 +51,22 @@ class SubjectService:
             items=items, next_after_id=items[-1].id if len(records) > limit else None
         )
 
+    def _ensure_name_available(
+        self, user_id: int, name: str, excluding: int | None = None
+    ) -> None:
+        # PostgreSQL lower() follows database collation. Full Unicode casefold
+        # supplies the API guarantee even on C locales (e.g. É/é and ß/SS).
+        query = select(Subject.name).where(Subject.user_id == user_id)
+        if excluding is not None:
+            query = query.where(Subject.id != excluding)
+        normalized = unicodedata.normalize("NFC", name).casefold()
+        with self._db.scalars(query.execution_options(yield_per=100)) as names:
+            if any(
+                unicodedata.normalize("NFC", item).casefold() == normalized
+                for item in names
+            ):
+                raise DomainError("SUBJECT_NAME_CONFLICT")
+
     def _slot(self, user_id: int, *, reactivating: bool = False) -> int:
         occupied = set(
             self._db.scalars(
@@ -68,8 +85,12 @@ class SubjectService:
     def _write(
         self, user_id: int, operation: Callable[[], T], *, deleting: bool = False
     ) -> T:
+        # Authentication/onboarding performed reads on this request session.
+        # End that snapshot; this service owns the complete write transaction.
+        self._db.rollback()
         for attempt in range(3):
             try:
+                self._db.execute(text("SET TRANSACTION ISOLATION LEVEL READ COMMITTED"))
                 owner = self._db.scalar(
                     select(User.id).where(User.id == user_id).with_for_update()
                 )
@@ -108,6 +129,7 @@ class SubjectService:
 
     def create(self, user_id: int, data: SubjectCreate) -> SubjectResponse:
         def insert_record() -> SubjectResponse:
+            self._ensure_name_available(user_id, data.name)
             record = Subject(
                 user_id=user_id,
                 **data.model_dump(),
@@ -123,6 +145,7 @@ class SubjectService:
     ) -> SubjectResponse:
         def update_record() -> SubjectResponse:
             record = self._owned(user_id, subject_id)
+            self._ensure_name_available(user_id, data.name, excluding=subject_id)
             for key, value in data.model_dump().items():
                 setattr(record, key, value)
             return self._response(record)

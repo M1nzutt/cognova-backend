@@ -13,7 +13,12 @@ traducción de constraints y rechazo de reintento ante commit ambiguo; 20 casos
 PostgreSQL de Materias aprobados. Rutas y OpenAPI publicados: CRUD, catálogo,
 filtros/cursor, archivo/reactivación y DELETE con confirm=true; Bearer + onboarding
 completo. Prueba de rutas existentes actualizada para reconocer el módulo real.
-Suite ampliada completa y validaciones de empaquetado en curso.
+Suite ampliada detectó que lower() en collation C no iguala É/é: comparación
+Unicode NFC+casefold bajo lock añadida; transacción READ COMMITTED explícita por
+mutación para evitar snapshots previos. No cambia 0004 ni auth. Revalidación dirigida: 30 pruebas aprobadas (23 PostgreSQL
++7 unitarias), y 3 casos adicionales con abortos PostgreSQL 40001/40P01 y UNIQUE
+de posición prueban rollback/reintento reales. Suite completa pendiente de cierre.
+Build sdist/wheel, mypy (86 archivos), Ruff, pip check y pip-audit aprobados.
 Sin cambios de auth,
 producción ni repositorios hermanos. El historial de onboarding sigue debajo.
 
