@@ -14,6 +14,10 @@ Nunca asumir que una tarea interrumpida quedó terminada.
 
 ## Alcance de repositorio y base de datos
 
+- Materias (2026-10-18): leer SUBJECTS_CONTRACT.md; consumir 0004_subjects al SHA
+  c3394c38c55a8cd466d10f02fe7c80d7c1e1980f. No modificar auth ni implementar
+  actividades, frontend o IA. Las referencias 0003 anteriores son históricas.
+
 - Este agente trabaja únicamente en `cognova-backend`.
 - La arquitectura vigente tiene tres repositorios: frontend, backend y database.
 - Backend conserva modelos ORM SQLAlchemy, queries y conexión PostgreSQL.

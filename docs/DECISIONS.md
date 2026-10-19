@@ -89,6 +89,21 @@ Reemplaza el diseño anterior de JWT persistido.
 
 ## Cambios a decisiones congeladas
 
+### Materias — 2026-10-18
+
+- Backend consume 0004_subjects en c3394c38c55a8cd466d10f02fe7c80d7c1e1980f;
+  readiness exige esa revisión y no ejecuta DDL.
+- Contrato vigente: SUBJECTS_CONTRACT.md. Máximo cinco activas; archivo conserva
+  identidad; nombre reservado aun archivada. NFC/strip y casefold Unicode bajo lock, más índice DB lower(name).
+  Transacciones de Materias explícitamente READ COMMITTED para lecturas tras lock.
+- Catálogo backend versión 1: diez bases y shades 100/200/300/400/500, documentados.
+- Ownership estricto, onboarding completo y 404 indistinguible para ajena/inexistente.
+- DELETE explícito confirm=true, sin cascadas; dependencias dan 409. Operación debe
+  revisar grants del runtime. No auth, actividades, frontend ni IA en esta fase.
+- Lock de User para toda mutación, posiciones 1–5 y máximo tres intentos completos
+  por conflictos recuperables. No reintentar conexión/commit ambiguo.
+- Requiere release coordinado; no despliegue automático ni merge en esta tarea.
+
 ### Registro mínimo y onboarding versionado — 2026-10-12
 
 - Sustituye el registro de seis campos. Name/email/password con límites30/50/8–12.

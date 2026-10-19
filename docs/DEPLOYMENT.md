@@ -1,5 +1,15 @@
 # Despliegue existente y transición de base de datos
 
+## Materias — pendiente de rollout
+
+La rama feat/subjects-0004 exige exactamente 0004_subjects. No mergear/desplegar
+sobre producción 0003. Database/operación deben respaldar y aplicar 0004 con el
+migrador, revisar SELECT/INSERT/UPDATE/DELETE de subjects y USAGE/SELECT de
+subjects_id_seq para cognova_runtime, y coordinar la ventana de cambio de readiness.
+No se modifican grants ni producción desde esta tarea. Después desplegar Backend
+y probar CRUD/ownership/archivo/reactivación con el rol runtime. Frontend puede
+integrar SUBJECTS_CONTRACT.md; consumo productivo queda pendiente de ese release.
+
 ## Release operativo autorizado — 2026-10-17
 
 Base productiva en 0003, verificada usando la conexión efectiva de Render.

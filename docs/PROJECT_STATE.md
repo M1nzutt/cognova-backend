@@ -20,7 +20,9 @@ mutación para evitar snapshots previos. No cambia 0004 ni auth. Revalidación d
 de posición prueban rollback/reintento reales. Cobertura PostgreSQL de Materias:
 26 casos, incluidas todas las rutas protegidas, ownership, Unicode, paginación,
 borrado con dependencias y upgrade 0003 con preservación. Readiness rechaza 0003.
-Suite completa pendiente de cierre.
+Suite completa local: 280 passed, 0 skipped; 110 casos PostgreSQL. JUnit validado
+en .local/subjects-results.xml. Cero esquemas test_* residuales e instancia local
+detenida. CI 39196997553 en curso sobre c62cde02bbeda0265e7723b604ac5f8abe099c72.
 Build sdist/wheel, mypy (86 archivos), Ruff, pip check y pip-audit aprobados.
 Sin cambios de auth,
 producción ni repositorios hermanos. El historial de onboarding sigue debajo.
