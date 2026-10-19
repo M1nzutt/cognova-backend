@@ -62,7 +62,9 @@ módulos académicos listados más abajo.
 - PUT `/subjects/{id}`
 - DELETE `/subjects/{id}`
 
-Ownership obligatorio.
+Contrato implementado de Materias: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
+Incluye cat?logo, filtros, paginaci?n, archivo/reactivaci?n y DELETE confirmado.
+Ownership y onboarding completo obligatorios.
 
 ## Goals
 
