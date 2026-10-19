@@ -51,8 +51,8 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. No se implementan aún los
-módulos académicos listados más abajo.
+sobre el usuario autenticado. No reciben user_id. Materias está implementado según su contrato; los demás
+módulos académicos listados más abajo siguen fuera de alcance.
 
 ## Subjects
 
@@ -62,7 +62,9 @@ módulos académicos listados más abajo.
 - PUT `/subjects/{id}`
 - DELETE `/subjects/{id}`
 
-Ownership obligatorio.
+Contrato implementado de Materias: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
+Incluye catálogo, filtros, paginación, archivo/reactivación y DELETE confirmado.
+Ownership y onboarding completo obligatorios.
 
 ## Goals
 

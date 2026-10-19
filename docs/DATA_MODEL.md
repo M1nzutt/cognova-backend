@@ -7,7 +7,7 @@ El historial local se retiró tras el traspaso validado de
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md), sin modificar revisiones existentes.
 
 Estado implementado: User, AuthSession, RateLimitBucket, AcademicGoalLegacy y
-QuestionnaireResponseRecord. Las entidades académicas posteriores
+QuestionnaireResponseRecord y Subject (0004). Las entidades académicas posteriores
 son especificación de producto, no tablas que deban crearse en esta fase.
 
 ## Identidad y autenticación
@@ -78,14 +78,20 @@ Contrato detallado: [ONBOARDING_CONTRACT.md](ONBOARDING_CONTRACT.md).
 
 ## Organización académica
 
-### Subject
-- id
-- user_id
-- name
-- description
-- color
-- created_at
-- updated_at
+### Subject — subjects (0004, implementado)
+- id INTEGER PK y user_id FK RESTRICT a users
+- name TEXT: máximo 20, UNIQUE(user_id,lower(name)), incluso archivadas
+- status: active / archived
+- difficulty: easy / medium / hard
+- color_base TEXT y color_shade SMALLINT
+- active_slot SMALLINT 1–5 para activas, NULL para archivadas
+- created_at / updated_at TIMESTAMPTZ
+
+UNIQUE(user_id,active_slot) y checks garantizan máximo cinco activas concurrentes.
+Backend asigna posiciones bajo lock de User, valida catálogo y autoriza ownership.
+No description ni color monolítico: la especificación conceptual anterior queda
+sustituida por el esquema 0004 y [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
+Archivar conserva id; DELETE confirmado no elimina dependencias por cascada.
 
 ### Goal
 - id

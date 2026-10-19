@@ -1,5 +1,11 @@
 # Onboarding y percepción inicial — contrato 2026-10-12
 
+Actualización 2026-10-18: Materias ya usa get_onboarded_user; las reglas de onboarding
+no cambian. El pin/readiness vigente de esta rama es 0004_subjects y SHA
+c3394c38c55a8cd466d10f02fe7c80d7c1e1980f. La sección de persistencia 0003 al final
+conserva la referencia histórica del módulo, no el head runtime actual.
+
+
 Base /api/v1; Bearer obligatorio; Cache-Control: no-store; ownership siempre
 derivado de sub/sid. Requests extra=forbid; nunca IDs de propietario del cliente.
 Errores conservan {error:{code,message}}. 401/422/503 usan el formato global.

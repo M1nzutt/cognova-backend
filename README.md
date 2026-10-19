@@ -47,9 +47,10 @@ disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
 No se usa `create_all`. Database conserva `0001_create_users` →
-`0002_auth_sessions` → `0003_onboarding_questionnaire`.
-La referencia exacta requerida es 232c43130c0fb3eddd32e1dd3707368ba0d87d4c.
-`python scripts/start.py` valida disponibilidad y revisión 0003 antes de escuchar,
+`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects`.
+La referencia exacta requerida es c3394c38c55a8cd466d10f02fe7c80d7c1e1980f.
+Materias: [contrato de API, catálogo y concurrencia](docs/SUBJECTS_CONTRACT.md).
+`python scripts/start.py` valida disponibilidad y revisión 0004 antes de escuchar,
 sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación

@@ -1,4 +1,33 @@
 # Despliegue existente y transición de base de datos
+## Release autorizado Materias — 2026-10-19, preparación
+
+Database ya está en 0004. Verificado con la DATABASE_URL efectiva de Render,
+sin imprimirla: cognova_runtime y TLS; falta exclusivamente DELETE en subjects.
+La autorización actual permite merge/deploy y smoke aun con ese permiso pendiente;
+no concede permiso para ajustar grants desde Backend ni para cerrar Materias.
+Conservar servicio srv-db2j6nqj9qps73crqa0g, main y autoDeploy=yes. No Blueprint.
+
+Smoke autorizado después de Live/readiness:
+`python -m scripts.smoke_subjects https://cognova-backend-lpsi.onrender.com
+--frontend-origin https://cognova-frontend.netlify.app --expected-delete 503
+--evidence .local/subjects-live-smoke.json` (una línea).
+Crea dos cuentas sintéticas y conserva su historia; solo archiva sus materias,
+revoca sesiones y no ejecuta SQL mutante ni grants. Guarda evidencias sin secretos.
+Ante DELETE 503, verificar 42501 con la credencial runtime y documentar Database
+como dependencia del permiso; no confundir con 409 por FK o con cierre del módulo.
+Después del grant operado por Database, repetir DELETE esperando 204 y segundo
+intento 404 antes de cerrar CRUD. Nunca saltar readiness ni revertir a 0003.
+
+
+## Materias — pendiente de rollout
+
+La rama feat/subjects-0004 exige exactamente 0004_subjects. No mergear/desplegar
+sobre producción 0003. Database/operación deben respaldar y aplicar 0004 con el
+migrador, revisar SELECT/INSERT/UPDATE/DELETE de subjects y USAGE/SELECT de
+subjects_id_seq para cognova_runtime, y coordinar la ventana de cambio de readiness.
+No se modifican grants ni producción desde esta tarea. Después desplegar Backend
+y probar CRUD/ownership/archivo/reactivación con el rol runtime. Frontend puede
+integrar SUBJECTS_CONTRACT.md; consumo productivo queda pendiente de ese release.
 
 ## Release operativo autorizado — 2026-10-17
 

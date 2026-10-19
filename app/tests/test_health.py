@@ -41,7 +41,7 @@ def test_readiness_requires_current_migration():
     session.scalar.return_value = 1
     session.scalars.return_value.all.return_value = ["0001_create_users"]
     assert not ReadinessService(database).check()
-    session.scalars.return_value.all.return_value = ["0003_onboarding_questionnaire"]
+    session.scalars.return_value.all.return_value = ["0004_subjects"]
     assert ReadinessService(database).check()
 
 
@@ -50,8 +50,9 @@ def test_readiness_requires_current_migration():
     [
         [],
         ["0002_auth_sessions"],
+        ["0003_onboarding_questionnaire"],
         ["0003_unknown"],
-        ["0003_onboarding_questionnaire", "another_head"],
+        ["0004_subjects", "another_head"],
     ],
 )
 def test_missing_unknown_or_multiple_heads_fail_closed(revisions):

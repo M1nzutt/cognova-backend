@@ -1,4 +1,72 @@
 # Cognova — Estado backend
+## Release Materias en preparación — 2026-10-19
+
+Inicio limpio en feat/subjects-0004, 06f6c4b1c94ddf6da4c78b518b2f7ccc0d2ad63c,
+66 commits. Usuario autoriza merge sin squash y deploy al servicio Render
+srv-db2j6nqj9qps73crqa0g existente, rama main, autoDeploy=yes. Live previo 9309eff.
+Preflight con la credencial runtime efectiva de Render: cognova_runtime, TLS,
+exactamente 0004_subjects; SELECT/INSERT/UPDATE subjects y USAGE/SELECT secuencia.
+DELETE/TRUNCATE denegados, CREATE public denegado; EXPLAIN DELETE da 42501.
+No se cambian schema, grants, secretos, auth ni recursos Render.
+
+Preparado scripts/smoke_subjects.py: crea dos usuarios sintéticos, valida onboarding,
+catálogo/crear/listar/detalle/editar/archivar/reactivar, capacidad, duplicados,
+ownership 404, DELETE explícito, no-store, CSRF/cookies, refresh y revocación.
+Retiene usuarios/cuestionarios; archiva las materias sintéticas y cierra sesiones.
+--expected-delete=503 registra el bloqueo por separado, nunca cierre completo.
+Ensayo nuevo contra API/PostgreSQL desechable: 1 passed. Ruff y mypy correctos.
+Suite previa 280 casos en ejecución; CI de la implementación c62cde0 verificado
+success (39196997553). Código app runtime idéntico al SHA final comunicado.
+Siguiente: validar CI de preparación, merge --no-ff, deploy y smoke real.
+
+
+## Materias — entrega cerrada 2026-10-19
+
+Rama feat/subjects-0004. Inicio limpio dec1f73 (57 commits); nueve commits de
+Materias dejan 66 totales, sin squash. Esta continuación aporta dos commits
+documentales: sincronización pendiente y evidencia final. No cambia funcionalidad.
+
+Database fijado a c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, revisión 0004_subjects.
+Contrato público: [SUBJECTS_CONTRACT](SUBJECTS_CONTRACT.md).
+ORM, schemas, servicio y rutas separados. Auth, frontend y Database sin cambios.
+
+CI final [39196997553](https://github.com/M1nzutt/cognova-backend/actions/runs/39196997553):
+**completed / success**, sobre c62cde02bbeda0265e7723b604ac5f8abe099c72.
+280 pruebas aprobadas, 0 omitidas, 110 casos PostgreSQL; además 1 prueba del wheel
+instalado y launcher HTTP real. Runtime sin Alembic/cognova_database comprobado.
+Ruff lint/formato, mypy (86 archivos), build sdist/wheel, pip-audit y gitleaks pasan.
+Los cierres posteriores solo documentales conservan ese código validado; se
+revisaron enlaces, diff y ausencia de cambios runtime antes de publicar.
+
+La suite local también pasó 280 pruebas; JUnit .local/subjects-results.xml validado.
+PostgreSQL desechable detenido y cero esquemas test_* residuales. Dos warnings
+existentes no fatales: Starlette/httpx y reflexión SQLAlchemy/Alembic de checks
+NOT VALID. Sin fallos ni omisiones aceptados.
+
+Nombre 1–20, NFC/strip y unicidad Unicode casefold por usuario, incluidas archivadas;
+índice DB lower(name) conservado. Catálogo de diez bases y shades 100/200/300/400/500.
+Máximo cinco activas mediante posiciones DB; archivo/reactivación conservan identidad.
+Mutaciones READ COMMITTED con lock de User y máximo tres intentos completos ante
+conflictos recuperables. El caso É/é en collation C quedó corregido y probado.
+
+Bearer y onboarding completo obligatorios; ownership en toda consulta, ajena e
+inexistente devuelven el mismo 404. DELETE requiere confirm=true y respeta FK:
+409 si hay dependencias. Los 26 casos PostgreSQL de Materias cubren concurrencia,
+rollback/reintentos reales, Unicode, paginación, permisos API, OpenAPI y upgrade
+desde 0003 conservando usuarios, sesiones, buckets y cuestionarios.
+
+**Siguiente dependencia real: Database/operación 0004 en producción**, con respaldo,
+migrador y grants SELECT/INSERT/UPDATE/DELETE de subjects más USAGE/SELECT de
+subjects_id_seq para runtime. Backend rechaza 0003; coordinar migración y release.
+No se aplicó DDL productivo, no se cambiaron grants, no hubo merge ni despliegue.
+Frontend puede integrar el contrato; consumo productivo espera ese corte.
+
+Commits: bee90dd contrato; 50b06ea pin/ORM; 540256c DTOs; 09a5cf5 servicio;
+34eed65 rutas/OpenAPI; 4162c53 Unicode/transacciones; c62cde0 integración;
+3c4e270 sincronización documental; el noveno commit incorpora esta evidencia final.
+Las referencias y cifras siguientes pertenecen al historial de onboarding.
+
+## Historial de onboarding
 
 Release productivo: 2026-10-17. Rama main. Historial de implementación abajo.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
