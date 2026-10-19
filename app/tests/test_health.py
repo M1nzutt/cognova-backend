@@ -50,6 +50,7 @@ def test_readiness_requires_current_migration():
     [
         [],
         ["0002_auth_sessions"],
+        ["0003_onboarding_questionnaire"],
         ["0003_unknown"],
         ["0004_subjects", "another_head"],
     ],

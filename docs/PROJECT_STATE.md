@@ -17,7 +17,10 @@ Suite ampliada detectó que lower() en collation C no iguala É/é: comparación
 Unicode NFC+casefold bajo lock añadida; transacción READ COMMITTED explícita por
 mutación para evitar snapshots previos. No cambia 0004 ni auth. Revalidación dirigida: 30 pruebas aprobadas (23 PostgreSQL
 +7 unitarias), y 3 casos adicionales con abortos PostgreSQL 40001/40P01 y UNIQUE
-de posición prueban rollback/reintento reales. Suite completa pendiente de cierre.
+de posición prueban rollback/reintento reales. Cobertura PostgreSQL de Materias:
+26 casos, incluidas todas las rutas protegidas, ownership, Unicode, paginación,
+borrado con dependencias y upgrade 0003 con preservación. Readiness rechaza 0003.
+Suite completa pendiente de cierre.
 Build sdist/wheel, mypy (86 archivos), Ruff, pip check y pip-audit aprobados.
 Sin cambios de auth,
 producción ni repositorios hermanos. El historial de onboarding sigue debajo.
