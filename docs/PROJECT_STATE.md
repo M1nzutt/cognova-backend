@@ -1,4 +1,24 @@
 # Cognova — Estado backend
+## Release Materias en preparación — 2026-10-19
+
+Inicio limpio en feat/subjects-0004, 06f6c4b1c94ddf6da4c78b518b2f7ccc0d2ad63c,
+66 commits. Usuario autoriza merge sin squash y deploy al servicio Render
+srv-db2j6nqj9qps73crqa0g existente, rama main, autoDeploy=yes. Live previo 9309eff.
+Preflight con la credencial runtime efectiva de Render: cognova_runtime, TLS,
+exactamente 0004_subjects; SELECT/INSERT/UPDATE subjects y USAGE/SELECT secuencia.
+DELETE/TRUNCATE denegados, CREATE public denegado; EXPLAIN DELETE da 42501.
+No se cambian schema, grants, secretos, auth ni recursos Render.
+
+Preparado scripts/smoke_subjects.py: crea dos usuarios sintéticos, valida onboarding,
+catálogo/crear/listar/detalle/editar/archivar/reactivar, capacidad, duplicados,
+ownership 404, DELETE explícito, no-store, CSRF/cookies, refresh y revocación.
+Retiene usuarios/cuestionarios; archiva las materias sintéticas y cierra sesiones.
+--expected-delete=503 registra el bloqueo por separado, nunca cierre completo.
+Ensayo nuevo contra API/PostgreSQL desechable: 1 passed. Ruff y mypy correctos.
+Suite previa 280 casos en ejecución; CI de la implementación c62cde0 verificado
+success (39196997553). Código app runtime idéntico al SHA final comunicado.
+Siguiente: validar CI de preparación, merge --no-ff, deploy y smoke real.
+
 
 ## Materias — entrega cerrada 2026-10-19
 
