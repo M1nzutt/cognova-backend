@@ -1,5 +1,32 @@
 # Cognova — Estado backend
 
+## Backend Materias cerrado — 2026-10-20
+
+Smoke DELETE final aprobado el 2026-10-20, 15:41:48–15:43:12Z, después del permiso
+DELETE concedido por Database. SHA productivo reconfirmado Live:
+430c64a3c299f82853f7947498f663f1cded590c; sin redeploy ni cambios funcionales.
+Runtime cognova_runtime, TLS y 0004_subjects; DELETE permitido, TRUNCATE y CREATE
+public denegados. Backend no modificó schema ni grants.
+
+Materia sintética 8: creación 201, DELETE confirm=true 204 sin cuerpo, GET posterior
+404 y segundo DELETE 404; ausente del listado y de PostgreSQL (count=0, READ ONLY).
+Materia ajena 1 del usuario sintético 5 intacta en todas sus columnas; ajena e
+inexistente devuelven el mismo 404. Auth/CSRF/cookies/no-store correctos:
+sin Bearer 401, sin confirmación 422, refresh/logout sin CSRF 403, con CSRF 200/204,
+access revocado 401. Readiness antes/después 200. Cuenta sintética 7 y cuestionario
+inicial retenidos; sesión cerrada. Solo se borró la materia creada para esta prueba.
+
+**Backend Materias queda cerrado; Frontend puede continuar con el contrato completo,
+incluido DELETE.** La validación de navegador/proxy sigue siendo responsabilidad
+Frontend. El resto del módulo ya estaba aprobado por el smoke anterior.
+Evidencias locales revisadas: .local/subjects-delete-smoke.json y
+.local/subjects-delete-runtime.json; detalle permanente en INTEGRATION_VALIDATION.
+No se repitió la suite ni el smoke CRUD completo para este cierre documental.
+
+Inicio limpio 5aa90c1, 69 commits. Un solo commit documental deja 70 totales,
+sin squash, con [skip ci] [skip render]. Únicamente PROJECT_STATE, DEPLOYMENT e
+INTEGRATION_VALIDATION actualizados. Los bloqueos siguientes son historial resuelto.
+
 ## Materias desplegado; cierre bloqueado por DELETE — 2026-10-20
 
 Retomado desde main limpio en 430c64a (68 commits). El merge --no-ff y push ya

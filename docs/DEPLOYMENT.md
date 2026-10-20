@@ -1,5 +1,23 @@
 # Despliegue existente y transición de base de datos
 
+## Materias cerrado, DELETE validado — 2026-10-20
+
+El grant específico de Database resolvió la última dependencia. Smoke real DELETE
+aprobado 15:41:48–15:43:12Z sobre el SHA productivo Live
+430c64a3c299f82853f7947498f663f1cded590c, deploy dep-dbb5fujm8hqs73eumf8g,
+servicio srv-db2j6nqj9qps73crqa0g. Sin redeploy, cambios de código, schema, grants,
+secretos ni configuración desde Backend. Runtime permanece en 0004_subjects.
+
+Crear materia sintética 201; DELETE confirm=true 204; GET posterior y segundo
+DELETE 404; ausencia comprobada en listado y PostgreSQL READ ONLY. Materia ajena
+intacta; ajena/inexistente protegidas con 404 idéntico. Auth, CSRF, cookies y
+no-store correctos; readiness 200 antes/después. Detalle en
+[INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md).
+
+**Backend Materias cerrado. Frontend puede continuar incluido DELETE.** No queda
+pendiente el permiso de eliminación. Este cierre es solo documental, con
+[skip ci] [skip render]; los estados de bloqueo siguientes son históricos.
+
 ## Materias Live — 2026-10-20; DELETE pendiente
 
 Servicio existente srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes.

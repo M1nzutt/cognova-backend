@@ -1,5 +1,41 @@
 # Validación de integración productiva
 
+## DELETE final aprobado y Backend Materias cerrado — 2026-10-20
+
+Smoke limitado posterior al grant de Database, ejecutado 15:41:48–15:43:12Z.
+SHA Live reconfirmado: 430c64a3c299f82853f7947498f663f1cded590c, deploy
+ dep-dbb5fujm8hqs73eumf8g, servicio srv-db2j6nqj9qps73crqa0g. Sin redeploy.
+Conexión efectiva cognova_runtime/TLS/0004_subjects: DELETE subjects permitido;
+TRUNCATE y CREATE public siguen denegados. No se otorgaron permisos desde Backend.
+
+| Control | Resultado real |
+| --- | --- |
+| Crear materia sintética propia id=8 | 201 |
+| DELETE confirm=true | 204, cuerpo vacío |
+| GET posterior / segundo DELETE | 404 / 404 SUBJECT_NOT_FOUND |
+| Listado posterior | 200, materia ausente |
+| PostgreSQL READ ONLY | count=0 para la materia borrada |
+| DELETE ajena id=1 / inexistente | 404 SUBJECT_NOT_FOUND idéntico |
+| Materia ajena del usuario sintético 5 | Todas las columnas preservadas |
+| DELETE sin Bearer / sin confirmación | 401 / 422 |
+| Refresh sin CSRF / válido | 403 / 200, rotación comprobada |
+| Logout sin CSRF / válido / access posterior | 403 / 204 / 401 |
+| Cookies | Secure, HttpOnly solo refresh, paths/host-only/SameSite=Lax correctos |
+| Cache-Control | no-store en todas las respuestas API comprobadas, incluidos 204 y errores |
+| Readiness antes / después | 200 / 200 |
+
+Cuenta sintética 7 y cuestionario inicial retenidos; sesión cerrada. Solo se eliminó
+la materia creada para este smoke. No se modificó código ni se repitió el CRUD
+completo: sus controles ya constan en el smoke anterior. Evidencias locales
+revisadas: .local/subjects-delete-smoke.json (status=passed) y
+.local/subjects-delete-runtime.json. No se imprimieron credenciales.
+
+**Dependencia DELETE resuelta; Backend Materias cerrado. Frontend puede continuar
+con todo el contrato.** Los resultados 503/42501 de las secciones siguientes
+son anteriores al grant y se conservan como trazabilidad. CI previo del mismo SHA:
+281 pruebas sin omisiones, 111 PostgreSQL y launcher adicional; no se afirma una
+nueva ejecución de esa suite para este cambio exclusivamente documental.
+
 ## Materias — validación productiva 2026-10-20
 
 Main integra feat/subjects-0004 mediante merge --no-ff
