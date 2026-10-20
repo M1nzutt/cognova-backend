@@ -1,0 +1,314 @@
+{
+  "started_at_utc": "2026-10-20T15:25:26.760126+00:00",
+  "checks": {
+    "health": {
+      "status": 200,
+      "no_store": true
+    },
+    "readiness": {
+      "status": 200,
+      "no_store": true
+    },
+    "catalog without bearer": {
+      "status": 401,
+      "no_store": true
+    },
+    "openapi": "passed",
+    "A register": {
+      "status": 201,
+      "no_store": true
+    },
+    "A onboarding gate": {
+      "status": 403,
+      "no_store": true,
+      "code": "ONBOARDING_REQUIRED"
+    },
+    "A login": {
+      "status": 200,
+      "no_store": true
+    },
+    "A onboarding history": "passed; revisions 1/2",
+    "A cookie attributes": "passed",
+    "A csrf rejection": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "A refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "A me after refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "A sessions": {
+      "status": 200,
+      "no_store": true
+    },
+    "A revoke other session": {
+      "status": 204,
+      "no_store": true
+    },
+    "A revoked access": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    },
+    "B register": {
+      "status": 201,
+      "no_store": true
+    },
+    "B onboarding gate": {
+      "status": 403,
+      "no_store": true,
+      "code": "ONBOARDING_REQUIRED"
+    },
+    "B login": {
+      "status": 200,
+      "no_store": true
+    },
+    "B onboarding history": "passed; revisions 1/2",
+    "B cookie attributes": "passed",
+    "B csrf rejection": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "B refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "B me after refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "B sessions": {
+      "status": 200,
+      "no_store": true
+    },
+    "B revoke other session": {
+      "status": 204,
+      "no_store": true
+    },
+    "B revoked access": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    },
+    "catalog": {
+      "status": 200,
+      "no_store": true
+    },
+    "create": {
+      "status": 201,
+      "no_store": true
+    },
+    "list": {
+      "status": 200,
+      "no_store": true
+    },
+    "detail": {
+      "status": 200,
+      "no_store": true
+    },
+    "edit": {
+      "status": 200,
+      "no_store": true
+    },
+    "archive": {
+      "status": 200,
+      "no_store": true
+    },
+    "archived name reserved": {
+      "status": 409,
+      "no_store": true,
+      "code": "SUBJECT_NAME_CONFLICT"
+    },
+    "reactivate": {
+      "status": 200,
+      "no_store": true
+    },
+    "duplicate": {
+      "status": 409,
+      "no_store": true,
+      "code": "SUBJECT_NAME_CONFLICT"
+    },
+    "same name another user": {
+      "status": 201,
+      "no_store": true
+    },
+    "missing": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "ownership GET": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "ownership PUT": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "ownership POST/archive": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "ownership POST/reactivate": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "ownership DELETE?confirm=true": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "isolated list": {
+      "status": 200,
+      "no_store": true
+    },
+    "create active 2": {
+      "status": 201,
+      "no_store": true
+    },
+    "create active 3": {
+      "status": 201,
+      "no_store": true
+    },
+    "create active 4": {
+      "status": 201,
+      "no_store": true
+    },
+    "create active 5": {
+      "status": 201,
+      "no_store": true
+    },
+    "sixth active": {
+      "status": 409,
+      "no_store": true,
+      "code": "SUBJECT_ACTIVE_LIMIT"
+    },
+    "archived outside capacity": {
+      "status": 201,
+      "no_store": true
+    },
+    "reactivation limit": {
+      "status": 409,
+      "no_store": true,
+      "code": "SUBJECT_REACTIVATION_LIMIT"
+    },
+    "free active slot": {
+      "status": 200,
+      "no_store": true
+    },
+    "reuse active slot": {
+      "status": 200,
+      "no_store": true
+    },
+    "five active after transition": {
+      "status": 200,
+      "no_store": true
+    },
+    "delete confirmation required": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "before delete": {
+      "status": 200,
+      "no_store": true
+    },
+    "explicit delete": {
+      "status": 503,
+      "no_store": true,
+      "code": "SERVICE_UNAVAILABLE"
+    },
+    "delete rollback preserved row": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retained subjects": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 1": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 3": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 4": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 5": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 6": {
+      "status": 200,
+      "no_store": true
+    },
+    "A retain archived 7": {
+      "status": 200,
+      "no_store": true
+    },
+    "A no active fixtures": {
+      "status": 200,
+      "no_store": true
+    },
+    "B retained subjects": {
+      "status": 200,
+      "no_store": true
+    },
+    "B retain archived 2": {
+      "status": 200,
+      "no_store": true
+    },
+    "B no active fixtures": {
+      "status": 200,
+      "no_store": true
+    },
+    "post-smoke readiness": {
+      "status": 200,
+      "no_store": true
+    },
+    "A logout": {
+      "status": 204,
+      "no_store": true
+    },
+    "A logged out": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    },
+    "B logout": {
+      "status": 204,
+      "no_store": true
+    },
+    "B logged out": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    }
+  },
+  "synthetic_user_ids": [
+    5,
+    6
+  ],
+  "delete": "blocked: HTTP 503 SERVICE_UNAVAILABLE; row unchanged",
+  "synthetic_subject_ids": {
+    "owner_subject": 1,
+    "other_subject": 2,
+    "reactivated": 7
+  },
+  "status": "passed_except_expected_delete",
+  "completed_at_utc": "2026-10-20T15:26:33.339368+00:00"
+}

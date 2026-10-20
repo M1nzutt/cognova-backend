@@ -1,5 +1,68 @@
 # Validación de integración productiva
 
+## Materias — validación productiva 2026-10-20
+
+Main integra feat/subjects-0004 mediante merge --no-ff
+430c64a3c299f82853f7947498f663f1cded590c; segundo padre d00ce49, sin squash.
+Render srv-db2j6nqj9qps73crqa0g confirma ese SHA Live, deploy
+ dep-dbb5fujm8hqs73eumf8g. El merge/push se completaron antes de reanudar;
+no se repitieron ni se crearon recursos. Endpoint:
+https://cognova-backend-lpsi.onrender.com, Origin https://cognova-frontend.netlify.app.
+
+[CI preparación 39296759454](https://github.com/M1nzutt/cognova-backend/actions/runs/39296759454)
+y [CI merge 39297303193](https://github.com/M1nzutt/cognova-backend/actions/runs/39297303193):
+completed/success reconfirmados. 281 passed, 0 skipped, 111 PostgreSQL; 1 prueba
+adicional de wheel y launcher HTTP. Ruff, formato, mypy, build, audit y gitleaks
+pasan. Local previo: 280 tests más 1 ensayo nuevo; post-smoke Ruff/formato/mypy
+pasan. Los dos warnings existentes no fatales se mantienen documentados.
+
+Smoke real ejecutado con scripts/smoke_subjects.py, --expected-delete 503:
+2026-10-20T15:25:26Z a 15:26:33Z. Evidencia sin credenciales:
+[HTTP](evidence/subjects-smoke-2026-10-20.json) y
+[runtime READ ONLY posterior](evidence/subjects-runtime-2026-10-20.json).
+
+| Control | Resultado real |
+| --- | --- |
+| Health/readiness antes y readiness después | 200; revisión exacta 0004_subjects |
+| Catálogo sin Bearer / onboarding incompleto | 401 / 403 ONBOARDING_REQUIRED |
+| Catálogo autenticado | 200; versión 1, diez bases, cinco shades |
+| Crear / listar / detalle / editar | 201 / 200 / 200 / 200 |
+| Archivar / reactivar | 200 / 200; identidad conservada |
+| Crear sexta activa | 409 SUBJECT_ACTIVE_LIMIT |
+| Crear archivada con cinco activas | 201, no consume cupo |
+| Reactivar sin cupo / liberar y reutilizar slot | 409 SUBJECT_REACTIVATION_LIMIT / 200 |
+| Duplicado y nombre reservado por archivada | 409 SUBJECT_NAME_CONFLICT |
+| Mismo nombre en otro usuario | 201 |
+| Ajena GET/PUT/archive/reactivate/DELETE | 404 SUBJECT_NOT_FOUND, igual a inexistente |
+| Listados entre usuarios | Aislados |
+| DELETE sin confirmación | 422 VALIDATION_ERROR |
+| DELETE propio confirm=true | 503 SERVICE_UNAVAILABLE; fila íntegra al releer |
+| Cookies y CSRF/refresh | Atributos correctos; sin CSRF 403, válido 200 y rotación |
+| Revocación / logout / access revocado | 204 / 204 / 401 |
+| Cache-Control | no-store en todas las respuestas API comprobadas, incluidos errores |
+
+El cuerpo DELETE es exactamente error.code=SERVICE_UNAVAILABLE y message=
+"Servicio temporalmente no disponible."; no expone SQL ni datos internos.
+La credencial DATABASE_URL real de Render conecta como cognova_runtime vía TLS:
+SELECT/INSERT/UPDATE subjects y USAGE/SELECT subjects_id_seq permitidos;
+DELETE/TRUNCATE denegados, sin CREATE public. EXPLAIN DELETE sin ejecución devuelve
+42501 antes y después del smoke. El resto del ciclo funciona y el error SQL de
+permisos se traduce al 503 global esperado, sin borrar la materia. No se otorgan
+permisos ni se modifica schema, auth o configuración desde Backend.
+
+Verificación posterior 15:27:07Z: usuarios sintéticos 5/6 conservan revisiones [1,2]
+cada uno; materias 6/1, todas archived; sesiones 2/2, ninguna sin revocar.
+El smoke solo retuvo y archivó sus propios registros; no eliminó historia.
+
+**Bloqueo pendiente único: DELETE en Database.** Solicitar permiso específico
+sobre public.subjects para cognova_runtime; después repetir por API 204, segundo
+DELETE/GET 404, ownership y no-store. No cerrar Materias hasta entonces.
+Frontend puede comenzar los flujos validados; eliminación productiva pendiente.
+Este smoke HTTP no sustituye la validación de navegador/proxy del frontend.
+
+## Historial: onboarding — 2026-10-17
+
+
 Fecha: 2026-10-17. Rama main. Onboarding desplegado y smoke aprobado.
 
 ## Runtime y permisos

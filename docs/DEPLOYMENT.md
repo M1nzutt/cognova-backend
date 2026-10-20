@@ -1,4 +1,33 @@
 # Despliegue existente y transición de base de datos
+
+## Materias Live — 2026-10-20; DELETE pendiente
+
+Servicio existente srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes.
+Merge sin squash 430c64a3c299f82853f7947498f663f1cded590c integra d00ce49 y
+conserva 06f6c4b en su historia. Deploy automático dep-dbb5fujm8hqs73eumf8g
+confirmado Live; readiness 200 antes/después del smoke real, PostgreSQL exactamente
+0004_subjects con TLS y credencial efectiva cognova_runtime. No se redeplegó al
+reanudar: el merge y push ya estaban hechos. Configuración y secretos sin cambios.
+
+CI 39296759454 (preparación) y 39297303193 (merge): success; 281 pruebas sin skips,
+111 PostgreSQL y launcher instalado adicional. El árbol del merge coincide con
+la rama validada. La evidencia final usa [skip ci] [skip render] para no sustituir
+el SHA Live por un commit documental. HealthCheckPath sigue vacío, sin cambios.
+
+El smoke autorizado ya se ejecutó; resultados en [INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md).
+Todo el ciclo de Materias excepto eliminación está validado en producción.
+DELETE propio confirm=true devuelve 503 SERVICE_UNAVAILABLE y conserva la fila;
+no es un 409 por dependencias. PostgreSQL deniega DELETE con SQLSTATE 42501.
+
+**Siguiente paso exclusivo de Database:** habilitar DELETE sobre public.subjects
+para cognova_runtime, sin TRUNCATE/DDL ni grants globales. Backend no ejecuta ese
+cambio. Tras confirmación, repetir DELETE por API con propietario: 204, fila ausente,
+segundo DELETE 404; comprobar aislamiento y no-store antes de cerrar Materias.
+Frontend puede iniciar su integración, con eliminación pendiente de este ajuste.
+No revertir a un backend que exige 0003 ni modificar readiness para ocultar errores.
+
+### Historial de preparación y despliegues anteriores
+
 ## Release autorizado Materias — 2026-10-19, preparación
 
 Database ya está en 0004. Verificado con la DATABASE_URL efectiva de Render,

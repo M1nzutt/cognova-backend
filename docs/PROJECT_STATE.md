@@ -1,4 +1,47 @@
 # Cognova — Estado backend
+
+## Materias desplegado; cierre bloqueado por DELETE — 2026-10-20
+
+Retomado desde main limpio en 430c64a (68 commits). El merge --no-ff y push ya
+se habían completado el 2026-10-19; no se repitieron. feat/subjects-0004 permanece
+en d00ce49, íntegra como segundo padre del merge. Render confirma Live del SHA
+430c64a3c299f82853f7947498f663f1cded590c, deploy dep-dbb5fujm8hqs73eumf8g,
+en el servicio existente srv-db2j6nqj9qps73crqa0g. Readiness HTTP 200 antes y después
+del smoke. Conexión efectiva cognova_runtime, TLS y exactamente 0004_subjects.
+
+CI de preparación 39296759454 y del merge 39297303193 reconfirmados success:
+281 tests, 0 omitidos, 111 PostgreSQL; 1 adicional de wheel/launcher HTTP.
+Ruff, mypy (86 archivos), build, pip-audit y gitleaks aprobados. Post-smoke local:
+Ruff/formato (125 archivos) y mypy correctos. Dos warnings conocidos no fatales
+(Starlette/httpx y reflexión de checks); no cambios en app runtime en este release.
+
+Smoke real 2026-10-20 15:25:26–15:26:33Z: catálogo, crear/listar/detalle/editar,
+archivar/reactivar, cinco activas, duplicados y aislamiento aprobados. Auth,
+onboarding, cookies, CSRF, refresh, revocación y no-store también aprobados.
+404 indistinguible para ajena/inexistente; 409 para duplicados/capacidad.
+DELETE confirmado devuelve 503 SERVICE_UNAVAILABLE, sin detalles nativos y sin
+borrar la materia. EXPLAIN DELETE bajo la credencial runtime efectiva devuelve
+42501; SELECT/INSERT/UPDATE/secuencia sí están permitidos. No se cambiaron grants.
+
+**Materias no se cierra. DEPENDENCY DATABASE: exclusivamente permiso DELETE en
+public.subjects para cognova_runtime**, según SUBJECTS_CONTRACT. Sin DDL ni grants
+globales. Después del ajuste por Database, Backend debe repetir DELETE autorizado
+204, segunda eliminación/lectura 404 y confirmar permisos/ownership/no-store.
+Frontend puede comenzar integración del contrato y los flujos validados; no dar
+por completo el CRUD productivo ni presentar DELETE como operativo antes de eso.
+
+Evidencia: [smoke](evidence/subjects-smoke-2026-10-20.json),
+[runtime posterior](evidence/subjects-runtime-2026-10-20.json) y
+[validación](INTEGRATION_VALIDATION.md). Usuarios sintéticos 5/6 retenidos, siete
+materias archivadas (6/1), dos snapshots por usuario y cuatro sesiones revocadas;
+cero sesiones sintéticas activas. No se borra su historia ni se toca otro usuario.
+No frontend, actividades, schema ni configuración Render modificados.
+
+Esta continuación añade un commit de evidencia/documentación: 69 totales.
+Release completo: d00ce49 preparación, 430c64a merge y este registro (3 nuevos desde
+los 66 iniciales), sin squash. Commit documental con [skip ci] [skip render]
+para conservar el SHA productivo validado. Los apartados siguientes son historial.
+
 ## Release Materias en preparación — 2026-10-19
 
 Inicio limpio en feat/subjects-0004, 06f6c4b1c94ddf6da4c78b518b2f7ccc0d2ad63c,
