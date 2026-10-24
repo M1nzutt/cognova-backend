@@ -9,7 +9,12 @@ Lectura de reglas/contratos y revisión Git completadas. Pin/ORM/readiness imple
 Servicio transaccional implementado, 6 pruebas adicionales de retry/errores pasan.
 CRUD/historia/OpenAPI aprobados: 6 escenarios PostgreSQL y 1 OpenAPI nuevos,
 incluidos ownership, precondiciones concurrentes y DELETE con/sin historial.
-Suite completa y controles de runtime aún pendientes; sin cambios de auth ni acciones productivas.
+Siete escenarios adicionales de integridad PostgreSQL pasan: preservación 0004,
+FK futura, retry real, carrera materia/actividad, rol runtime y rollback de historial.
+Primera regresión: 356 passed y un inventario OpenAPI antiguo corregido; repetición
+completa en curso. Auditoría detectó CVE-2026-114603 en opentelemetry-api 1.45.0;
+pin/hashes actualizados exclusivamente a 1.45.1, auditoría posterior limpia.
+ sin cambios de auth ni acciones productivas.
 
 
 ## Backend Materias cerrado — 2026-10-20
