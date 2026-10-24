@@ -1,5 +1,15 @@
 # Cognova — Estado backend
 
+## Release Actividades en curso — 2026-10-24
+
+Autorización actual: merge, deploy y smoke productivo después de Database 0005.
+Main integrado sin squash en 2221e85, CI40129132661 success, Render Live y ready200.
+Smoke detectó DELETE con historial503: PostgreSQL productivo devuelve23001
+(restrict_violation), mientras el servicio solo traducía23503. Fila e historial
+preservados. Se amplía traducción a409 para ambos SQLSTATE en Actividades/Materias,
+con regresión unitaria y DELETE con historia bajo rol restringido PostgreSQL local.
+No se cambia schema, grants ni auth. Cierre pendiente de deploy corregido y smoke.
+
 ## Actividades — implementación validada, producción pendiente (2026-10-23)
 
 Rama feat/activities-0005; inicio limpio main da2845d (70 commits).

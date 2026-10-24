@@ -54,6 +54,7 @@ def test_retry_is_bounded_and_does_not_expose_native_errors():
     [
         ("23503", "fk_activities_owner_subject", False, "SUBJECT_NOT_FOUND"),
         ("23503", "future_fk", True, "ACTIVITY_HAS_DEPENDENCIES"),
+        ("23001", "restrict_fk", True, "ACTIVITY_HAS_DEPENDENCIES"),
     ],
 )
 def test_expected_constraints_translate_without_retry(

@@ -107,7 +107,7 @@ class SubjectService:
                 )
                 if state == "23505" and constraint == "uq_subjects_user_name_lower":
                     raise DomainError("SUBJECT_NAME_CONFLICT") from None
-                if state == "23503" and deleting:
+                if state in {"23503", "23001"} and deleting:
                     raise DomainError("SUBJECT_HAS_DEPENDENCIES") from None
                 retry = state in {"40001", "40P01"} or (
                     state == "23505" and constraint == "uq_subjects_active_slot"

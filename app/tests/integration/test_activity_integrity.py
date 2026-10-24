@@ -202,6 +202,9 @@ def test_runtime_least_privilege_history_and_http_permission_failure(
             len(client.get(path + "/deadline-history", headers=headers).json()["items"])
             == 1
         )
+        blocked = client.delete(path + "?confirm=true", headers=headers)
+        assert blocked.status_code == 409, blocked.text
+        assert blocked.json()["error"]["code"] == "ACTIVITY_HAS_DEPENDENCIES"
         fresh = client.post(BASE, headers=headers, json=payload).json()
         fresh_path = BASE + "/" + str(fresh["id"])
         assert (

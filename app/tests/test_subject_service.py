@@ -55,6 +55,7 @@ def test_retry_is_bounded_and_does_not_expose_native_errors():
     [
         ("23505", "uq_subjects_user_name_lower", False, "SUBJECT_NAME_CONFLICT"),
         ("23503", "future_fk", True, "SUBJECT_HAS_DEPENDENCIES"),
+        ("23001", "restrict_fk", True, "SUBJECT_HAS_DEPENDENCIES"),
     ],
 )
 def test_expected_constraints_translate_without_retry(

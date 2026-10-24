@@ -118,7 +118,7 @@ class ActivityService:
                 constraint = getattr(
                     getattr(exc.orig, "diag", None), "constraint_name", None
                 )
-                if state == "23503":
+                if state in {"23503", "23001"}:
                     if deleting:
                         raise DomainError("ACTIVITY_HAS_DEPENDENCIES") from None
                     if constraint == "fk_activities_owner_subject":
