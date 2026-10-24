@@ -152,7 +152,7 @@ Producción debe contar con:
 - Database administra migraciones Alembic, constraints, índices y recuperación.
 - Backend conserva el ORM, consultas, transacciones y autorización por usuario.
 - Rol migrador con DDL y rol runtime con DML deben separarse durante el corte.
-- El launcher de esta rama exige conectividad y `0004_subjects` antes de
+- El launcher de esta rama exige conectividad y `0005_activities` antes de
   Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
 - Database migra antes del release; backend no migra ni repara esquema al arrancar.
   La separación se desplegó con3e3ed95; onboarding/0003 requiere release coordinado.

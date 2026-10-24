@@ -85,6 +85,9 @@ def test_launcher_serves_registered_routes_over_http(pg_settings, tmp_path):
             me = client.get("/api/v1/auth/me")
             assert me.status_code == 401  # Registered and protected, not 404.
             assert me.headers["X-Request-ID"]
+            activities = client.get("/api/v1/activities")
+            assert activities.status_code == 401
+            assert activities.headers["cache-control"] == "no-store"
     finally:
         process.terminate()
         try:

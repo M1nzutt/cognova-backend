@@ -78,18 +78,9 @@ Ownership y onboarding completo obligatorios.
 
 ## Activities
 
-- GET `/activities`
-- POST `/activities`
-- GET `/activities/{id}`
-- PUT `/activities/{id}`
-- DELETE `/activities/{id}`
-- GET `/activities/prioritized`
-
-Debe soportar:
-- `type`;
-- `priority`;
-- `deadline`;
-- estado.
+Contrato vigente: [ACTIVITIES_CONTRACT](ACTIVITIES_CONTRACT.md), sobre 0005.
+CRUD, PATCH de estado/deadline, historial persistente y filtros paginados.
+La especificación anterior de type y /prioritized queda fuera de esta fase.
 
 ## Dependencies
 

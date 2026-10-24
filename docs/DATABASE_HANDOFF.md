@@ -4,6 +4,22 @@ Fecha: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
 ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
 conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
+## Consumo 0005 — Actividades (2026-10-23)
+
+Referencia: 604e296e2670d154ba7e18d7afa3f010e66dd42d, revisión 0005_activities.
+Checkout aislado dentro de Backend; no se modifica el repositorio hermano.
+Readiness/startup exigen exactamente 0005; no desplegar sobre 0004.
+ORM conserva triggers como autoridad de fechas/revisión/historia. Runtime requiere
+DML de activities, USAGE/SELECT de activities_id_seq y solo SELECT de eventos,
+además de permisos existentes/lock users. Nunca EXECUTE de funciones trigger ni
+escritura directa de historia. Database aplica migración/grants en release separado.
+Contrato y rollback funcional: ACTIVITIES_CONTRACT. Las referencias siguientes
+son históricas; no autorizan DDL runtime ni acreditan producción 0005.
+
+Validación 0005: 358 tests (124 PostgreSQL), ORM sin drift y preservación desde0004.
+CI Backend40050090141 success sobre3f0c0cd992119aea985c1a23d6e271ea8b94faf2.
+Rol local restringido verificado; esto no acredita grants de producción.
+
 ## Consumo 0004 — Materias (2026-10-18)
 
 Referencia vigente: c3394c38c55a8cd466d10f02fe7c80d7c1e1980f,

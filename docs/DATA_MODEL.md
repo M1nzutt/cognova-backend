@@ -7,7 +7,7 @@ El historial local se retiró tras el traspaso validado de
 [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md), sin modificar revisiones existentes.
 
 Estado implementado: User, AuthSession, RateLimitBucket, AcademicGoalLegacy y
-QuestionnaireResponseRecord y Subject (0004). Las entidades académicas posteriores
+QuestionnaireResponseRecord, Subject y Activity/ActivityDeadlineEvent (0005). Las entidades académicas posteriores
 son especificación de producto, no tablas que deban crearse en esta fase.
 
 ## Identidad y autenticación
@@ -104,19 +104,18 @@ Archivar conserva id; DELETE confirmado no elimina dependencias por cascada.
 - created_at
 - updated_at
 
-### AcademicActivity
-- id
-- user_id
-- subject_id
-- goal_id?
-- title
-- description
-- type
-- priority
-- deadline
-- status
-- created_at
-- updated_at
+### Activity / ActivityDeadlineEvent — 0005
+
+Contrato vigente: [ACTIVITIES_CONTRACT](ACTIVITIES_CONTRACT.md).
+Activity: id/user_id/subject_id, title<=50, deadline TIMESTAMPTZ obligatorio,
+original_deadline inmutable, deadline_revision, priority/status con tokens exactos,
+estimated_duration 10–300, notes<=200 nullable y timestamps controlados por trigger.
+FK compuesta a subjects(user_id,id), UPDATE/DELETE RESTRICT. Sin type/goal_id.
+Índices (user_id,subject_id), (user_id,status,deadline,id).
+ActivityDeadlineEvent: PK(activity_id,revision), FK RESTRICT, previous_deadline,
+new_deadline, event_type y occurred_at. Solo lectura desde Backend; trigger DB
+registra cambios atómicos y protege historia. No se generan tablas con ORM.
+Materia archivada conserva actividades; actividad con eventos no admite DELETE.
 
 ### ActivityDependency
 - id

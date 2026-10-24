@@ -1,5 +1,26 @@
 class DomainError(Exception):
     _errors = {
+        "ACTIVITY_NOT_FOUND": (404, "Actividad no encontrada."),
+        "ACTIVITY_TRANSITION_CONFLICT": (
+            409,
+            "Reabre la actividad como pendiente antes de cambiar a ese estado.",
+        ),
+        "ACTIVITY_STATE_CONFLICT": (
+            409,
+            "El estado cambió; consulta la actividad e intenta de nuevo.",
+        ),
+        "ACTIVITY_DEADLINE_CONFLICT": (
+            409,
+            "La fecha cambió; consulta la actividad e intenta de nuevo.",
+        ),
+        "ACTIVITY_HAS_DEPENDENCIES": (
+            409,
+            "No puedes eliminar una actividad con historial o registros relacionados.",
+        ),
+        "ACTIVITY_WRITE_CONFLICT": (
+            409,
+            "La actividad cambió durante la operación; consulta e intenta de nuevo.",
+        ),
         "SUBJECT_NOT_FOUND": (404, "Materia no encontrada."),
         "SUBJECT_NAME_CONFLICT": (409, "Ya existe una materia con ese nombre."),
         "SUBJECT_ACTIVE_LIMIT": (409, "Puedes tener máximo cinco materias activas."),
