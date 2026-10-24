@@ -1,5 +1,13 @@
 # Materias — contrato 2026-10-18
 
+## Integración con Actividades — 2026-10-23
+
+La rama actual consume 0005_activities. Se conserva el contrato de Materias.
+DELETE de materia con actividades devuelve 409 SUBJECT_HAS_DEPENDENCIES mediante
+la FK real de 0005, incluso si la materia está archivada. No cambia auth ni cupos.
+Los pins/pendientes de release 0004 que siguen son evidencia histórica.
+
+
 Base /api/v1. Bearer y onboarding completo obligatorios en todas las rutas,
 incluido catálogo; no-store y errores globales existentes. No cambia auth.
 DB fija c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, revisión 0004_subjects.

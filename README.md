@@ -2,12 +2,12 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-Esta rama implementa registro mínimo, datos académicos y cuestionario versionado.
-Contrato frontend: [ONBOARDING_CONTRACT.md](docs/ONBOARDING_CONTRACT.md).
+Esta rama incorpora Actividades sobre auth, onboarding y Materias existentes.
+Contrato Actividades: [ACTIVITIES_CONTRACT.md](docs/ACTIVITIES_CONTRACT.md).
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
-cognova-database. Esta rama requiere 0003 y no se despliega automáticamente.
+cognova-database. Esta rama requiere 0005 y no se despliega automáticamente.
 
 API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
 ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
@@ -47,10 +47,10 @@ disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
 No se usa `create_all`. Database conserva `0001_create_users` →
-`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects`.
-La referencia exacta requerida es c3394c38c55a8cd466d10f02fe7c80d7c1e1980f.
+`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects` → `0005_activities`.
+La referencia exacta requerida es 604e296e2670d154ba7e18d7afa3f010e66dd42d.
 Materias: [contrato de API, catálogo y concurrencia](docs/SUBJECTS_CONTRACT.md).
-`python scripts/start.py` valida disponibilidad y revisión 0004 antes de escuchar,
+`python scripts/start.py` valida disponibilidad y revisión 0005 antes de escuchar,
 sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación
@@ -122,3 +122,12 @@ existente fue confirmado por el usuario; no se recrea durante la separación DB.
 Una clase relevante por archivo. El frontend se desarrolla en otro repositorio.
 Consultar [estado](docs/PROJECT_STATE.md) y [reglas](docs/AGENT_RULES.md)
 antes de continuar.
+
+### Validación de Actividades
+
+La suite PostgreSQL crea únicamente esquemas test_<uuid> en servidor local desechable,
+con TEST_DATABASE_ALLOW_DDL=yes y REQUIRE_POSTGRES_TESTS=1. La prueba de mínimo
+privilegio requiere un administrador local capaz de crear/eliminar un rol temporal
+(como PostgreSQL efímero de CI); nunca usar credenciales ni túneles de producción.
+El checkout .local/database-handoff debe estar limpio en el SHA completo de tools/database-ref.json.
+El rol runtime productivo nunca debe recibir privilegios administrativos de pruebas.

@@ -1,5 +1,19 @@
 # Despliegue existente y transición de base de datos
 
+## Actividades — desarrollo, no desplegado (2026-10-23)
+
+Rama feat/activities-0005; no merge a main ni deploy solicitado/ejecutado.
+El nuevo código requiere exactamente 0005_activities. La última evidencia
+productiva registrada sigue en 0004; no se consultó producción en esta entrega.
+DEPENDENCY DATABASE: release separado de 0005 al SHA fijado en DATABASE_HANDOFF,
+respaldo/preflight y permisos DML/secuencia de activities, SELECT de eventos.
+Sin grants de escritura de historia, EXECUTE de triggers ni DDL runtime.
+Coordinar ventana: el backend anterior exige 0004 y el nuevo exige 0005; no asumir
+compatibilidad de instancias antiguas tras la migración. Después del release DB,
+merge/deploy Backend y smoke real del contrato. No downgrade automático sobre datos.
+Frontend puede desarrollar en paralelo contra contrato/OpenAPI; producción pendiente.
+
+
 ## Materias cerrado, DELETE validado — 2026-10-20
 
 El grant específico de Database resolvió la última dependencia. Smoke real DELETE

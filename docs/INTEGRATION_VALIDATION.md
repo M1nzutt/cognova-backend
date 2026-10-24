@@ -1,5 +1,36 @@
 # Validación de integración productiva
 
+## Actividades — evidencia local y CI, sin smoke productivo (2026-10-23)
+
+Código 3f0c0cd992119aea985c1a23d6e271ea8b94faf2; DB
+604e296e2670d154ba7e18d7afa3f010e66dd42d / 0005_activities.
+358 tests locales, 124 PostgreSQL17.11, sin skips; JUnit validado por
+scripts/check_test_results.py. CI40050090141 completed/success.
+
+- POST201; GET/list/PUT/PATCH200; DELETE confirmado sin historia204 y posterior404.
+- Ajena/inexistente:404 idéntico en cada ruta; asignar materia ajena/inexistente404.
+- Filtros combinados, cursor, rango inclusivo y mismo instante con offset distinto.
+- deadline mayor/menor registra postponed/rescheduled; fecha inicial inmutable.
+- Mismo instante no añade evento; PUT también registra historia. Estado independiente.
+- Terminal a otro estado sin reapertura409; precondiciones desactualizadas409.
+- Dos cambios concurrentes con misma revisión: uno confirma y otro409; un solo evento.
+- Historia existente/FK futura bloquean DELETE409; actividad/materia preservadas.
+- Carrera crear actividad/borrar materia serializada; sin huérfanos.
+- Error al escribir historia revierte actividad; abortos40001/40P01 reintentan completos.
+- Upgrade0004 preserva usuarios/sesiones/cuestionarios/materias; ORM sin drift.
+- Rol temporal local: DML actividades funciona, trigger escribe historia sin grants
+  directos; DDL/escritura historia/revisión/EXECUTE de trigger denegados42501.
+  Revocar DELETE local produce HTTP503 genérico y conserva fila. Sin cambios de grants
+  productivos. El rol de prueba se elimina al terminar.
+- Bearer/onboarding/CSRF/no-store correctos; regresión completa de auth/Materias pasa.
+- OpenAPI documenta requests, filtros, security, errores y DELETE204 sin cuerpo.
+- Wheel aislado sin tooling de migración: launcher/readiness/Actividades401 aprobados.
+
+Ruff, mypy, pip check, build y auditoría correctos. Pin de opentelemetry-api corregido
+1.45.0→1.45.1 por CVE-2026-114603. No se hizo smoke en Render; requiere release DB0005
+más permisos y deploy Backend coordinados. Frontend puede desarrollar en paralelo.
+
+
 ## DELETE final aprobado y Backend Materias cerrado — 2026-10-20
 
 Smoke limitado posterior al grant de Database, ejecutado 15:41:48–15:43:12Z.

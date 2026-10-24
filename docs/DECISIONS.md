@@ -1,5 +1,15 @@
 # Cognova — Decisiones Congeladas
 
+## Actividades — decisión 2026-10-23
+
+Contrato ACTIVITIES_CONTRACT sustituye la actividad conceptual con type/goal_id.
+Sin estructuras algorítmicas artificiales ni /prioritized en esta fase. CRUD y
+filtros SQL usan índices existentes de 0005. Estados terminales completed/cancelled
+requieren reapertura a pending; cambios de deadline son independientes del estado.
+Materia archivada admite conservar/crear/editar actividades. Historial DB impide
+borrar una actividad con eventos: conflicto explícito, sin eludir FK.
+
+
 ## Producto
 
 - Nombre: Cognova.

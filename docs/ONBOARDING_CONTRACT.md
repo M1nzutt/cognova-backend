@@ -1,5 +1,12 @@
 # Onboarding y percepción inicial — contrato 2026-10-12
 
+## Compatibilidad actual — 2026-10-23
+
+La rama Actividades fija 0005_activities y mantiene onboarding/auth sin cambios.
+Materias y Actividades requieren get_onboarded_user. Los pins y exclusiones de
+fases anteriores que siguen abajo son históricos; ver DATABASE_HANDOFF vigente.
+
+
 Actualización 2026-10-18: Materias ya usa get_onboarded_user; las reglas de onboarding
 no cambian. El pin/readiness vigente de esta rama es 0004_subjects y SHA
 c3394c38c55a8cd466d10f02fe7c80d7c1e1980f. La sección de persistencia 0003 al final

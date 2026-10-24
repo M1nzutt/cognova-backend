@@ -1,21 +1,40 @@
 # Cognova — Estado backend
 
-## Actividades en implementación — 2026-10-23
+## Actividades — implementación validada, producción pendiente (2026-10-23)
 
-Inicio limpio main da2845d, 70 commits. Rama feat/activities-0005.
-Contrato definido en ACTIVITIES_CONTRACT; DB fijará SHA 604e296e2670d154ba7e18d7afa3f010e66dd42d.
-Lectura de reglas/contratos y revisión Git completadas. Pin/ORM/readiness implementados: 11 tests unitarios y 3 PostgreSQL aprobados
-(compatibilidad ORM sin drift, startup read-only, readiness). DTOs, filtros y matriz de transiciones validados con 56 pruebas unitarias nuevas.
-Servicio transaccional implementado, 6 pruebas adicionales de retry/errores pasan.
-CRUD/historia/OpenAPI aprobados: 6 escenarios PostgreSQL y 1 OpenAPI nuevos,
-incluidos ownership, precondiciones concurrentes y DELETE con/sin historial.
-Siete escenarios adicionales de integridad PostgreSQL pasan: preservación 0004,
-FK futura, retry real, carrera materia/actividad, rol runtime y rollback de historial.
-Primera regresión: 356 passed y un inventario OpenAPI antiguo corregido; repetición
-completa en curso. Auditoría detectó CVE-2026-114603 en opentelemetry-api 1.45.0;
-pin/hashes actualizados exclusivamente a 1.45.1, auditoría posterior limpia.
- sin cambios de auth ni acciones productivas.
+Rama feat/activities-0005; inicio limpio main da2845d (70 commits).
+Database fijado a 604e296e2670d154ba7e18d7afa3f010e66dd42d, revisión exacta
+0005_activities; checkout de tooling aislado y limpio dentro de Backend.
+Código validado: 3f0c0cd992119aea985c1a23d6e271ea8b94faf2.
 
+Contrato: ACTIVITIES_CONTRACT. CRUD, filtros subject/status/priority/deadline/rango,
+PATCH estado y deadline con precondiciones, historial paginado. Ownership y
+onboarding en todas las rutas; materia archivada admitida. DB conserva fecha
+inicial y registra eventos atómicos. Actividad con eventos/dependencias: DELETE409;
+sin dependencias y confirm=true:204. Materia con actividades:409. Nunca cascadas.
+No cambios de auth, frontend, schema productivo, grants productivos ni despliegue.
+
+Validación final: 358 pruebas aprobadas, 124 PostgreSQL, cero omitidas (JUnit
+.local/activities-results.xml); 77 casos más que la base de 281. Preservación desde
+0004, ORM sin drift, API/ownership, límites, precondiciones concurrentes, carrera
+materia/actividad, rollback de historia, FK futura, retry real y rol restringido.
+Ruff lint/formato (145 archivos), mypy (101), pip check y build sdist/wheel correctos.
+Wheel instalado aislado: launcher HTTP y rutas protegidas pasan (1 prueba adicional);
+sin Alembic ni cognova_database en runtime. Dos warnings conocidos no fatales:
+Starlette/httpx y reflexión de checks SQLAlchemy. No se desactivaron controles.
+
+Auditoría detectó CVE-2026-114603 en opentelemetry-api1.45.0; único cambio de
+lock:1.45.1 y hashes. Auditoría posterior sin vulnerabilidades conocidas.
+[CI 40050090141](https://github.com/M1nzutt/cognova-backend/actions/runs/40050090141)
+completed/success sobre 3f0c0cd, incluyendo secretos, tests, tipos, build y auditoría.
+El commit final es documental con [skip ci] [skip render]; no altera código validado.
+
+Ocho commits nuevos, 78 totales, sin squash: contrato, pin/ORM, DTO/transiciones,
+servicio, rutas, pruebas de integridad, parche de dependencia y cierre documental.
+Rama publicada; main permanece sin merge. Frontend puede empezar en paralelo con
+contrato/OpenAPI. DEPENDENCY DATABASE para producción: aplicar 0005 y permisos
+runtime descritos en DATABASE_HANDOFF antes del merge/deploy coordinado y smoke real.
+La evidencia productiva anterior es 0004; no se consultó producción en esta tarea.
 
 ## Backend Materias cerrado — 2026-10-20
 
