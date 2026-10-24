@@ -6,7 +6,8 @@ Inicio limpio main da2845d, 70 commits. Rama feat/activities-0005.
 Contrato definido en ACTIVITIES_CONTRACT; DB fijará SHA 604e296e2670d154ba7e18d7afa3f010e66dd42d.
 Lectura de reglas/contratos y revisión Git completadas. Pin/ORM/readiness implementados: 11 tests unitarios y 3 PostgreSQL aprobados
 (compatibilidad ORM sin drift, startup read-only, readiness). DTOs, filtros y matriz de transiciones validados con 56 pruebas unitarias nuevas.
-Servicios/API pendientes; sin cambios de auth ni acciones productivas.
+Servicio transaccional implementado, 6 pruebas adicionales de retry/errores pasan.
+CRUD/historia/OpenAPI en validación PostgreSQL; sin cambios de auth ni acciones productivas.
 
 
 ## Backend Materias cerrado — 2026-10-20
