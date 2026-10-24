@@ -14,6 +14,10 @@ Nunca asumir que una tarea interrumpida quedó terminada.
 
 ## Alcance de repositorio y base de datos
 
+- Actividades autorizadas 2026-10-23: consumir 0005 en
+  604e296e2670d154ba7e18d7afa3f010e66dd42d. Leer ACTIVITIES_CONTRACT.
+  Sustituye exclusiones históricas de actividades; no autoriza producción ni otros repos.
+
 - Materias (2026-10-18): leer SUBJECTS_CONTRACT.md; consumir 0004_subjects al SHA
   c3394c38c55a8cd466d10f02fe7c80d7c1e1980f. No modificar auth ni implementar
   actividades, frontend o IA. Las referencias 0003 anteriores son históricas.

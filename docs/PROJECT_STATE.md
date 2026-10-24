@@ -1,5 +1,13 @@
 # Cognova — Estado backend
 
+## Actividades en implementación — 2026-10-23
+
+Inicio limpio main da2845d, 70 commits. Rama feat/activities-0005.
+Contrato definido en ACTIVITIES_CONTRACT; DB fijará SHA 604e296e2670d154ba7e18d7afa3f010e66dd42d.
+Lectura de reglas/contratos y revisión Git completadas. Implementación y pruebas
+pendientes; sin cambios de auth ni acciones productivas.
+
+
 ## Backend Materias cerrado — 2026-10-20
 
 Smoke DELETE final aprobado el 2026-10-20, 15:41:48–15:43:12Z, después del permiso
