@@ -60,6 +60,7 @@ class Subject(Base):
             "OR (status = 'archived' AND active_slot IS NULL)",
             name="ck_subjects_active_slot",
         ),
+        UniqueConstraint("user_id", "id", name="uq_subjects_user_id_id"),
         UniqueConstraint("user_id", "active_slot", name="uq_subjects_active_slot"),
         Index("uq_subjects_user_name_lower", "user_id", func.lower(name), unique=True),
         Index("ix_subjects_user_status", "user_id", "status"),
