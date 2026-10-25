@@ -1,0 +1,305 @@
+{
+  "started_at_utc": "2026-10-24T20:20:49.563618+00:00",
+  "checks": {
+    "readiness": {
+      "status": 200,
+      "no_store": true
+    },
+    "without bearer": {
+      "status": 401,
+      "no_store": true
+    },
+    "A register": {
+      "status": 201,
+      "no_store": true
+    },
+    "A onboarding gate": {
+      "status": 403,
+      "no_store": true,
+      "code": "ONBOARDING_REQUIRED"
+    },
+    "A csrf refresh rejected": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "A refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "A authenticated": {
+      "status": 200,
+      "no_store": true
+    },
+    "A secure cookies": "passed",
+    "B register": {
+      "status": 201,
+      "no_store": true
+    },
+    "B onboarding gate": {
+      "status": 403,
+      "no_store": true,
+      "code": "ONBOARDING_REQUIRED"
+    },
+    "B csrf refresh rejected": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "B refresh": {
+      "status": 200,
+      "no_store": true
+    },
+    "B authenticated": {
+      "status": 200,
+      "no_store": true
+    },
+    "B secure cookies": "passed",
+    "A subject": {
+      "status": 201,
+      "no_store": true
+    },
+    "B subject": {
+      "status": 201,
+      "no_store": true
+    },
+    "create activity": {
+      "status": 201,
+      "no_store": true
+    },
+    "detail": {
+      "status": 200,
+      "no_store": true
+    },
+    "list": {
+      "status": 200,
+      "no_store": true
+    },
+    "edit": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter subject": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter status": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter priority": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter deadline": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter range": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter combined": {
+      "status": 200,
+      "no_store": true
+    },
+    "filter excludes": {
+      "status": 200,
+      "no_store": true
+    },
+    "in progress": {
+      "status": 200,
+      "no_store": true
+    },
+    "stale status": {
+      "status": 409,
+      "no_store": true,
+      "code": "ACTIVITY_STATE_CONFLICT"
+    },
+    "postpone": {
+      "status": 200,
+      "no_store": true
+    },
+    "reschedule": {
+      "status": 200,
+      "no_store": true
+    },
+    "deadline history": {
+      "status": 200,
+      "no_store": true
+    },
+    "equivalent timezone no event": {
+      "status": 200,
+      "no_store": true
+    },
+    "concurrent 409": {
+      "status": 409,
+      "no_store": true,
+      "code": "ACTIVITY_DEADLINE_CONFLICT"
+    },
+    "concurrent 200": {
+      "status": 200,
+      "no_store": true
+    },
+    "after concurrency": {
+      "status": 200,
+      "no_store": true
+    },
+    "history after concurrency": {
+      "status": 200,
+      "no_store": true
+    },
+    "complete": {
+      "status": 200,
+      "no_store": true
+    },
+    "terminal transition conflict": {
+      "status": 409,
+      "no_store": true,
+      "code": "ACTIVITY_TRANSITION_CONFLICT"
+    },
+    "reopen": {
+      "status": 200,
+      "no_store": true
+    },
+    "title bound": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "duration bound": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "timezone required": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "owner field forbidden": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "reversed deadline range": {
+      "status": 422,
+      "no_store": true,
+      "code": "VALIDATION_ERROR"
+    },
+    "missing activity": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership GET": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership GET/deadline-history": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership PUT": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership PATCH/status": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership PATCH/deadline": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "ownership DELETE?confirm=true": {
+      "status": 404,
+      "no_store": true,
+      "code": "ACTIVITY_NOT_FOUND"
+    },
+    "isolated list": {
+      "status": 200,
+      "no_store": true
+    },
+    "foreign subject": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "missing subject": {
+      "status": 404,
+      "no_store": true,
+      "code": "SUBJECT_NOT_FOUND"
+    },
+    "A csrf logout rejected": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "A logout": {
+      "status": 204,
+      "no_store": true
+    },
+    "A revoked access": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    },
+    "B csrf logout rejected": {
+      "status": 403,
+      "no_store": true,
+      "code": "CSRF_VALIDATION_FAILED"
+    },
+    "B logout": {
+      "status": 204,
+      "no_store": true
+    },
+    "B revoked access": {
+      "status": 401,
+      "no_store": true,
+      "code": "SESSION_REVOKED"
+    }
+  },
+  "synthetic_user_ids": [
+    16,
+    17
+  ],
+  "synthetic_subject_ids": [
+    28,
+    29
+  ],
+  "retained_activity_id": 1,
+  "deadline_events": [
+    {
+      "revision": 1,
+      "previous_deadline": "2030-01-01T12:00:00Z",
+      "new_deadline": "2030-01-03T12:00:00Z",
+      "event_type": "postponed",
+      "occurred_at": "2026-10-24T20:21:02.290245Z"
+    },
+    {
+      "revision": 2,
+      "previous_deadline": "2030-01-03T12:00:00Z",
+      "new_deadline": "2030-01-02T12:00:00Z",
+      "event_type": "rescheduled",
+      "occurred_at": "2026-10-24T20:21:02.491988Z"
+    },
+    {
+      "revision": 3,
+      "previous_deadline": "2030-01-02T12:00:00Z",
+      "new_deadline": "2030-01-05T12:00:00Z",
+      "event_type": "postponed",
+      "occurred_at": "2026-10-24T20:21:03.046078Z"
+    }
+  ],
+  "original_deadline": "2030-01-01T12:00:00Z",
+  "status": "failed",
+  "failure_type": "RuntimeError",
+  "failed_check": "history blocks delete: expected 409, got 503",
+  "completed_at_utc": "2026-10-24T20:21:08.596378+00:00"
+}

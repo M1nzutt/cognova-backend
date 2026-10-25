@@ -1,0 +1,7 @@
+{
+  "sqlstate": "23001",
+  "constraint": "fk_deadline_events_activity",
+  "table": "activity_deadline_events",
+  "message": "update or delete on table \"activities\" violates RESTRICT setting of foreign key constraint \"fk_deadline_events_activity\" on table \"activity_deadline_events\"",
+  "retained_count": 1
+}

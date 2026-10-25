@@ -1,5 +1,31 @@
 # Despliegue existente y transición de base de datos
 
+## Actividades Live — 2026-10-24
+
+Servicio existente srv-db2j6nqj9qps73crqa0g, main, autoDeploy=yes:
+https://cognova-backend-lpsi.onrender.com. Merge 2221e85 y push dispararon el primer
+deploy automático. Smoke detectó 23001 no traducido; corrección fe5989b y push
+produjeron dep-dbeh7u15efls73b1uqag, Live confirmado con SHA completo
+fe5989b86d93d10e724cbf28de4f9d64048bb711. No se recreó servicio ni se cambió Blueprint,
+secretos, grants, auth o HealthCheckPath (permanece vacío).
+
+Readiness 200 antes/después del smoke final 20:25:51–20:26:12Z. Preflight y revisión
+posterior READ ONLY usan la credencial real Render: cognova_runtime, TLS,
+0005_activities; PostgreSQL 18.6. DML completo activities, SELECT eventos,
+USAGE/SELECT secuencia; no TRUNCATE, CREATE public ni escritura directa de historia.
+El trigger conserva fecha inicial y registra eventos sin grants nuevos.
+
+Smoke reproducible autorizado: python -m scripts.smoke_activities
+https://cognova-backend-lpsi.onrender.com --frontend-origin
+https://cognova-frontend.netlify.app --evidence .local/activities-live-smoke-final.json
+(en una sola línea). Crea dos cuentas sintéticas y conserva historia; no ejecutar
+como comprobación documental ni repetir sin necesidad. Credenciales solo en memoria.
+
+CI merge 40129132661 success; CI final: [40129775095](https://github.com/M1nzutt/cognova-backend/actions/runs/40129775095) success sobre 5535585; corrección [40129632727](https://github.com/M1nzutt/cognova-backend/actions/runs/40129632727) success. Tooling/tests 5535585 y cierre
+documental omiten Render; el código runtime coincide con fe5989b desplegado.
+Frontend puede continuar. No revertir a un backend que requiera 0004 ni hacer
+downgrade DB automático. Ver INTEGRATION_VALIDATION para resultados y filas retenidas.
+
 ## Actividades — desarrollo, no desplegado (2026-10-23)
 
 Rama feat/activities-0005; no merge a main ni deploy solicitado/ejecutado.

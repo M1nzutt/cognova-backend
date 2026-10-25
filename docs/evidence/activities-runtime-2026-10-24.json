@@ -1,0 +1,92 @@
+{
+  "runtime_role": "cognova_runtime",
+  "database": "cognova",
+  "revisions": [
+    "0005_activities"
+  ],
+  "observed_at_utc": "2026-10-24T20:26:43.878725+00:00",
+  "tls": true,
+  "activities_permissions": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": true,
+    "DELETE": true,
+    "TRUNCATE": false
+  },
+  "activities_sequence": {
+    "USAGE": true,
+    "SELECT": true,
+    "UPDATE": false
+  },
+  "schema_create": false,
+  "delete_plan_sqlstate": "allowed",
+  "events_permissions": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false
+  },
+  "server_version": "18.6 (Debian 18.6-1.pgdg12+2)",
+  "retained_activity": {
+    "id": 2,
+    "user_id": 18,
+    "status": "cancelled",
+    "original_deadline": "2030-01-01T12:00:00+00:00",
+    "deadline_revision": 3
+  },
+  "event_chain": [
+    {
+      "revision": 1,
+      "event_type": "postponed",
+      "previous_deadline": "2030-01-01T12:00:00+00:00",
+      "new_deadline": "2030-01-03T12:00:00+00:00"
+    },
+    {
+      "revision": 2,
+      "event_type": "rescheduled",
+      "previous_deadline": "2030-01-03T12:00:00+00:00",
+      "new_deadline": "2030-01-02T12:00:00+00:00"
+    },
+    {
+      "revision": 3,
+      "event_type": "postponed",
+      "previous_deadline": "2030-01-02T12:00:00+00:00",
+      "new_deadline": "2030-01-05T12:00:00+00:00"
+    }
+  ],
+  "deleted_activity_count": 0,
+  "synthetic_subjects": [
+    {
+      "id": 30,
+      "status": "archived"
+    },
+    {
+      "id": 31,
+      "status": "archived"
+    }
+  ],
+  "synthetic_sessions": [
+    {
+      "user_id": 16,
+      "total": 1,
+      "not_revoked": 0
+    },
+    {
+      "user_id": 17,
+      "total": 1,
+      "not_revoked": 0
+    },
+    {
+      "user_id": 18,
+      "total": 1,
+      "not_revoked": 0
+    },
+    {
+      "user_id": 19,
+      "total": 1,
+      "not_revoked": 0
+    }
+  ],
+  "first_attempt_activity_preserved": true
+}

@@ -1,14 +1,31 @@
 # Cognova — Estado backend
 
-## Release Actividades en curso — 2026-10-24
+## Actividades desplegado — validación final (2026-10-24)
 
-Autorización actual: merge, deploy y smoke productivo después de Database 0005.
-Main integrado sin squash en 2221e85, CI40129132661 success, Render Live y ready200.
-Smoke detectó DELETE con historial503: PostgreSQL productivo devuelve23001
-(restrict_violation), mientras el servicio solo traducía23503. Fila e historial
-preservados. Se amplía traducción a409 para ambos SQLSTATE en Actividades/Materias,
-con regresión unitaria y DELETE con historia bajo rol restringido PostgreSQL local.
-No se cambia schema, grants ni auth. Cierre pendiente de deploy corregido y smoke.
+Autorización actual: integrar/desplegar Actividades y validar producción después de
+Database 0005; sustituye la restricción de producción de la fase de implementación.
+Merge --no-ff 2221e85 integra feat/activities-0005 (442f5b2), sin squash.
+SHA Live final: fe5989b86d93d10e724cbf28de4f9d64048bb711. Readiness 200 antes/después;
+conexión efectiva cognova_runtime, TLS y exactamente 0005_activities. Pin Database
+604e296e2670d154ba7e18d7afa3f010e66dd42d conservado. No schema/grants/auth modificados.
+
+El primer smoke encontró DELETE con historia 503: PostgreSQL 18.6 devuelve 23001
+(restrict_violation); el Backend solo traducía 23503. fe5989b corrige ambos códigos
+para conflictos 409 de Actividades/Materias; regresión unitaria y PostgreSQL con rol
+restringido. Sin borrar historia ni ampliar permisos. Segundo smoke completo aprobado:
+CRUD, filtros, transiciones, deadline/historial, concurrencia 200/409, ownership,
+DELETE 204 sin historia y 409 con dependencias, auth/CSRF/cookies/no-store.
+
+Validación automatizada final: 361 pruebas aprobadas, 125 PostgreSQL, cero fallos y cero omitidas. Lint/formato, mypy 101 archivos y
+build sdist/wheel aprobados. CI merge 40129132661 success; CI final: [40129775095](https://github.com/M1nzutt/cognova-backend/actions/runs/40129775095) success sobre 5535585; corrección [40129632727](https://github.com/M1nzutt/cognova-backend/actions/runs/40129632727) success.
+Detalle/evidencias permanentes en INTEGRATION_VALIDATION y DEPLOYMENT.
+
+Inicio 78 commits; cierre 82: merge, corrección RESTRICT, smoke/regresión, documentación.
+5535585 agrega solo tooling/tests con [skip render]; cierre documental con
+[skip ci] [skip render] conserva el SHA Live. No squash ni cambios en otros repos.
+Frontend Actividades puede continuar con contrato/OpenAPI; no queda dependencia
+Database para este release. Validación visual/proxy Netlify pertenece al Frontend.
+Backend Actividades queda cerrado. Las secciones de implementación siguientes son históricas.
 
 ## Actividades — implementación validada, producción pendiente (2026-10-23)
 

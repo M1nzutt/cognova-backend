@@ -1,5 +1,62 @@
 # Validación de integración productiva
 
+## Actividades — smoke productivo final aprobado (2026-10-24)
+
+SHA fe5989b86d93d10e724cbf28de4f9d64048bb711, deploy dep-dbeh7u15efls73b1uqag Live.
+Smoke HTTP real 20:25:51–20:26:12Z, Origin frontend existente. Backend exige 0005;
+PostgreSQL real confirma 0005_activities/TLS/cognova_runtime. Ningún grant/schema
+cambiado desde Backend. No se afirma validación visual ni proxy de navegador.
+
+| Control | Resultado |
+| --- | --- |
+| Readiness antes/después, OpenAPI | 200; rutas Actividades presentes |
+| Crear / listar / detalle / editar | 201 / 200 / 200 / 200 |
+| Filtros materia, estado, prioridad, deadline exacto/rango inclusivo/combinado | 200, inclusión/exclusión correctas |
+| Pending→in_progress→completed→pending→cancelled | 200; estado/deadline independientes |
+| Estado esperado obsoleto / terminal sin reapertura | 409 ACTIVITY_STATE_CONFLICT / ACTIVITY_TRANSITION_CONFLICT |
+| Deadline adelante / atrás | 200; postponed / rescheduled |
+| Instante equivalente con otra zona | 200, sin evento nuevo |
+| Dos PATCH concurrentes con expected_revision=2 | uno 200, otro 409 ACTIVITY_DEADLINE_CONFLICT; revisión 3 |
+| Historial / fecha inicial | tres eventos encadenados; original 2030-01-01T12:00:00Z intacto |
+| DELETE con historia / materia con actividad | 409 ACTIVITY_HAS_DEPENDENCIES / SUBJECT_HAS_DEPENDENCIES; conservadas |
+| DELETE sin confirmación / sin historia confirmado | 422 / 204 sin cuerpo |
+| GET después / segundo DELETE / listado | 404 / 404 / ausente |
+| Ajena/inexistente, todas las rutas y materia ajena | 404 indistinguible; listado ajeno vacío |
+| Título 51, duración 9, fecha sin zona, user_id extra, rango invertido | 422, error genérico |
+| Sin Bearer / onboarding pendiente | 401 / 403 |
+| Refresh/logout sin CSRF / válidos | 403 / 200 y 204; refresh rotado, access revocado 401 |
+| Cookies / caché | Secure, paths, host-only, HttpOnly y SameSite correctos; no-store en todas las respuestas verificadas |
+| Archivado de materia | actividad conservada, accesible |
+
+Primer intento 20:20:49–20:21:08Z sobre 2221e85 detectó 503 al borrar actividad con
+historia. Diagnóstico con credencial runtime y transacción revertida: SQLSTATE 23001,
+constraint fk_deadline_events_activity, fila intacta. PostgreSQL 18.6 productivo
+usa 23001 donde PostgreSQL 17 local devolvía 23503. Corrección mínima en servicios
+traduce ambos a 409 al borrar; sin exponer errores nativos. Se añadió regresión para
+ambos SQLSTATE y DELETE con historia bajo rol restringido. El 503 por permiso DB
+faltante sigue probado mediante fallo controlado local; no se revocaron grants
+productivos para inducirlo. El segundo smoke aprobado certifica la corrección real.
+
+Verificación READ ONLY 20:26:43Z: actividad 2 usuario 18 cancelada, revisión 3, fecha
+original intacta; eventos postponed/rescheduled/postponed encadenados. Actividad 3
+borrada count=0. Materias 30/31 archivadas. Usuarios 18/19 y sus cuestionarios/historia
+retenidos deliberadamente. Primer intento conserva usuarios 16/17, materias 28/29
+activas y actividad 1 con historial; no se pudo completar archivado al abortar el
+smoke, y no se hizo limpieza SQL ni se borró historia. Las cuatro sesiones sintéticas
+están revocadas; cero activas. No se modificaron filas de otros usuarios.
+
+Pruebas finales: 361 pruebas aprobadas, 125 PostgreSQL, cero fallos y cero omitidas. Ruff check/formato 147 archivos y mypy 101
+correctos; build sdist/wheel aprobado. CI merge 40129132661 success; CI final:
+[40129775095](https://github.com/M1nzutt/cognova-backend/actions/runs/40129775095) success sobre 5535585; corrección [40129632727](https://github.com/M1nzutt/cognova-backend/actions/runs/40129632727) success. Warnings conocidos no fatales: Starlette/httpx y reflexión de checks.
+
+Evidencia sin secretos: [smoke final](evidence/activities-smoke-2026-10-24.json),
+[runtime final](evidence/activities-runtime-2026-10-24.json),
+[primer intento](evidence/activities-first-attempt-2026-10-24.json) y
+[diagnóstico RESTRICT](evidence/activities-restrict-2026-10-24.json),
+[despliegue](evidence/activities-deploy-2026-10-24.json) y
+[suite final](evidence/activities-tests-2026-10-24.json).
+Backend Actividades validado en producción; Frontend puede continuar con el contrato.
+
 ## Actividades — evidencia local y CI, sin smoke productivo (2026-10-23)
 
 Código 3f0c0cd992119aea985c1a23d6e271ea8b94faf2; DB
