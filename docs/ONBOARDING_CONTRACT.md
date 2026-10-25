@@ -103,7 +103,12 @@ puede contenerlo y se decodifica quitando solo el primer prefijo. Nunca guardar
 objetos anidados o claves extra que el check DB no permite. Catalog version=1
 congela esta codificación. Lecturas validan el snapshot antes de devolver DTO.
 
-DB fija: 232c43130c0fb3eddd32e1dd3707368ba0d87d4c, head
+### Historial del rollout inicial (resuelto)
+
+Producción vigente: 0005_activities; pin actual en DATABASE_HANDOFF. El contrato
+onboarding se conserva. El párrafo siguiente describe solo la fase inicial 0003.
+
+DB fijada entonces: 232c43130c0fb3eddd32e1dd3707368ba0d87d4c, head
 0003_onboarding_questionnaire. Backend no ejecuta DDL. Rama no se mergea/deploya
 automáticamente: database/operación deben coordinar aplicación de 0003 y permisos
 antes del release que exige ese head. Ninguna acción de producción en esta fase.

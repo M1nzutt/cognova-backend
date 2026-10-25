@@ -1,5 +1,14 @@
 # Cognova — Contrato API v1
 
+## Alcance vigente
+
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
+conservan planificación de producto, no endpoints desplegados.
+
 Base:
 
 ```text
@@ -51,8 +60,8 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. Materias está implementado según su contrato; los demás
-módulos académicos listados más abajo siguen fuera de alcance.
+sobre el usuario autenticado. No reciben user_id. Materias y Actividades están implementados según sus
+contratos; los restantes módulos son planificación futura.
 
 ## Subjects
 

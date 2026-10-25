@@ -1,8 +1,25 @@
 # Cognova — Estado backend
 
-## Actividades desplegado — validación final (2026-10-24)
+## Estado vigente — 2026-10-25
 
-Autorización actual: integrar/desplegar Actividades y validar producción después de
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+SHA Live documentado: `fe5989b86d93d10e724cbf28de4f9d64048bb711`.
+Pin Database: `604e296e2670d154ba7e18d7afa3f010e66dd42d`.
+Migración, grants y rollout de estos releases resueltos; evidencia en DEPLOYMENT
+e INTEGRATION_VALIDATION. Esta tarea solo rectifica documentación: sin código,
+smoke nuevo ni redeploy. Inicio limpio 9eb48c6 (82 commits); un commit documental
+con [skip ci] [skip render] deja 83. Checks: diff, alcance Markdown, enlaces locales
+y consistencia con readiness/pin y evidencias existentes.
+
+Los apartados siguientes son históricos: sus fechas, cifras, autorizaciones y
+pendientes no reabren releases ni autorizan repetir operaciones.
+
+## Histórico — Actividades desplegado — validación final (2026-10-24)
+
+Autorización de aquel release: integrar/desplegar Actividades y validar producción después de
 Database 0005; sustituye la restricción de producción de la fase de implementación.
 Merge --no-ff 2221e85 integra feat/activities-0005 (442f5b2), sin squash.
 SHA Live final: fe5989b86d93d10e724cbf28de4f9d64048bb711. Readiness 200 antes/después;
@@ -27,7 +44,7 @@ Frontend Actividades puede continuar con contrato/OpenAPI; no queda dependencia
 Database para este release. Validación visual/proxy Netlify pertenece al Frontend.
 Backend Actividades queda cerrado. Las secciones de implementación siguientes son históricas.
 
-## Actividades — implementación validada, producción pendiente (2026-10-23)
+## Histórico — Actividades — implementación validada, producción pendiente (2026-10-23)
 
 Rama feat/activities-0005; inicio limpio main da2845d (70 commits).
 Database fijado a 604e296e2670d154ba7e18d7afa3f010e66dd42d, revisión exacta
@@ -63,7 +80,7 @@ contrato/OpenAPI. DEPENDENCY DATABASE para producción: aplicar 0005 y permisos
 runtime descritos en DATABASE_HANDOFF antes del merge/deploy coordinado y smoke real.
 La evidencia productiva anterior es 0004; no se consultó producción en esta tarea.
 
-## Backend Materias cerrado — 2026-10-20
+## Histórico — Backend Materias cerrado — 2026-10-20
 
 Smoke DELETE final aprobado el 2026-10-20, 15:41:48–15:43:12Z, después del permiso
 DELETE concedido por Database. SHA productivo reconfirmado Live:
@@ -90,7 +107,7 @@ Inicio limpio 5aa90c1, 69 commits. Un solo commit documental deja 70 totales,
 sin squash, con [skip ci] [skip render]. Únicamente PROJECT_STATE, DEPLOYMENT e
 INTEGRATION_VALIDATION actualizados. Los bloqueos siguientes son historial resuelto.
 
-## Materias desplegado; cierre bloqueado por DELETE — 2026-10-20
+## Histórico — Materias desplegado; cierre bloqueado por DELETE — 2026-10-20
 
 Retomado desde main limpio en 430c64a (68 commits). El merge --no-ff y push ya
 se habían completado el 2026-10-19; no se repitieron. feat/subjects-0004 permanece
@@ -132,7 +149,7 @@ Release completo: d00ce49 preparación, 430c64a merge y este registro (3 nuevos 
 los 66 iniciales), sin squash. Commit documental con [skip ci] [skip render]
 para conservar el SHA productivo validado. Los apartados siguientes son historial.
 
-## Release Materias en preparación — 2026-10-19
+## Histórico — Release Materias en preparación — 2026-10-19
 
 Inicio limpio en feat/subjects-0004, 06f6c4b1c94ddf6da4c78b518b2f7ccc0d2ad63c,
 66 commits. Usuario autoriza merge sin squash y deploy al servicio Render
@@ -153,7 +170,7 @@ success (39196997553). Código app runtime idéntico al SHA final comunicado.
 Siguiente: validar CI de preparación, merge --no-ff, deploy y smoke real.
 
 
-## Materias — entrega cerrada 2026-10-19
+## Histórico — Materias — entrega cerrada 2026-10-19
 
 Rama feat/subjects-0004. Inicio limpio dec1f73 (57 commits); nueve commits de
 Materias dejan 66 totales, sin squash. Esta continuación aporta dos commits
@@ -205,7 +222,7 @@ Release productivo: 2026-10-17. Rama main. Historial de implementación abajo.
 Implementado: registro mínimo → datos académicos → percepción inicial → onboarding.
 Onboarding desplegado en el servicio Render existente. No se modificaron frontend ni database.
 
-## Release operativo 2026-10-17 — desplegado
+## Histórico — Release operativo 2026-10-17 — desplegado
 
 Database ya aplicó 0003 y preservó sus datos. Servicio Render existente confirmado:
 srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes. Merge sin squash y SHA Live:
@@ -239,7 +256,7 @@ se conservaron al reanudar. Conteo antes del cierre:53; con este cierre document
 Cada cambio corresponde a contrato, catálogo, DTO, validación, servicio o tests real.
 Rama publicada periódicamente. Confirmar números finales con git rev-list --count HEAD.
 
-## Referencia de esquema
+## Histórico — Referencia de esquema
 
 [tools/database-ref.json](../tools/database-ref.json) fija exactamente:
 232c43130c0fb3eddd32e1dd3707368ba0d87d4c de M1nzutt/cognova-database.
@@ -251,7 +268,7 @@ ORM: User académico nullable; AcademicGoalLegacy de solo lectura;
 QuestionnaireResponseRecord con PK(user_id,revision), JSONB completo y timestamp.
 Modelo/esquema externo comparados en PostgreSQL, incluidos constraints relevantes.
 
-## Contratos y comportamiento
+## Histórico — Contratos y comportamiento
 
 [ONBOARDING_CONTRACT](ONBOARDING_CONTRACT.md), [AUTH_CONTRACT](AUTH_CONTRACT.md),
 [QUESTIONNAIRE](QUESTIONNAIRE.md) y [API_CONTRACT](API_CONTRACT.md) son la referencia.
@@ -287,7 +304,7 @@ siguen válidas. Identidad legacy fuera de los checks físicos30/50 sigue pudien
 iniciar sesión/leer; rehash se difiere y edición académica devuelve409
 LEGACY_PROFILE_REMEDIATION_REQUIRED hasta remediación explícita, sin truncar datos.
 
-## Pruebas y controles
+## Histórico — Pruebas y controles
 
 CI de código completo: [38349589618](https://github.com/M1nzutt/cognova-backend/actions/runs/38349589618),
 commit9f7b31c; CI final con documentación sincronizada:
@@ -317,7 +334,7 @@ No hay tests fallidos, omisiones de integración ni excepciones de seguridad ace
 Último commit solo documentación/evidencia: no repite CI del mismo código validado.
 Antes de cierre se revisaron diff/check, links y estado Git; no secretos versionados.
 
-## Commits principales de la fase
+## Histórico — Commits principales de la fase
 
 fb9b002 contratos;3f02158..efc71c9 diez grupos de opciones;fe3c324 catálogo tipado;
 8f01920/f18bbbf validadores y tests;66c9dfd codec;38bfa59 ORM;5c017ae pin/readiness;
@@ -327,7 +344,7 @@ d4fd37b migración/legacy;8bb1ed4 límitesDB;9f7b31c OpenAPI;
 4982f25/144ea8a/0541fd7/e18b4de documentación y principio IA oficial.
 El hash del cierre figura en git log. No inflar historial ni squash posterior.
 
-## Dependencias externas reales y siguiente paso
+## Histórico — Dependencias externas reales y siguiente paso
 
 FRONTEND: consumir registro de3 campos y UserResponse.onboarding; usar next_step
 para perfil/cuestionario/completo sin adivinar por strings. Leer catálogo1, enviar

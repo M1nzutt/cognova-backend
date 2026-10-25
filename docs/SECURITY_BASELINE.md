@@ -98,10 +98,11 @@ recuperación; backend conserva ORM, acceso autorizado y transacciones. El corte
 debe separar rol migrador y runtime sin quitar la comprobación de compatibilidad.
 El código backend ya no ejecuta DDL ni conserva historial Alembic. La compatibilidad
 con database se validó en PostgreSQL de CI y el merge está desplegado en Render.
-Health/readiness/OpenAPI se verificaron en producción; grants/recuperación son
-controles separados aún no acreditados. Ver
-[DATABASE_HANDOFF.md](DATABASE_HANDOFF.md). Esta asignación no marca el checklist
-como completado ni acredita backups o pruebas de producción todavía no verificadas.
+Health/readiness/OpenAPI y grants runtime del release 0005 fueron verificados;
+ver [DEPLOYMENT](DEPLOYMENT.md) e [INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md).
+La recuperación pertenece a Database; sus controles de este release están
+resueltos según el handoff. Esto no certifica disponibilidad actual de backups
+ni marca automáticamente el checklist general como completado.
 
 ## 10. Logging
 
@@ -189,7 +190,10 @@ No compartir:
 - cookies;
 - secretos.
 
-## 18. Checklist previo a producción
+## 18. Plantilla de checklist para cada release
+
+No es el inventario de pendientes del release cerrado; consultar PROJECT_STATE
+y las evidencias de cada entrega. IA y otros módulos futuros no están implementados.
 
 - [ ] Auth completa y probada
 - [ ] Refresh rotation

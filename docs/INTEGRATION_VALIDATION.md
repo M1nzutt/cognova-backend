@@ -57,7 +57,10 @@ Evidencia sin secretos: [smoke final](evidence/activities-smoke-2026-10-24.json)
 [suite final](evidence/activities-tests-2026-10-24.json).
 Backend Actividades validado en producción; Frontend puede continuar con el contrato.
 
-## Actividades — evidencia local y CI, sin smoke productivo (2026-10-23)
+Los apartados siguientes son históricos: sus revisiones y bloqueos corresponden
+a cada fecha, no a pendientes del release 0005 cerrado.
+
+## Histórico — Actividades — evidencia local y CI, sin smoke productivo (2026-10-23)
 
 Código 3f0c0cd992119aea985c1a23d6e271ea8b94faf2; DB
 604e296e2670d154ba7e18d7afa3f010e66dd42d / 0005_activities.
@@ -88,7 +91,7 @@ Ruff, mypy, pip check, build y auditoría correctos. Pin de opentelemetry-api co
 más permisos y deploy Backend coordinados. Frontend puede desarrollar en paralelo.
 
 
-## DELETE final aprobado y Backend Materias cerrado — 2026-10-20
+## Histórico — DELETE final aprobado y Backend Materias cerrado — 2026-10-20
 
 Smoke limitado posterior al grant de Database, ejecutado 15:41:48–15:43:12Z.
 SHA Live reconfirmado: 430c64a3c299f82853f7947498f663f1cded590c, deploy
@@ -124,7 +127,7 @@ son anteriores al grant y se conservan como trazabilidad. CI previo del mismo SH
 281 pruebas sin omisiones, 111 PostgreSQL y launcher adicional; no se afirma una
 nueva ejecución de esa suite para este cambio exclusivamente documental.
 
-## Materias — validación productiva 2026-10-20
+## Histórico — Materias — validación productiva 2026-10-20
 
 Main integra feat/subjects-0004 mediante merge --no-ff
 430c64a3c299f82853f7947498f663f1cded590c; segundo padre d00ce49, sin squash.
@@ -189,7 +192,7 @@ Este smoke HTTP no sustituye la validación de navegador/proxy del frontend.
 
 Fecha: 2026-10-17. Rama main. Onboarding desplegado y smoke aprobado.
 
-## Runtime y permisos
+## Histórico — Runtime y permisos
 
 Servicio srv-db2j6nqj9qps73crqa0g, base existente en 0003_onboarding_questionnaire.
 Se inspeccionó DATABASE_URL efectiva en Render sin imprimirla: antes usaba
@@ -215,7 +218,7 @@ Permisos de futuras tablas deben otorgarse deliberadamente, sin grants globales.
 La comprobación local usó el endpoint externo del mismo recurso; Render conserva
 el interno. El nuevo deploy cargó la conexión y pasó readiness y smoke real.
 
-## Git, CI y deploy
+## Histórico — Git, CI y deploy
 
 - 40ed5baf8001d6a75c9a7010b3a67ff795900b14: smoke y preparación operativa.
 - [CI previo 39077069939](https://github.com/M1nzutt/cognova-backend/actions/runs/39077069939): success.
@@ -228,7 +231,7 @@ el interno. El nuevo deploy cargó la conexión y pasó readiness y smoke real.
 - [CI del merge 39077241478](https://github.com/M1nzutt/cognova-backend/actions/runs/39077241478): success;
   mismos 226 tests, launcher adicional y controles completos aprobados.
 
-## Smoke real
+## Histórico — Smoke real
 
 Ejecutado scripts/smoke_auth.py contra https://cognova-backend-lpsi.onrender.com,
 con Origin https://cognova-frontend.netlify.app. Credenciales/tokens/cookies solo
@@ -258,7 +261,7 @@ Verificación PostgreSQL READ ONLY adicional: 1 usuario sintético reciente,
 2 sesiones, 0 sin revocar, 2 respuestas con revisiones [1,2]. La cuenta y su
 historial permanecen deliberadamente; no se borran datos ni se fabrica limpieza.
 
-## Alcance del cierre
+## Histórico — Alcance del cierre
 
 Backend listo para frontend compatible con el contrato. No se desplegó ni modificó
 frontend/database. E2E de navegador y proxy Netlify siguen a cargo del frontend;

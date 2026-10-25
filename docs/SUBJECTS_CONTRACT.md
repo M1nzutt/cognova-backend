@@ -10,7 +10,8 @@ Los pins/pendientes de release 0004 que siguen son evidencia histórica.
 
 Base /api/v1. Bearer y onboarding completo obligatorios en todas las rutas,
 incluido catálogo; no-store y errores globales existentes. No cambia auth.
-DB fija c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, revisión 0004_subjects.
+Pin histórico de implementación: c3394c38c55a8cd466d10f02fe7c80d7c1e1980f, 0004_subjects.
+Pin vigente y producción 0005: ver DATABASE_HANDOFF. Backend Materias cerrado.
 
 ## DTOs y catálogo
 
@@ -49,7 +50,8 @@ No promete snapshot entre páginas. Archivo/reactivación idempotentes: repetir
 el estado actual no cambia updated_at ni consume otra posición.
 DELETE es irreversible; Frontend debe solicitar confirmación al usuario. No
 borra dependencias ni historia por cascada. Una segunda eliminación da 404.
-No se incorpora auditoría de cambios ni actividades en esta entrega.
+La entrega inicial de Materias no incorporó auditoría ni Actividades; estas últimas
+se integraron posteriormente sobre 0005 conforme a su contrato.
 
 ## Errores
 
@@ -88,10 +90,10 @@ conexión/commit ambiguo. Mantener id/user_id/created_at; updated_at solo al cam
 Runtime necesita SELECT/INSERT/UPDATE/DELETE sobre subjects, USAGE/SELECT sobre
 subjects_id_seq y SELECT/UPDATE sobre users para locks; no TRUNCATE ni DDL.
 El DELETE es una ampliación deliberada respecto al contrato inicial Database,
-autorizada por este módulo y pendiente de grants por operación. Futuras FK a
+autorizada por este módulo y concedida el 2026-10-20. Futuras FK a
 subjects deben ser RESTRICT: no eludirlas ni borrar historial para liberar cupo.
 
-## Integración y rollout
+## Histórico — Integración y rollout inicial 0004
 
 Frontend puede integrar este contrato y OpenAPI al completar las pruebas. La API
 productiva no dispone de Materias hasta aplicar 0004 desde Database, revisar grants

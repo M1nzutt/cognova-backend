@@ -72,11 +72,12 @@ relee estado en cada intento. Reintentos completos solo 40001/40P01, máximo tre
 FK compuesta garantiza mismo dueño incluso ante escrituras externas. Sin RLS:
 las consultas de lectura/historia y escritura siempre restringen user_id.
 
-## Dependencias
+## Dependencias resueltas y permisos vigentes
 
-Frontend puede implementar contra contrato/OpenAPI validado en paralelo.
-Producción requiere release Database 0005, respaldo/preflight y grants mínimos:
+Backend Actividades cerrado el 2026-10-24. Frontend puede consumir el contrato.
+Database 0005, respaldo/preflight y grants fueron verificados para el release;
+ver DEPLOYMENT e INTEGRATION_VALIDATION. Se conserva el contrato mínimo:
 activities SELECT/INSERT/UPDATE/DELETE, activities_id_seq USAGE/SELECT,
 activity_deadline_events solo SELECT; preservar permisos previos y lock users.
 Sin DDL, INSERT/UPDATE/DELETE de historia ni EXECUTE de funciones trigger runtime.
-No aplicar migraciones/grants productivos desde Backend. No merge/deploy en esta tarea.
+No aplicar migraciones/grants productivos desde Backend. Este cierre documental no redeploya.

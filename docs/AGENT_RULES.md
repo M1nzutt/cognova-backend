@@ -1,5 +1,15 @@
 # Cognova — Reglas para Agentes
 
+## Alcance vigente — 2026-10-25
+
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+Solo documentación en Backend, sin código ni redeploy. Para este bloque coherente
+se autoriza un commit con [skip ci] [skip render] y push. Las autorizaciones de
+implementación fechadas abajo son históricas, no describen bloqueos actuales.
+
 ## Antes de trabajar
 
 1. Leer `APP_CONTEXT.md`.

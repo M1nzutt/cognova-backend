@@ -1,6 +1,14 @@
 ﻿# Handoff database → backend
 
-Fecha: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+Pin vigente: `604e296e2670d154ba7e18d7afa3f010e66dd42d`. Migración, grants y rollout
+resueltos para estos releases; ver DEPLOYMENT e INTEGRATION_VALIDATION. Los
+registros de corte/implementación conservan pendientes históricos, no bloqueos actuales.
+
+Fecha histórica del corte inicial: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
 ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
 conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
@@ -16,11 +24,11 @@ escritura directa de historia. Database aplica migración/grants en release sepa
 Contrato y rollback funcional: ACTIVITIES_CONTRACT. Las referencias siguientes
 son históricas; no autorizan DDL runtime ni acreditan producción 0005.
 
-Validación 0005: 358 tests (124 PostgreSQL), ORM sin drift y preservación desde0004.
+Validación local histórica del 2026-10-23 (producción validada al día siguiente): 358 tests (124 PostgreSQL), ORM sin drift y preservación desde0004.
 CI Backend40050090141 success sobre3f0c0cd992119aea985c1a23d6e271ea8b94faf2.
 Rol local restringido verificado; esto no acredita grants de producción.
 
-## Consumo 0004 — Materias (2026-10-18)
+## Histórico — Consumo 0004 — Materias (2026-10-18)
 
 Referencia vigente: c3394c38c55a8cd466d10f02fe7c80d7c1e1980f,
 revisión exacta 0004_subjects. El checkout de pruebas aislado dentro de backend
@@ -45,7 +53,7 @@ Fuente de tooling fijada en [tools/database-ref.json](../tools/database-ref.json
 Esta rama de onboarding requiere `0003_onboarding_questionnaire`. La evidencia
 de handoff 0002 siguiente es histórica; no cambia ni se repite esa fase.
 
-## Consumo 0003 — onboarding
+## Histórico — Consumo 0003 — onboarding
 
 - ORM de campos académicos nullable, archivo legacy y snapshots inmutables.
 - Registro mínimo; q1 es el objetivo vigente. Legacy se conserva literalmente.
@@ -122,7 +130,7 @@ el pool en éxito/error; falla sin escuchar y sin imprimir secretos si DB no est
 lista. No hay imports Alembic/database, advisory locks ni upgrade en runtime.
 
 Readiness conserva SELECT 1 y lectura de alembic_version. Solo acepta una fila
-`0003_onboarding_questionnaire`; ausencia, revisión distinta o múltiples heads dan503.
+`0005_activities`; ausencia, revisión distinta o múltiples heads dan503.
 No hay variable de entorno para eludir esa decisión ni dependencia HTTP con
 cognova-database, que no es un servicio. El identificador queda explícito en
 ReadinessService y la referencia de tooling declara el mismo contrato.
@@ -152,7 +160,7 @@ con sus dependencias exclusivas. CI prueba además instalación runtime separada
 sin Alembic/cognova_database. No usar un wheel database aislado: requiere checkout
 completo con migraciones. Instrucciones reproducibles en [README](../README.md).
 
-## Rollout realizado y controles operativos restantes
+## Histórico — Rollout inicial y controles entonces restantes
 
 Al cerrar fase 2 no se había desplegado. Posteriormente se mergeó 3e3ed95 y Render
 lo desplegó automáticamente; durante el incidente de URL se verificaron Live,
@@ -171,7 +179,7 @@ Operación/database aún deben acreditar los controles no verificados aquí:
 5. Mantener serialización de jobs DDL (advisory lock 1943187001 en database), abortar
    rollout ante fallo y nunca hacer downgrade automático para revertir backend.
 
-## Dependencias externas
+## Histórico — Dependencias externas del corte inicial
 
 **DEPENDENCY DATABASE — operación/documentación:** el checkout hermano y su
 PROJECT_STATE siguen registrando que no existe CI remoto aprobado. Su responsable

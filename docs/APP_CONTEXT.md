@@ -1,5 +1,14 @@
 # Cognova — Contexto Funcional y Conceptual de la Aplicación
 
+## Estado implementado — 2026-10-25
+
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+Las secciones conceptuales siguientes expresan la visión de producto; no acreditan
+implementación ni fijan por sí solas el contrato del próximo módulo. Ver PROJECT_STATE.
+
 ## 1. Qué es Cognova
 
 **Cognova** es una aplicación web de acompañamiento académico con inteligencia artificial.
@@ -211,9 +220,10 @@ El usuario podrá crear:
 - prioridades;
 - sesiones de estudio.
 
-Las actividades serán genéricas y tendrán un tipo.
+El contrato implementado de Actividades está en ACTIVITIES_CONTRACT y no incluye
+`type`. La propuesta conceptual anterior se conserva como histórica.
 
-Tipos sugeridos:
+Tipos sugeridos históricamente (no implementados):
 
 ```text
 task
@@ -224,7 +234,7 @@ practice
 other
 ```
 
-Esto evita crear una clase diferente para cada tipo de actividad.
+La propuesta histórica buscaba evitar una clase por tipo; no es el contrato vigente.
 
 ---
 

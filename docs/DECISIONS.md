@@ -43,7 +43,7 @@ borrar una actividad con eventos: conflicto explícito, sin eludir FK.
 - Registro: nombre/email/password. Carrera y semestre se completan en onboarding;
   objetivo académico vigente corresponde a q1 del cuestionario versionado.
 - Materias personalizables.
-- Actividad genérica con `type`.
+- Actividades según ACTIVITIES_CONTRACT, sin `type`; la propuesta anterior fue sustituida.
 - Prioridades manuales y deadlines.
 - Calendario visual.
 - Temporizador integrado con backend como fuente oficial.
@@ -97,7 +97,11 @@ Reemplaza el diseño anterior de JWT persistido.
 - Backups y procedimiento de restauración antes de declarar producción estable.
 - CI con pruebas, build y controles de seguridad.
 
-## Cambios a decisiones congeladas
+## Historial de cambios a decisiones congeladas
+
+Los pins, restricciones de fase y pendientes siguientes corresponden a sus fechas.
+Estado vigente: Materias y Actividades cerrados sobre 0005. Calendario es el
+siguiente módulo, con contrato por definir. Ver PROJECT_STATE.
 
 ### Materias — 2026-10-18
 

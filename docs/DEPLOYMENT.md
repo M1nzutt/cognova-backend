@@ -1,5 +1,12 @@
 # Despliegue existente y transición de base de datos
 
+Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+
+Los apartados históricos conservan los bloqueos de cada fecha, ya resueltos para
+estos releases. Esta revisión documental no consulta producción ni redeploya.
+
 ## Actividades Live — 2026-10-24
 
 Servicio existente srv-db2j6nqj9qps73crqa0g, main, autoDeploy=yes:
@@ -26,7 +33,7 @@ documental omiten Render; el código runtime coincide con fe5989b desplegado.
 Frontend puede continuar. No revertir a un backend que requiera 0004 ni hacer
 downgrade DB automático. Ver INTEGRATION_VALIDATION para resultados y filas retenidas.
 
-## Actividades — desarrollo, no desplegado (2026-10-23)
+## Histórico — Actividades — desarrollo, no desplegado (2026-10-23)
 
 Rama feat/activities-0005; no merge a main ni deploy solicitado/ejecutado.
 El nuevo código requiere exactamente 0005_activities. La última evidencia
@@ -40,7 +47,7 @@ merge/deploy Backend y smoke real del contrato. No downgrade automático sobre d
 Frontend puede desarrollar en paralelo contra contrato/OpenAPI; producción pendiente.
 
 
-## Materias cerrado, DELETE validado — 2026-10-20
+## Histórico — Materias cerrado, DELETE validado — 2026-10-20
 
 El grant específico de Database resolvió la última dependencia. Smoke real DELETE
 aprobado 15:41:48–15:43:12Z sobre el SHA productivo Live
@@ -58,7 +65,7 @@ no-store correctos; readiness 200 antes/después. Detalle en
 pendiente el permiso de eliminación. Este cierre es solo documental, con
 [skip ci] [skip render]; los estados de bloqueo siguientes son históricos.
 
-## Materias Live — 2026-10-20; DELETE pendiente
+## Histórico — Materias Live — 2026-10-20; DELETE pendiente
 
 Servicio existente srv-db2j6nqj9qps73crqa0g, rama main, autoDeploy=yes.
 Merge sin squash 430c64a3c299f82853f7947498f663f1cded590c integra d00ce49 y
@@ -86,7 +93,7 @@ No revertir a un backend que exige 0003 ni modificar readiness para ocultar erro
 
 ### Historial de preparación y despliegues anteriores
 
-## Release autorizado Materias — 2026-10-19, preparación
+## Histórico — Release autorizado Materias — 2026-10-19, preparación
 
 Database ya está en 0004. Verificado con la DATABASE_URL efectiva de Render,
 sin imprimirla: cognova_runtime y TLS; falta exclusivamente DELETE en subjects.
@@ -106,7 +113,7 @@ Después del grant operado por Database, repetir DELETE esperando 204 y segundo
 intento 404 antes de cerrar CRUD. Nunca saltar readiness ni revertir a 0003.
 
 
-## Materias — pendiente de rollout
+## Histórico — Materias — pendiente de rollout
 
 La rama feat/subjects-0004 exige exactamente 0004_subjects. No mergear/desplegar
 sobre producción 0003. Database/operación deben respaldar y aplicar 0004 con el
@@ -116,7 +123,7 @@ No se modifican grants ni producción desde esta tarea. Después desplegar Backe
 y probar CRUD/ownership/archivo/reactivación con el rol runtime. Frontend puede
 integrar SUBJECTS_CONTRACT.md; consumo productivo queda pendiente de ese release.
 
-## Release operativo autorizado — 2026-10-17
+## Histórico — Release operativo autorizado — 2026-10-17
 
 Base productiva en 0003, verificada usando la conexión efectiva de Render.
 Rol previo cognova_user propietario; nuevo runtime cognova_runtime con permisos
@@ -175,20 +182,22 @@ y escucha en 0.0.0.0:10000. No arrancar con Uvicorn directo para eludir el prefl
 en desarrollo es posible, pero producción debe conservar `python scripts/start.py`.
 
 `/api/v1/health` no consulta DB. `/api/v1/ready` comprueba `SELECT 1` y que
-`alembic_version` contenga solo `0002_auth_sessions`; si falla responde 503 sin
+`alembic_version` contenga solo `0005_activities`; si falla responde 503 sin
 exponer detalles. No invoca Alembic, no aplica DDL y no verifica drift físico.
 
 ## Operación de migraciones y permisos
 
-Database ejecutará el job de migración con un release inmutable, en la base
+Para futuras revisiones, Database ejecutará el job con un release inmutable, en la base
 existente, antes del rollout backend. Un fallo cancela el rollout. Backend
 verificará conexión/compatibilidad antes de escuchar y conservará readiness
 durante ejecución. El proceso API usará credencial runtime sin permisos DDL.
 
-El runner externo y la compatibilidad backend se validaron en PostgreSQL de CI,
+Como antecedente histórico del corte inicial, el runner externo y la compatibilidad
+backend se validaron en PostgreSQL de CI,
 permitiendo retirar Alembic local del runtime. Esto no acredita permisos o
 recuperación de producción. El rollout de ese código ya ocurrió; la auditoría de
-roles/grants y el ensayo de recuperación siguen siendo controles separados.
+roles/grants y el ensayo de recuperación fueron controles separados. El cierre
+0005 y los grants vigentes están documentados al inicio; ese pendiente está resuelto.
 Evidencia final: [CI 38184856858](https://github.com/M1nzutt/cognova-backend/actions/runs/38184856858),
 103 tests aprobados sin omisiones y runtime sin herramientas de migración.
 La secuencia exacta y la política para futuras revisiones están en
@@ -206,7 +215,7 @@ Variables runtime existentes, sin cambiar valores en esta fase:
 
 | Variable | Responsabilidad |
 | --- | --- |
-| `DATABASE_URL` | Conexión backend a la base existente; secreta, TLS en producción; rol runtime tras el corte |
+| `DATABASE_URL` | Conexión backend a la base existente; secreta, TLS en producción; rol runtime cognova_runtime |
 | `JWT_SECRET`, `JWT_ALGORITHM` | Solo backend; no requeridas por database |
 | `ENVIRONMENT`, `PORT` | Entorno y puerto del servicio API |
 | `CORS_ALLOWED_ORIGINS` | Array JSON de orígenes explícitos; conservar el frontend autorizado |
@@ -220,7 +229,7 @@ El job database tendrá su propia credencial migradora en el gestor de secretos,
 sin transmitirla al backend o frontend. No cambiar nombres de variables runtime
 como parte de una separación documental.
 
-## Incidente 404 cerrado: hostname incorrecto
+## Histórico — Incidente 404 cerrado: hostname incorrecto
 
 La URL difundida con `1psi` (número uno) no pertenece al servicio inspeccionado:
 responde texto `Not Found`, HTTP 404 y `x-render-routing: no-server`, sin
@@ -261,7 +270,7 @@ Refresh: HttpOnly, Path=/api/v1/auth; CSRF: Path=/; ambos host-only y Secure en
 producción. No cambiar cookies, DTOs, tokens o rutas por separar repositorios.
 El agente frontend es responsable de su configuración y documentación.
 
-## Validación y reversión del corte futuro
+## Validación y reversión de futuros releases
 
 - Database: verificar backup/restauración, mismo destino, mismo historial/heads,
   no pérdida de filas ni secretos de sesiones y migración repetible sin recreación.
@@ -273,5 +282,6 @@ El agente frontend es responsable de su configuración y documentación.
 - No revertir DB automáticamente. Solo volver a un release backend compatible con
   el head aplicado; si aún no se hizo el corte, mantener el launcher actual.
 
-No se afirma que backups, grants, CI remoto o compatibilidad de un runner externo
-estén validados por esta documentación.
+Estos controles se repiten cuando corresponda a un nuevo release; no son bloqueos
+abiertos de Materias/Actividades. Evidencia del cierre vigente al inicio.
+No se acredita una verificación productiva nueva en esta revisión documental.

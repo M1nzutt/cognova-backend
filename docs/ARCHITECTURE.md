@@ -155,7 +155,8 @@ Producción debe contar con:
 - El launcher de esta rama exige conectividad y `0005_activities` antes de
   Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
 - Database migra antes del release; backend no migra ni repara esquema al arrancar.
-  La separación se desplegó con3e3ed95; onboarding/0003 requiere release coordinado.
+  La separación se desplegó con3e3ed95; onboarding, Materias y Actividades están
+  cerrados, con producción en 0005 (ver DEPLOYMENT).
 - Una revisión futura requiere coordinación de compatibilidad antes de aplicarse;
   consultar la secuencia de corte en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md)
   y el estado operativo en [DEPLOYMENT.md](DEPLOYMENT.md).

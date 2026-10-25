@@ -2,12 +2,15 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-Esta rama incorpora Actividades sobre auth, onboarding y Materias existentes.
+Materias y Actividades están cerrados en producción, junto con auth y onboarding.
 Contrato Actividades: [ACTIVITIES_CONTRACT.md](docs/ACTIVITIES_CONTRACT.md).
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
-cognova-database. Esta rama requiere 0005 y no se despliega automáticamente.
+cognova-database. Producción usa `0005_activities`; SHA Live documentado:
+`fe5989b86d93d10e724cbf28de4f9d64048bb711`. Main tiene auto-deploy en Render;
+este cierre documental usa [skip ci] [skip render], sin redeploy.
+Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
 
 API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
 ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
@@ -27,7 +30,7 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-Están implementados auth, health/readiness, perfil académico y cuestionario
+Están implementados auth, health/readiness, perfil académico, cuestionario, Materias y Actividades
 bajo `/api/v1`, según [el contrato](docs/API_CONTRACT.md).
 
 `CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
