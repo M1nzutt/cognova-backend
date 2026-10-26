@@ -10,7 +10,9 @@ implementados. Primer control: 20 pruebas unitarias y 5 de integración PostgreS
 local aprobadas; Ruff y mypy (107 archivos) correctos. Pruebas versionadas:
 límites/zonas/cursor, OpenAPI, errores sanitizados, filtros, ownership/onboarding,
 lectura sin mutaciones, archivo de materia y cambios del recurso original.
-Suite completa y auditoría en ejecución; build sdist/wheel aprobado.
+Primera suite: 385 aprobadas, un inventario OpenAPI antiguo omitía /calendar.
+Se actualiza esa expectativa; no fallo funcional. Auditoría sin vulnerabilidades,
+pip check correcto y build sdist/wheel aprobado. Revalidación completa pendiente.
 No merge ni deploy solicitado. Producción conserva fe5989b / 0005_activities.
 
 ## Histórico — Cierre documental 2026-10-25
