@@ -1,6 +1,40 @@
 # Cognova — Estado backend
 
-## Calendario v1 listo para integración — 2026-10-25
+## Calendario desplegado; smoke autenticado bloqueado — 2026-10-26
+
+Merge --no-ff 61a2f98668f0d3452f0582d7a074f1290dbae43d integra d819832, sin squash;
+árbol idéntico a la rama validada. Main publicado; Render existente desplegó
+ese SHA, dep-dbfoj54s728c73cs1nvg Live. Health/readiness200 y OpenAPI200.
+Readiness exige exactamente 0005_activities según el código desplegado; no se hizo
+consulta SQL nueva. Pin Database y permisos sin cambios; no migraciones.
+
+Smoke público GET aprobado 2026-10-26 17:12:45Z: Calendario con/sin rango y
+Actividades (lista/detalle/historial) rechazan sin auth con401 y no-store.
+OpenAPI Calendario solo GET, parámetros/DTO correctos y rutas Actividades conservadas.
+Evidencia: [calendar-public-smoke](evidence/calendar-public-smoke-2026-10-26.json).
+No se crearon cuentas/sesiones ni se enviaron mutaciones; no se accedió a cuentas reales.
+
+**Calendario no queda cerrado.** No hay credencial sintética disponible en configuración
+local segura; usuario indicó no inventarla, no crear datos y registrar el bloqueo.
+Pendientes productivos: onboarding403 con cuenta incompleta; rango [from,to) y máximo
+366 días; filtros materia/estado/prioridad; paginación cronológica multipágina;
+ownership entre cuentas sintéticas; no-store autenticado; comparar actividades/historia
+antes/después para acreditar ausencia de cambios; regresión autenticada de Actividades
+(lista/detalle/historial). La ausencia de solicitudes mutadoras no sustituye esa comparación.
+Frontend puede preparar integración con contrato; cierre productivo espera este smoke.
+
+CI de implementación 40255644217 success reconfirmado; suite validada 386 tests,
+130 PostgreSQL, cero omisiones. CI del merge
+[40366167700](https://github.com/M1nzutt/cognova-backend/actions/runs/40366167700)
+completed/success sobre 61a2f98 (tests PostgreSQL, lint, mypy, build, auditoría y
+runtime). Árbol del merge idéntico a d819832. No se repitió suite local del mismo
+código; checks documentales, enlaces y JSON aprobados para este cierre parcial.
+Inicio 88 commits; merge y registro documental añaden dos, 90 totales, sin squash.
+Commit documental [skip ci] [skip render], sin redeploy ni cambios funcionales.
+La autorización de release del usuario sustituye el límite de no deploy de la fase
+anterior. No se modificaron frontend/database ni schema.
+
+## Histórico — Calendario v1 listo para integración — 2026-10-25
 
 Rama feat/calendar-read-view, base main 1a55b39 (83 commits). Contrato definido
 antes del código: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). GET /api/v1/calendar

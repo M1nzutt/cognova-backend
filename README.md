@@ -8,20 +8,21 @@ Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
 cognova-database. Producción usa `0005_activities`; SHA Live documentado:
-`fe5989b86d93d10e724cbf28de4f9d64048bb711`. Main tiene auto-deploy en Render;
+`61a2f98668f0d3452f0582d7a074f1290dbae43d`. Main tiene auto-deploy en Render;
 este cierre documental usa [skip ci] [skip render], sin redeploy.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
+Calendario desplegado con contrato definido; cierre pendiente del smoke autenticado.
 
 API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
 ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
 
-## Calendario v1 — implementación en rama
+## Calendario v1 — desplegado, validación autenticada pendiente
 
 GET /api/v1/calendar ofrece Actividades por rango y filtros, con ownership,
 onboarding y paginación cronológica. Solo consulta recursos existentes; sin eventos
 libres, tablas ni migraciones. [Contrato](docs/CALENDAR_CONTRACT.md).
-Todavía no desplegado: producción conserva el SHA Live de Actividades anterior.
-Frontend puede preparar su integración; el consumo productivo requiere release Backend.
+SHA Live 61a2f98; controles públicos aprobados. Falta credencial sintética para
+validar filtros, ownership, paginación y regresión autenticada. Frontend puede
+preparar integración; no considerar cerrado el release (ver PROJECT_STATE).
 
 ## Entorno local
 

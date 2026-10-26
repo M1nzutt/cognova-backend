@@ -58,5 +58,7 @@ DTO de actividad separado, discriminado por type dentro del contenedor de calend
 servicio de consulta separado de mutaciones. Al incorporar fuentes futuras, ampliar
 mediante contrato explícito la unión de DTOs y la paginación/orden total entre tipos.
 No reservar endpoints, enums ni tablas ficticias para Sesiones/Planes/Retos ahora.
-Contrato y código validados con suite local y CI; Frontend puede implementar. Consumo productivo
-requiere merge/deploy Backend y smoke en release separado, no solicitado aquí.
+Contrato/código validados con suite local y CI; desplegados el 2026-10-26 en 61a2f98.
+Smoke público aprobado; autenticado bloqueado por falta de credencial sintética.
+Frontend puede preparar integración, pero el cierre espera esa validación real.
+Ver PROJECT_STATE e INTEGRATION_VALIDATION.

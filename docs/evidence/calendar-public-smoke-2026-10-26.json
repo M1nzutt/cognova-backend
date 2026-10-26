@@ -1,0 +1,75 @@
+{
+  "observed_at_utc": "2026-10-26T17:12:45.641628+00:00",
+  "production_sha": "61a2f98668f0d3452f0582d7a074f1290dbae43d",
+  "deploy_id": "dep-dbfoj54s728c73cs1nvg",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/health",
+      "status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ready",
+      "status": 200,
+      "cache_control": "no-store"
+    },
+    {
+      "method": "GET",
+      "path": "/openapi.json",
+      "status": 200,
+      "cache_control": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar",
+      "status": 401,
+      "cache_control": "no-store",
+      "error_code": "INVALID_OR_EXPIRED_TOKEN"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/calendar?deadline_from=2030-01-01T00%3A00%3A00Z&deadline_to=2030-02-01T00%3A00%3A00Z",
+      "status": 401,
+      "cache_control": "no-store",
+      "error_code": "INVALID_OR_EXPIRED_TOKEN"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activities",
+      "status": 401,
+      "cache_control": "no-store",
+      "error_code": "INVALID_OR_EXPIRED_TOKEN"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activities/1",
+      "status": 401,
+      "cache_control": "no-store",
+      "error_code": "INVALID_OR_EXPIRED_TOKEN"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/activities/1/deadline-history",
+      "status": 401,
+      "cache_control": "no-store",
+      "error_code": "INVALID_OR_EXPIRED_TOKEN"
+    }
+  ],
+  "authenticated_smoke": "blocked_missing_existing_synthetic_credential",
+  "all_requests_read_only_get": true,
+  "openapi_calendar_and_activities_contract": "passed",
+  "public_smoke": "passed",
+  "schema_readiness": "200; deployed ReadinessService requires exactly 0005_activities; no direct SQL verification in this smoke",
+  "pending": [
+    "onboarding 403 with valid incomplete synthetic account",
+    "authenticated half-open range and 366-day maximum",
+    "subject/status/priority filters",
+    "chronological multi-page traversal",
+    "ownership across synthetic users",
+    "authenticated no-store",
+    "unchanged activity/history before and after calendar reads",
+    "authenticated activities list/detail/history regression"
+  ]
+}

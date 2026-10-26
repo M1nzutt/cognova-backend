@@ -1,14 +1,26 @@
 # Despliegue existente y transición de base de datos
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario v1 está implementado y validado en feat/calendar-read-view, aún no
-desplegado. Contrato CALENDAR_CONTRACT. Requiere release Backend separado
-(merge/deploy/smoke); sin migración ni grants nuevos, mantiene exactamente 0005.
+Calendario está Live en 61a2f98668f0d3452f0582d7a074f1290dbae43d, pero su cierre
+está bloqueado por falta de credencial sintética para el smoke autenticado.
 
-Los apartados históricos conservan los bloqueos de cada fecha, ya resueltos para
-estos releases. Esta revisión documental no consulta producción ni redeploya.
+## Calendario Live — 2026-10-26, validación parcial
 
-## Actividades Live — 2026-10-24
+Merge --no-ff de feat/calendar-read-view (d819832), sin squash. Push main activó
+Render srv-db2j6nqj9qps73crqa0g existente, deploy dep-dbfoj54s728c73cs1nvg Live.
+No se recreó servicio ni modificó configuración, secretos, auth, schema o grants.
+Health/readiness200 y OpenAPI200; revisión esperada del SHA desplegado: 0005_activities.
+No consulta PostgreSQL nueva en este smoke. No migración ni dependencia nueva Database.
+
+Solo GET públicos: auth requerida401 en Calendario y Actividades; no-store correcto.
+Contrato OpenAPI verificado; prueba autenticada pendiente según INTEGRATION_VALIDATION.
+No hay tokens/credenciales sintéticas configurados. Por instrucción del usuario no
+se crean cuentas ni datos ni se fabrican tokens. No considerar el release cerrado.
+Evidencia [pública](evidence/calendar-public-smoke-2026-10-26.json).
+El commit documental usa [skip ci] [skip render] y conserva este SHA Live.
+Los apartados anteriores al 2026-10-26 describen historia, no el SHA productivo vigente.
+
+## Histórico — Actividades Live — 2026-10-24
 
 Servicio existente srv-db2j6nqj9qps73crqa0g, main, autoDeploy=yes:
 https://cognova-backend-lpsi.onrender.com. Merge 2221e85 y push dispararon el primer

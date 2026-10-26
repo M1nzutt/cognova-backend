@@ -1,6 +1,32 @@
 # Validación de integración productiva
 
-## Calendario v1 — validación local/CI 2026-10-25, sin deploy
+## Calendario — smoke público 2026-10-26; autenticado bloqueado
+
+SHA Live 61a2f98668f0d3452f0582d7a074f1290dbae43d, deploy dep-dbfoj54s728c73cs1nvg.
+Solo solicitudes GET, sin cuentas reales, credenciales inventadas ni mutaciones.
+[Evidencia sanitizada](evidence/calendar-public-smoke-2026-10-26.json).
+
+| Control productivo | Resultado |
+| --- | --- |
+| Health/readiness/OpenAPI | 200; código desplegado requiere exactamente 0005 |
+| Calendario sin auth, con/sin rango | 401 INVALID_OR_EXPIRED_TOKEN; no-store |
+| Calendario OpenAPI | Solo GET; filtros, cursor y DTO esperados |
+| Actividades lista/detalle/historial sin auth | 401; no-store |
+| Rutas Actividades OpenAPI | GET/POST/PUT/PATCH/DELETE originales conservados |
+
+Bloqueo explícito: no existe credencial/token sintético disponible en configuración
+local segura. Reportes de smoke previos contienen solo evidencias, no credenciales.
+No se utilizaron cuentas reales ni se generaron tokens; no login/registro/refresh/logout.
+No se redujeron controles de seguridad. La inspección de OpenAPI no valida filtros reales.
+
+Pendiente con cuentas sintéticas existentes: onboarding403; límites [from,to) y
+366 días; filtros materia/estado/prioridad; cursor cronológico multipágina; ownership;
+no-store en respuestas autenticadas; igualdad antes/después de actividades e historia;
+regresión de lista/detalle/historial de Actividades con auth. No se certifica ese smoke
+ni la ausencia empírica de cambios sin comparación autenticada. No nuevos tests de
+escritura de Actividades en producción. Calendario continúa abierto.
+
+## Histórico — Calendario v1: validación local/CI 2026-10-25, antes del deploy
 
 GET /api/v1/calendar: [contrato](CALENDAR_CONTRACT.md), código bb75d41.
 25 pruebas nuevas (20 unitarias/OpenAPI/errores, 5 PostgreSQL). Verifican rango
