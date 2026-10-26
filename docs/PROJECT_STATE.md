@@ -1,6 +1,38 @@
 # Cognova — Estado backend
 
-## Calendario desplegado; smoke autenticado bloqueado — 2026-10-26
+## Backend Calendario cerrado — 2026-10-26
+
+SHA productivo Live: 61a2f98668f0d3452f0582d7a074f1290dbae43d, deploy
+dep-dbfoj54s728c73cs1nvg. Sin redeploy ni cambios funcionales. Readiness200 antes
+y después; código desplegado exige 0005_activities. Pin Database sin cambios.
+
+Usuario autorizó cuentas/datos sintéticos mínimos por API, sustituyendo el bloqueo
+anterior. Smoke real aprobado 17:18:54–17:19:20Z: onboarding403 antes de completar;
+rango [from,to), offsets equivalentes, 366 días200 y exceso422; filtros por materia,
+estado, prioridad y combinados; tres páginas de un elemento ordenadas por deadline/id,
+incluidos empates; ownership bidireccional y no-store en todas las respuestas API.
+Regresión autenticada Actividades: listado, detalle e historial200; ajena404.
+
+Comparación exacta antes/después de ambos usuarios: listados y DTOs completos de
+Actividades (incluidos timestamps), historial, materias y cuestionario inicial
+idénticos; SHA-256 coincidente en la [evidencia](evidence/calendar-authenticated-smoke-2026-10-26.json).
+Observación por API, sin consulta SQL ni certificación de columnas no expuestas.
+El servicio Calendario ejecuta solo SELECT; no se observaron cambios en recursos.
+
+Usuarios sintéticos21/22 retenidos con perfiles y una revisión inicial cada uno:
+no endpoint de borrado de cuenta y cuestionarios inmutables. Actividades6–11 y
+materias33–35 eliminadas sin historial: DELETE204, GET404 y listados finales vacíos.
+Dos sesiones, una por usuario, cerradas con CSRF válido: logout204, access posterior401,
+cookies eliminadas. Se retienen sus registros revocados. Sin credenciales en disco,
+Git o logs; aleatorias y únicamente en memoria. No cuentas reales ni datos ajenos.
+
+Suite/CI previos conservados: 386 tests, 130 PostgreSQL; CI merge40366167700 success.
+No se repitió suite local por este cierre documental. Diff, enlaces, JSON y alcance
+sin código comprobados. Inicio limpio092bb87 (90 commits); un commit documental
+[skip ci] [skip render] deja91 totales, sin squash. Frontend puede empezar; Backend
+Calendario queda cerrado y no requiere cambios de Database.
+
+## Histórico — Calendario desplegado; smoke autenticado bloqueado — 2026-10-26
 
 Merge --no-ff 61a2f98668f0d3452f0582d7a074f1290dbae43d integra d819832, sin squash;
 árbol idéntico a la rama validada. Main publicado; Render existente desplegó

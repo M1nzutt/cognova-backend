@@ -7,11 +7,11 @@ Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
 Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
 nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
 
-Release autorizado 2026-10-26: merge --no-ff, push main y deploy Render existente,
-con smoke de solo lectura. Sin credencial sintética disponible, registrar el bloqueo
-y completar solo controles públicos: no cuentas reales, tokens inventados ni datos
-nuevos. Esta autorización sustituye el límite de no deploy de la implementación.
-No cambios en otros repositorios ni migraciones.
+Release autorizado y cerrado 2026-10-26: merge --no-ff, deploy Render y smoke.
+La autorización posterior permitió cuentas/datos sintéticos mínimos por API,
+credenciales aleatorias solo en memoria, limpieza segura y revocación de sesiones.
+Sustituye el bloqueo anterior por falta de credenciales; no permite cuentas reales,
+cambios en otros repositorios ni migraciones. Evidencia y cierre en PROJECT_STATE.
 
 ## Antes de trabajar
 

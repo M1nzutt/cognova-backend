@@ -1,10 +1,16 @@
 # Despliegue existente y transición de base de datos
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario está Live en 61a2f98668f0d3452f0582d7a074f1290dbae43d, pero su cierre
-está bloqueado por falta de credencial sintética para el smoke autenticado.
+Calendario está Live y cerrado en 61a2f98668f0d3452f0582d7a074f1290dbae43d.
+El smoke autenticado autorizado pasó el 2026-10-26 17:18:54–17:19:20Z, sin redeploy.
+Readiness200 antes/después, schema esperado0005. Se crearon solo cuentas/datos
+sintéticos, se compararon recursos antes/después y se limpiaron materias/actividades.
+Usuarios21/22 y sus cuestionarios iniciales retenidos; ambas sesiones revocadas.
+[Resultados](INTEGRATION_VALIDATION.md) y [evidencia](evidence/calendar-authenticated-smoke-2026-10-26.json).
+Frontend puede comenzar. No cambios de código, hosting, schema, grants ni otros repos.
+El registro documental [skip ci] [skip render] conserva el SHA Live validado.
 
-## Calendario Live — 2026-10-26, validación parcial
+## Histórico — Calendario Live, antes del smoke autenticado — 2026-10-26
 
 Merge --no-ff de feat/calendar-read-view (d819832), sin squash. Push main activó
 Render srv-db2j6nqj9qps73crqa0g existente, deploy dep-dbfoj54s728c73cs1nvg Live.

@@ -59,6 +59,6 @@ servicio de consulta separado de mutaciones. Al incorporar fuentes futuras, ampl
 mediante contrato explícito la unión de DTOs y la paginación/orden total entre tipos.
 No reservar endpoints, enums ni tablas ficticias para Sesiones/Planes/Retos ahora.
 Contrato/código validados con suite local y CI; desplegados el 2026-10-26 en 61a2f98.
-Smoke público aprobado; autenticado bloqueado por falta de credencial sintética.
-Frontend puede preparar integración, pero el cierre espera esa validación real.
+Smoke público y autenticado aprobados; Backend Calendario cerrado el 2026-10-26.
+Frontend puede empezar la integración contra el servicio productivo.
 Ver PROJECT_STATE e INTEGRATION_VALIDATION.

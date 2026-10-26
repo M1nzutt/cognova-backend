@@ -98,7 +98,7 @@ La especificación anterior de type y /prioritized queda fuera de esta fase.
 GET `/calendar`: rango obligatorio, filtros y paginación según
 [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Solo lectura de Actividades;
 no eventos libres ni mutaciones propias. Desplegado en 61a2f98; smoke autenticado
-pendiente por falta de credencial sintética (ver PROJECT_STATE).
+aprobado y Backend Calendario cerrado (ver PROJECT_STATE).
 
 ## Dependencies
 

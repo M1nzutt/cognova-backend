@@ -1,6 +1,47 @@
 # Validación de integración productiva
 
-## Calendario — smoke público 2026-10-26; autenticado bloqueado
+## Calendario — smoke autenticado aprobado 2026-10-26
+
+SHA Live61a2f98668f0d3452f0582d7a074f1290dbae43d; sin redeploy ni cambios de código.
+Autorización explícita para dos cuentas sintéticas con credenciales aleatorias solo
+en memoria, sin usar cuentas reales. Ejecución17:18:54–17:19:20Z.
+[Evidencia sanitizada](evidence/calendar-authenticated-smoke-2026-10-26.json).
+
+| Control | Resultado productivo |
+| --- | --- |
+| Readiness antes/después | 200, no-store; código exige0005 |
+| Onboarding incompleto en ambas cuentas | 403 ONBOARDING_REQUIRED; después completo |
+| Rango semiabierto | Incluye límite inferior, excluye superior y fecha anterior |
+| Offsets equivalentes | Mismos resultados |
+| 366 días / 366 días + 1 microsegundo | 200 / 422 VALIDATION_ERROR |
+| Rango vacío / fecha sin zona | 422 |
+| Materia / estado / prioridad / combinación | Subconjuntos exactos y vacío correcto |
+| Materia archivada | Actividad incluida y filtrable |
+| Paginación | Tres páginas, limit1, orden[7,6,8], desempate por ID, sin duplicados |
+| Ownership | Solo actividades propias; filtro materia ajena vacío en ambos sentidos |
+| Actividad e historial ajenos | 404 en ambos sentidos |
+| Actividades listado/detalle/historial | 200 antes y después; historial vacío conservado |
+| No-store autenticado | Todas las respuestas verificadas |
+| Igualdad antes/después | Recursos y SHA-256 idénticos |
+
+Snapshot en memoria de recursos propios: listas y detalles completos de actividades,
+historial, materias y cuestionario inicial. Incluye timestamps y fechas originales.
+SHA-256 antes/después b21152b3668ef8563d5c010230c84b5905b1f15f2d7b9fe9636b0c12999a6e5d.
+Durante esta comparación solo hubo GET. No consultas SQL ni inspección de columnas
+no expuestas. Complementa el servicio SELECT-only y sus pruebas PostgreSQL previas.
+
+Limpieza: actividades6–11 y materias33–35 eliminadas con204, luego404; listados
+finales de ambos usuarios vacíos. No se generaron eventos de deadline ni se destruyó
+historia. Usuarios sintéticos21/22, perfiles y una revisión inicial por cuenta
+retenidos porque no hay borrado de cuenta y el cuestionario es inmutable.
+Cada cuenta tenía una única sesión; logout con CSRF204, access401 y cookies borradas.
+Ambos registros de sesión quedan revocados. Credenciales no guardadas ni impresas.
+
+No nuevos fallos; suite386/130 PostgreSQL y CI merge40366167700 previamente verdes.
+Checks documentales del cierre, sin repetir suite ni deploy. Backend Calendario
+cerrado; el bloqueo anterior queda resuelto. Frontend puede empezar.
+
+## Histórico — Calendario: smoke público y bloqueo inicial 2026-10-26
 
 SHA Live 61a2f98668f0d3452f0582d7a074f1290dbae43d, deploy dep-dbfoj54s728c73cs1nvg.
 Solo solicitudes GET, sin cuentas reales, credenciales inventadas ni mutaciones.

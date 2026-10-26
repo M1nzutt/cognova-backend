@@ -1,0 +1,537 @@
+{
+  "started_at_utc": "2026-10-26T17:18:54.688633+00:00",
+  "production_sha": "61a2f98668f0d3452f0582d7a074f1290dbae43d",
+  "checks": {
+    "A readiness before": {
+      "http": 200,
+      "no_store": true
+    },
+    "A register": {
+      "http": 201,
+      "no_store": true
+    },
+    "A onboarding gate": {
+      "http": 403,
+      "no_store": true
+    },
+    "A profile": {
+      "http": 200,
+      "no_store": true
+    },
+    "A questionnaire catalog": {
+      "http": 200,
+      "no_store": true
+    },
+    "A initial questionnaire": {
+      "http": 201,
+      "no_store": true
+    },
+    "A onboarding complete": {
+      "http": 200,
+      "no_store": true
+    },
+    "A subject 0": {
+      "http": 201,
+      "no_store": true
+    },
+    "A subject 1": {
+      "http": 201,
+      "no_store": true
+    },
+    "B readiness before": {
+      "http": 200,
+      "no_store": true
+    },
+    "B register": {
+      "http": 201,
+      "no_store": true
+    },
+    "B onboarding gate": {
+      "http": 403,
+      "no_store": true
+    },
+    "B profile": {
+      "http": 200,
+      "no_store": true
+    },
+    "B questionnaire catalog": {
+      "http": 200,
+      "no_store": true
+    },
+    "B initial questionnaire": {
+      "http": 201,
+      "no_store": true
+    },
+    "B onboarding complete": {
+      "http": 200,
+      "no_store": true
+    },
+    "B subject 0": {
+      "http": 201,
+      "no_store": true
+    },
+    "A create activity 0": {
+      "http": 201,
+      "no_store": true
+    },
+    "A create activity 1": {
+      "http": 201,
+      "no_store": true
+    },
+    "A create activity 2": {
+      "http": 201,
+      "no_store": true
+    },
+    "A create activity 3": {
+      "http": 201,
+      "no_store": true
+    },
+    "A create activity 4": {
+      "http": 201,
+      "no_store": true
+    },
+    "B create activity 0": {
+      "http": 201,
+      "no_store": true
+    },
+    "archive synthetic subject": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before detail 6": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before history 6": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before detail 7": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before history 7": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before detail 8": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before history 8": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before detail 9": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before history 9": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before detail 10": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before history 10": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before detail 11": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before history 11": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "half-open range": {
+      "http": 200,
+      "no_store": true
+    },
+    "equivalent offsets": {
+      "http": 200,
+      "no_store": true
+    },
+    "366 days accepted": {
+      "http": 200,
+      "no_store": true
+    },
+    "over 366 rejected": {
+      "http": 422,
+      "no_store": true
+    },
+    "empty range rejected": {
+      "http": 422,
+      "no_store": true
+    },
+    "naive date rejected": {
+      "http": 422,
+      "no_store": true
+    },
+    "filter subject_id 33": {
+      "http": 200,
+      "no_store": true
+    },
+    "filter subject_id 34": {
+      "http": 200,
+      "no_store": true
+    },
+    "filter status completed": {
+      "http": 200,
+      "no_store": true
+    },
+    "filter status pending": {
+      "http": 200,
+      "no_store": true
+    },
+    "filter priority urgent": {
+      "http": 200,
+      "no_store": true
+    },
+    "filter priority high": {
+      "http": 200,
+      "no_store": true
+    },
+    "combined filters": {
+      "http": 200,
+      "no_store": true
+    },
+    "combined empty": {
+      "http": 200,
+      "no_store": true
+    },
+    "page 0": {
+      "http": 200,
+      "no_store": true
+    },
+    "page 1": {
+      "http": 200,
+      "no_store": true
+    },
+    "page 2": {
+      "http": 200,
+      "no_store": true
+    },
+    "B own rows": {
+      "http": 200,
+      "no_store": true
+    },
+    "A foreign subject": {
+      "http": 200,
+      "no_store": true
+    },
+    "B foreign subject": {
+      "http": 200,
+      "no_store": true
+    },
+    "A foreign activity ": {
+      "http": 404,
+      "no_store": true
+    },
+    "A foreign activity /deadline-history": {
+      "http": 404,
+      "no_store": true
+    },
+    "B foreign activity ": {
+      "http": 404,
+      "no_store": true
+    },
+    "B foreign activity /deadline-history": {
+      "http": 404,
+      "no_store": true
+    },
+    "A after activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after detail 6": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after history 6": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after detail 7": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after history 7": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after detail 8": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after history 8": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after detail 9": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after history 9": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after detail 10": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after history 10": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after detail 11": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after history 11": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup history 6": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 6": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 6": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup history 7": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 7": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 7": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup history 8": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 8": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 8": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup history 9": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 9": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 9": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup history 10": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 10": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 10": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup delete subject 33": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent subject 33": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup delete subject 34": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent subject 34": {
+      "http": 404,
+      "no_store": true
+    },
+    "A final activities": {
+      "http": 200,
+      "no_store": true
+    },
+    "A final subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "A sessions before logout": {
+      "http": 200,
+      "no_store": true
+    },
+    "A logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "A revoked access": {
+      "http": 401,
+      "no_store": true
+    },
+    "cleanup history 11": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup delete activity 11": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent activity 11": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup delete subject 35": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup absent subject 35": {
+      "http": 404,
+      "no_store": true
+    },
+    "B final activities": {
+      "http": 200,
+      "no_store": true
+    },
+    "B final subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "B sessions before logout": {
+      "http": 200,
+      "no_store": true
+    },
+    "B logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "B revoked access": {
+      "http": 401,
+      "no_store": true
+    },
+    "readiness after cleanup": {
+      "http": 200,
+      "no_store": true
+    }
+  },
+  "synthetic_user_ids": [
+    21,
+    22
+  ],
+  "created_activity_ids": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "created_subject_ids": [
+    33,
+    34,
+    35
+  ],
+  "deleted_activity_ids": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "deleted_subject_ids": [
+    33,
+    34,
+    35
+  ],
+  "revoked_user_sessions": [
+    21,
+    22
+  ],
+  "cleanup_errors": [],
+  "deploy_id": "dep-dbfoj54s728c73cs1nvg",
+  "pagination": {
+    "page_size": 1,
+    "pages": 3,
+    "ids": [
+      7,
+      6,
+      8
+    ],
+    "tie_break_id": true
+  },
+  "resource_comparison": {
+    "equal": true,
+    "before_sha256": "b21152b3668ef8563d5c010230c84b5905b1f15f2d7b9fe9636b0c12999a6e5d",
+    "after_sha256": "b21152b3668ef8563d5c010230c84b5905b1f15f2d7b9fe9636b0c12999a6e5d",
+    "scope": "both synthetic users: complete activity DTOs/list/detail, deadline history, subjects, initial questionnaire"
+  },
+  "status": "passed",
+  "retained": "synthetic user profiles, one immutable questionnaire revision per user, revoked auth-session records; no account-deletion endpoint",
+  "completed_at_utc": "2026-10-26T17:19:20.704743+00:00"
+}
