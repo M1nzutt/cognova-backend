@@ -1,5 +1,11 @@
 # Cognova — Decisiones Congeladas
 
+## Calendario — decisión 2026-10-25
+
+Calendario v1: vista transversal, solo recursos de Cognova. No eventos libres;
+consulta Actividades sin persistir copias. Contrato CALENDAR_CONTRACT; fuentes
+futuras requieren ampliar contrato, no tablas ficticias en esta fase.
+
 ## Actividades — decisión 2026-10-23
 
 Contrato ACTIVITIES_CONTRACT sustituye la actividad conceptual con type/goal_id.
@@ -101,7 +107,7 @@ Reemplaza el diseño anterior de JWT persistido.
 
 Los pins, restricciones de fase y pendientes siguientes corresponden a sus fechas.
 Estado vigente: Materias y Actividades cerrados sobre 0005. Calendario es el
-siguiente módulo, con contrato por definir. Ver PROJECT_STATE.
+módulo siguiente, ahora definido en CALENDAR_CONTRACT. Ver PROJECT_STATE.
 
 ### Materias — 2026-10-18
 

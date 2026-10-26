@@ -3,12 +3,13 @@
 ## Alcance vigente — 2026-10-25
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
-Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
+Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
+nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
 
-Solo documentación en Backend, sin código ni redeploy. Para este bloque coherente
-se autoriza un commit con [skip ci] [skip render] y push. Las autorizaciones de
-implementación fechadas abajo son históricas, no describen bloqueos actuales.
+Autorizada implementación, pruebas, commits granulares y push en rama Calendario.
+No merge/deploy productivo en esta tarea. La autorización sustituye el cierre
+documental anterior; no permite cambios en otros repositorios ni migraciones.
 
 ## Antes de trabajar
 

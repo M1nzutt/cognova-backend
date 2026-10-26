@@ -1,8 +1,9 @@
 # Despliegue existente y transición de base de datos
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
-Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+Calendario v1 está implementado y validado en feat/calendar-read-view, aún no
+desplegado. Contrato CALENDAR_CONTRACT. Requiere release Backend separado
+(merge/deploy/smoke); sin migración ni grants nuevos, mantiene exactamente 0005.
 
 Los apartados históricos conservan los bloqueos de cada fecha, ya resueltos para
 estos releases. Esta revisión documental no consulta producción ni redeploya.

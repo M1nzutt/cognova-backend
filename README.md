@@ -15,6 +15,14 @@ Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
 API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
 ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
 
+## Calendario v1 — implementación en rama
+
+GET /api/v1/calendar ofrece Actividades por rango y filtros, con ownership,
+onboarding y paginación cronológica. Solo consulta recursos existentes; sin eventos
+libres, tablas ni migraciones. [Contrato](docs/CALENDAR_CONTRACT.md).
+Todavía no desplegado: producción conserva el SHA Live de Actividades anterior.
+Frontend puede preparar su integración; el consumo productivo requiere release Backend.
+
 ## Entorno local
 
 Requiere Python 3.11 o superior y PostgreSQL (16 o superior recomendado).

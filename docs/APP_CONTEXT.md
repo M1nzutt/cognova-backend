@@ -3,8 +3,9 @@
 ## Estado implementado — 2026-10-25
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
-Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
+Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
+nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
 
 Las secciones conceptuales siguientes expresan la visión de producto; no acreditan
 implementación ni fijan por sí solas el contrato del próximo módulo. Ver PROJECT_STATE.
@@ -259,7 +260,11 @@ El sistema no debe cambiar automáticamente una prioridad declarada por el usuar
 
 # 11. Calendario
 
-El calendario es una parte importante de la experiencia.
+El calendario es una vista transversal de Cognova, no un calendario personal.
+No admite eventos libres. V1 muestra Actividades; Sesiones, Planes y Retos son
+fuentes futuras, sin implementación en esta fase. Ver CALENDAR_CONTRACT.
+
+La visión conceptual futura siguiente no amplía el alcance implementado.
 
 Debe permitir visualizar:
 

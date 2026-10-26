@@ -1,5 +1,11 @@
 # Cognova — Arquitectura Backend
 
+## Calendario — decisión 2026-10-25
+
+Calendario v1 separa router, DTO discriminado y servicio de consulta read-only.
+Lee Activities con ownership y paginación cronológica; no ORM/migración nuevos.
+Cambios siguen pasando por Actividades. Ver CALENDAR_CONTRACT.
+
 ```text
 Usuario
   ↓
