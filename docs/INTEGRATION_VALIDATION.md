@@ -1,5 +1,23 @@
 # Validación de integración productiva
 
+## Calendario v1 — validación local/CI 2026-10-25, sin deploy
+
+GET /api/v1/calendar: [contrato](CALENDAR_CONTRACT.md), código bb75d41.
+25 pruebas nuevas (20 unitarias/OpenAPI/errores, 5 PostgreSQL). Verifican rango
+semiabierto, offsets equivalentes, ventanas inválidas y límite 366 días, cursor
+pareado, orden cronológico con empates, paginación sin duplicados con datos estables,
+filtros AND, materias archivadas, actividad ajena oculta, onboarding obligatorio,
+401/403/422/503 sanitizado y no-store. Mutaciones de Calendario rechazadas con405.
+Cambiar deadline desde Actividades mueve el elemento sin duplicarlo; fecha original
+e historial postponed/rescheduled conservados. DELETE del recurso original se refleja.
+Snapshots activities/history/subjects antes/después de consultas coinciden.
+
+Suite completa: 386 passed, 130 PostgreSQL, cero skipped/fallos. Ruff/formato, mypy,
+build y auditoría aprobados. CI [40255644217](https://github.com/M1nzutt/cognova-backend/actions/runs/40255644217)
+success; incluye instalación runtime sin tooling DB y launcher real del wheel.
+Sin nueva prueba productiva, credenciales/grants de producción ni acceso a otros repos.
+Frontend puede integrar; despliegue y smoke Calendario pertenecen al release siguiente.
+
 ## Actividades — smoke productivo final aprobado (2026-10-24)
 
 SHA fe5989b86d93d10e724cbf28de4f9d64048bb711, deploy dep-dbeh7u15efls73b1uqag Live.

@@ -62,7 +62,8 @@ Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
 sobre el usuario autenticado. No reciben user_id. Materias y Actividades están implementados según sus
-contratos; los restantes módulos son planificación futura.
+contratos; Calendario v1 añade su consulta transversal en la rama de implementación.
+Los demás módulos son planificación futura.
 
 ## Subjects
 

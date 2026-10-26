@@ -1,19 +1,33 @@
 # Cognova — Estado backend
 
-## Calendario en implementación — 2026-10-25
+## Calendario v1 listo para integración — 2026-10-25
 
-Rama feat/calendar-read-view, base main 1a55b39, 83 commits iniciales.
-Contrato definido en CALENDAR_CONTRACT antes del código: consulta transversal
-de Actividades, sin eventos libres ni migraciones. Rango semiabierto y cursor
-cronológico; auth/onboarding/ownership existentes. Router, DTOs y servicio
-implementados. Primer control: 20 pruebas unitarias y 5 de integración PostgreSQL
-local aprobadas; Ruff y mypy (107 archivos) correctos. Pruebas versionadas:
-límites/zonas/cursor, OpenAPI, errores sanitizados, filtros, ownership/onboarding,
-lectura sin mutaciones, archivo de materia y cambios del recurso original.
-Primera suite: 385 aprobadas, un inventario OpenAPI antiguo omitía /calendar.
-Se actualiza esa expectativa; no fallo funcional. Auditoría sin vulnerabilidades,
-pip check correcto y build sdist/wheel aprobado. Revalidación completa pendiente.
-No merge ni deploy solicitado. Producción conserva fe5989b / 0005_activities.
+Rama feat/calendar-read-view, base main 1a55b39 (83 commits). Contrato definido
+antes del código: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). GET /api/v1/calendar
+consulta Actividades por rango semiabierto obligatorio, materia/estado/prioridad y
+cursor cronológico. Identidad (type,id), fechas vigentes/originales, sin eventos
+libres, duplicación persistente, mutaciones de Calendario ni migraciones.
+Ownership y onboarding obligatorios; errores/no-store existentes, auth intacta.
+DTO/servicio separados permiten ampliar fuentes futuras mediante contrato explícito;
+no se implementaron Sesiones, Planes, Retos, IA ni frontend.
+
+Código validado: bb75d41655a473f313c091ba388a08b892adbc23.
+386 pruebas locales aprobadas, 130 PostgreSQL, cero fallos/omisiones; 25 nuevas.
+Ruff lint/formato (155 archivos), mypy (107), pip check y build sdist/wheel aprobados.
+Auditoría requirements.lock sin vulnerabilidades conocidas, lock sin cambios.
+[CI 40255644217](https://github.com/M1nzutt/cognova-backend/actions/runs/40255644217)
+completed/success, incluyendo secretos, PostgreSQL, wheel/launcher y auditoría.
+La primera suite detectó solo un inventario OpenAPI antiguo, corregido y revalidado.
+Dos warnings preexistentes no fatales: Starlette/httpx y reflexión SQLAlchemy.
+PostgreSQL local 17.11 desechable detenido al terminar. Sin operaciones productivas.
+
+Cinco commits nuevos, 88 totales: contrato, consulta/DTO/ruta, pruebas, inventario
+OpenAPI y cierre documental [skip ci] [skip render]. Sin squash. Enlaces locales y
+diff comprobados; modelos, schema, pin Database y lógica de Actividades sin cambios.
+Frontend puede implementar contra contrato/OpenAPI. Para consumo productivo falta
+release separado de Backend (merge/deploy/smoke); no hay dependencia nueva Database.
+Producción conserva fe5989b86d93d10e724cbf28de4f9d64048bb711 / 0005_activities,
+pin 604e296e2670d154ba7e18d7afa3f010e66dd42d. No se hizo merge ni deploy aquí.
 
 ## Histórico — Cierre documental 2026-10-25
 

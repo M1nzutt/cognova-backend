@@ -9,6 +9,7 @@ Primera fuente: Actividades existentes sobre 0005_activities; pin Database conse
 
 GET /api/v1/calendar, Bearer y onboarding completo obligatorios; no-store.
 Query extra=forbid:
+
 - deadline_from y deadline_to obligatorios: ISO 8601 con zona, no fecha sola ni epoch.
 - Rango semiabierto [from,to), from < to, máximo 366 días de tiempo transcurrido.
   Filtra el deadline vigente, no el original. Frontend calcula los límites de su zona
@@ -31,6 +32,15 @@ Lista vacía devuelve items=[] y next_cursor=null. Se leen como máximo limit+1 
 Sin snapshot entre páginas: si cambia deadline durante recorrido, refrescar rango;
 puede moverse un elemento entre páginas. No prometer vista congelada ni total_count.
 
+## Ejemplo de consulta
+
+GET /api/v1/calendar?deadline_from=2030-01-01T00:00:00Z&deadline_to=2030-02-01T00:00:00Z&limit=50
+
+Conservar estos filtros y añadir los campos devueltos en next_cursor a la siguiente
+petición. Codificar el signo + de offsets positivos como %2B al construir la query.
+Al recibir next_cursor=null terminó el recorrido. Volver a consultar el rango tras
+editar la actividad original; no insertar ni actualizar elementos de calendario.
+
 ## Escrituras, seguridad y errores
 
 No POST/PUT/PATCH/DELETE de Calendario: 405. Sin endpoint de detalle duplicado.
@@ -48,5 +58,5 @@ DTO de actividad separado, discriminado por type dentro del contenedor de calend
 servicio de consulta separado de mutaciones. Al incorporar fuentes futuras, ampliar
 mediante contrato explícito la unión de DTOs y la paginación/orden total entre tipos.
 No reservar endpoints, enums ni tablas ficticias para Sesiones/Planes/Retos ahora.
-Frontend puede implementar contra este contrato tras validación; consumo productivo
+Contrato y código validados con suite local y CI; Frontend puede implementar. Consumo productivo
 requiere merge/deploy Backend y smoke en release separado, no solicitado aquí.
