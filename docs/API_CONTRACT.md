@@ -3,8 +3,9 @@
 ## Alcance vigente
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
-Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
+Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
+nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
 conservan planificación de producto, no endpoints desplegados.
@@ -90,6 +91,12 @@ Ownership y onboarding completo obligatorios.
 Contrato vigente: [ACTIVITIES_CONTRACT](ACTIVITIES_CONTRACT.md), sobre 0005.
 CRUD, PATCH de estado/deadline, historial persistente y filtros paginados.
 La especificación anterior de type y /prioritized queda fuera de esta fase.
+
+## Calendar
+
+GET `/calendar`: rango obligatorio, filtros y paginación según
+[CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Solo lectura de Actividades;
+no eventos libres ni mutaciones propias. Implementación en rama, aún no desplegada.
 
 ## Dependencies
 

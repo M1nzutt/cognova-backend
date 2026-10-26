@@ -1,5 +1,11 @@
 # Cognova — Decisiones Congeladas
 
+## Calendario — decisión 2026-10-25
+
+Calendario v1: vista transversal, solo recursos de Cognova. No eventos libres;
+consulta Actividades sin persistir copias. Contrato CALENDAR_CONTRACT; fuentes
+futuras requieren ampliar contrato, no tablas ficticias en esta fase.
+
 ## Actividades — decisión 2026-10-23
 
 Contrato ACTIVITIES_CONTRACT sustituye la actividad conceptual con type/goal_id.

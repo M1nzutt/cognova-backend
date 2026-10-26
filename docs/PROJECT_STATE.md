@@ -1,6 +1,14 @@
 # Cognova — Estado backend
 
-## Estado vigente — 2026-10-25
+## Calendario en implementación — 2026-10-25
+
+Rama feat/calendar-read-view, base main 1a55b39, 83 commits iniciales.
+Contrato definido en CALENDAR_CONTRACT antes del código: consulta transversal
+de Actividades, sin eventos libres ni migraciones. Rango semiabierto y cursor
+cronológico; auth/onboarding/ownership existentes. Implementación y checks pendientes.
+No merge ni deploy solicitado. Producción conserva fe5989b / 0005_activities.
+
+## Histórico — Cierre documental 2026-10-25
 
 Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
 Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
