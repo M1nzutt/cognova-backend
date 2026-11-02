@@ -460,6 +460,54 @@ def test_concurrent_start_allows_only_one_active_session(
         )
 
 
+def test_concurrent_pause_closes_the_open_interval_once(client, registration, database):
+    user, headers = onboard(client, registration)
+    subject = create_subject(client, headers).json()
+    plan = create_plan(client, headers, subject["id"])
+    assert (
+        client.post(
+            BASE + "/" + str(plan["id"]) + "/start", headers=headers
+        ).status_code
+        == 200
+    )
+    barrier = Barrier(2)
+
+    def pause():
+        with database.session() as db:
+            barrier.wait(timeout=10)
+            try:
+                StudySessionService(db).pause(user["user"]["id"], plan["id"])
+                return "paused"
+            except DomainError as error:
+                return error.code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(lambda _: pause(), range(2)))
+    assert outcomes.count("paused") == 1
+    assert outcomes.count("STUDY_SESSION_TRANSITION_CONFLICT") == 1
+    with database.session() as db:
+        assert (
+            db.scalar(
+                text(
+                    "SELECT count(*) FROM study_session_intervals "
+                    "WHERE session_id = :session_id AND ended_at IS NOT NULL"
+                ),
+                {"session_id": plan["id"]},
+            )
+            == 1
+        )
+        assert (
+            db.scalar(
+                text(
+                    "SELECT count(*) FROM study_session_intervals "
+                    "WHERE session_id = :session_id AND ended_at IS NULL"
+                ),
+                {"session_id": plan["id"]},
+            )
+            == 0
+        )
+
+
 @pytest.mark.parametrize("pg_settings", ["0005_activities"], indirect=True)
 def test_upgrade_from_0005_preserves_existing_resources_and_enables_sessions(
     client, registration, database, pg_settings
