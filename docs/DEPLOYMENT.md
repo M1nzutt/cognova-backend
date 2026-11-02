@@ -1,14 +1,63 @@
 # Despliegue existente y transición de base de datos
 
-## Estado actual — 2026-11-02
+## Estado actual — Backend Sesiones Live y cerrado — 2026-11-02
 
-Database producción está en `0006_study_sessions`, con SHA fijado
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`. La rama Backend
-`feat/study-sessions-0006` implementa el módulo; CI pasó, pero todavía no se ha
-mergeado ni desplegado. El último SHA Backend documentado como Live es
-`61a2f98668f0d3452f0582d7a074f1290dbae43d`, cuya readiness exige 0005; no se ha
-revalidado contra el schema 0006 y no debe presentarse como release de Sesiones.
-Se requiere coordinar merge/deploy y smoke autenticado del temporizador.
+Database producción está en `0006_study_sessions`, pin
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Release Backend integrado sin squash:
+merge `56e7caccb247776ed93c63e949faf9b76202ebcf`, conservando los 12 commits de
+`feat/study-sessions-0006`. `main` fue publicado en el servicio Render existente
+`srv-db2j6nqj9qps73crqa0g` (`cognova-backend`, auto-deploy yes). Deploy
+`dep-dbkhuinlk1mc738rgv90` está **Live** sobre el mismo SHA del merge.
+
+Tras el deploy: `/api/v1/health` 200, `/api/v1/ready` 200 `no-store` con
+`{"status":"ready"}` y `/openapi.json` 200 con `/api/v1/sessions`. La readiness de
+esta revisión exige exactamente `0006_study_sessions`. El SHA previo Live era
+`61a2f98668f0d3452f0582d7a074f1290dbae43d`; su GET de readiness agotó el timeout
+antes del rollout. No se usó como validación de 0006.
+
+Preflight de PostgreSQL READ ONLY, antes del deploy: rol efectivo `cognova_runtime`,
+base `cognova`, TLS confirmado, `alembic_version = 0006_study_sessions`. Grants:
+
+| Recurso | Permisos runtime verificados |
+| --- | --- |
+| `study_sessions` | SELECT/INSERT/UPDATE/DELETE; sin TRUNCATE |
+| `study_session_intervals` | SELECT/INSERT/UPDATE; sin DELETE ni TRUNCATE |
+| `study_sessions_id_seq`, `study_session_intervals_id_seq` | USAGE/SELECT; sin UPDATE |
+| `public` | sin CREATE |
+| `alembic_version` | SELECT únicamente; sin INSERT/UPDATE/DELETE/TRUNCATE y runtime no es owner |
+
+El runtime conserva el mínimo que usa el servicio; no se alteraron schema, grants ni
+credenciales de Database desde Backend. DML productivo fue exclusivamente el smoke
+autorizado por API. Las consultas posteriores de inventario fueron READ ONLY.
+
+Smoke autenticado con dos cuentas sintéticas: onboarding incompleto 403 y completo;
+Bearer requerido 401; CSRF de refresh ausente 403 y válido 200; `no-store` verificado
+en las respuestas API del smoke. Se probaron creación/listado/detalle/edición, actividad
+opcional, rechazo de materia/actividad ajena o inconsistente, start/pause/resume/finish,
+resultados completed/partial/postponed/cancelled, contexto y `other_text`, conflicto de
+usuario activo y carrera de dos starts (un 200 y un 409). Repetir start/pause/resume/
+finish devuelve 409. `actual_duration` equivale a la suma de intervalos cerrados y no
+cuenta pausas. DELETE de plan sin ejecución: 204 y GET posterior 404; con intervalos o
+ejecución: 409, preserva sesión e historial. Sesiones auth revocadas: 2/2.
+
+Regresión autenticada: Materias (catálogo/lista), Actividades (lista/detalle/historial)
+y Calendario (actividad sintética visible con tipo `activity`). Las instantáneas de
+materias, actividades, historial y sesiones quedaron idénticas antes/después del GET de
+Calendario. Evidencia y resultados sanitizados en
+[INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md) y
+[evidence/study-sessions-smoke-2026-11-02.json](evidence/study-sessions-smoke-2026-11-02.json).
+
+Inventario final verificado por PostgreSQL READ ONLY: 2 usuarios, 2 auth_sessions,
+0 sin revocar; 2 materias, 1 actividad, 5 sesiones finalizadas, 5 intervalos y 0
+sesiones activas o planificadas. Quedan retenidos únicamente datos sintéticos ligados
+a historia/FKs y perfiles sin endpoint de borrado. Se eliminaron los recursos
+sintéticos sin dependencias. No se almacenaron credenciales.
+
+CI: [41545222075](https://github.com/M1nzutt/cognova-backend/actions/runs/41545222075)
+completed/success sobre `c74583e` (423 tests, cero omisiones); CI de merge
+[41547152047](https://github.com/M1nzutt/cognova-backend/actions/runs/41547152047)
+completed/success sobre `56e7cacc`. Backend Sesiones está cerrado y Frontend puede
+comenzar. El cierre documental `[skip ci] [skip render]` no requiere redeploy.
 
 ## Histórico — Calendario productivo al 2026-10-26
 

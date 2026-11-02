@@ -1,30 +1,40 @@
 # Cognova — Estado backend
 
-## Sesiones de estudio + temporizador — implementación en rama, 2026-11-02
+## Sesiones de estudio y temporizador — Backend cerrado — 2026-11-02
 
-Database producción está en `0006_study_sessions`; el SHA fijado es
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Backend implementa Sesiones en
-`feat/study-sessions-0006`, sobre base `7ce75c3` (91 commits iniciales). Código
-validado en `51b17f5289808ff97f510170f5b0a87549d9ade8`; contrato:
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md).
+Database producción permanece en `0006_study_sessions`, fijada a
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Backend integró
+`feat/study-sessions-0006` a `main` con merge `--no-ff`:
+`56e7caccb247776ed93c63e949faf9b76202ebcf`. Render confirmó Live sobre ese SHA.
+Contrato: [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md).
 
-Incluye planificación, filtros y cursor, ownership, PUT/DELETE seguro, ciclo
-planned/running/paused/finished, resultados, intervalos persistentes de ejecución,
-pausas excluidas de `actual_duration`, serialización por usuario y errores 404/409.
-No modifica Database ni Frontend. Calendario v1 permanece sin cambios.
+Readiness y health respondieron 200; readiness fue `no-store`. OpenAPI 200 contiene
+`/api/v1/sessions`. Smoke autenticado productivo validó planificación, ownership,
+transiciones, intervalos, resultados, borrado seguro y regresiones de Materias,
+Actividades y Calendario. El temporizador produjo tres intervalos para la sesión
+partial; `actual_duration` coincidió con la suma de intervalos cerrados y excluyó
+pausas. CI del SHA de rama `41545222075` pasó con 423 tests y cero omisiones; CI de
+main `41547152047` pasó sobre el merge.
 
-Validación local: 281 pasaron, 142 PostgreSQL se omitieron porque esta máquina no
-tiene `TEST_DATABASE_URL`; los 11 casos de Sesiones se recolectaron y ejecutaron en CI.
-CI [41544468562](https://github.com/M1nzutt/cognova-backend/actions/runs/41544468562)
-pasó con 423 tests, cero omisiones, PostgreSQL, control JUnit, Ruff, mypy, build/wheel,
-runtime aislado, launcher y auditoría. Localmente pasan Ruff lint/formato, mypy, build
-y auditoría; el lock fija dnspython 2.9.1 con hashes de PyPI para corregir
-CVE-2026-114605. Sesiones no está desplegado: el SHA Backend Live
-documentado es `61a2f98668f0d3452f0582d7a074f1290dbae43d`, construido para 0005;
-coordinar un release nuevo antes de dar por lista la readiness sobre Database 0006.
+Preflight PostgreSQL READ ONLY confirmó rol `cognova_runtime`, TLS activo y revisión
+exacta `0006_study_sessions`. Tiene los permisos DML necesarios sobre
+`study_sessions`, SELECT/INSERT/UPDATE sobre `study_session_intervals` y
+USAGE/SELECT de ambas secuencias. No tiene TRUNCATE ni CREATE en `public`, no es
+owner y no puede escribir `alembic_version`. No se modificó Database ni Frontend.
 
-La rama partió de 91 commits; 11 commits de implementación/seguridad/tests y uno
-documental dejan 103 commits antes de su integración, sin squash.
+El smoke creó dos usuarios sintéticos y sus perfiles de onboarding. Se retienen por
+la ausencia de borrado de cuenta y por las FKs de las cinco sesiones finalizadas:
+2 usuarios, 2 materias, 1 actividad, 5 sesiones y 5 intervalos. Una verificación
+READ ONLY confirmó cero sesiones running/paused/planned y cero sesiones de auth sin
+revocar. Se eliminaron tres planes sin ejecución, una materia y una actividad sin
+dependencias; se revocaron las dos sesiones auth. Credenciales aleatorias solo en
+memoria, sin logs ni commits. Evidencia sanitizada:
+[evidencia de Sesiones](evidence/study-sessions-smoke-2026-11-02.json).
+
+**Backend Sesiones queda cerrado. Frontend puede empezar con el contrato publicado.**
+El main resultante cuenta 105 commits; 12 commits de la rama y el merge se preservan
+sin squash. El commit de cierre documental usa `[skip ci] [skip render]` para conservar
+el SHA productivo validado.
 
 ## Histórico — Backend Calendario cerrado — 2026-10-26
 

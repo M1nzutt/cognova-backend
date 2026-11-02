@@ -1,0 +1,146 @@
+{
+  "validated_at_utc": "2026-11-02",
+  "database": {
+    "revision": "0006_study_sessions",
+    "sha": "eff87b387345a1d3f286e3a6007d41e707ec9d13"
+  },
+  "backend": {
+    "branch": "main",
+    "merge_sha": "56e7caccb247776ed93c63e949faf9b76202ebcf",
+    "render_deploy": "dep-dbkhuinlk1mc738rgv90",
+    "status": "live"
+  },
+  "ci": {
+    "feature_run": 41545222075,
+    "feature_sha": "c74583e3487b81c3253df61e71451fcf455bd708",
+    "feature_conclusion": "success",
+    "tests": 423,
+    "skipped": 0,
+    "merge_run": 41547152047,
+    "merge_sha": "56e7caccb247776ed93c63e949faf9b76202ebcf",
+    "merge_conclusion": "success"
+  },
+  "preflight": {
+    "database_role": "cognova_runtime",
+    "database": "cognova",
+    "tls": true,
+    "revision": [
+      "0006_study_sessions"
+    ],
+    "study_sessions": {
+      "select": true,
+      "insert": true,
+      "update": true,
+      "delete": true,
+      "truncate": false
+    },
+    "study_session_intervals": {
+      "select": true,
+      "insert": true,
+      "update": true,
+      "delete": false,
+      "truncate": false
+    },
+    "sequences": {
+      "usage": true,
+      "select": true,
+      "update": false
+    },
+    "public_create": false,
+    "alembic_version": {
+      "select": true,
+      "insert": false,
+      "update": false,
+      "delete": false,
+      "truncate": false,
+      "runtime_is_owner": false
+    }
+  },
+  "deployment_checks": {
+    "health": {
+      "http": 200,
+      "no_store": true
+    },
+    "readiness": {
+      "http": 200,
+      "no_store": true,
+      "revision_contract": "0006_study_sessions"
+    },
+    "openapi": {
+      "http": 200,
+      "sessions_route": true
+    }
+  },
+  "smoke": {
+    "auth": {
+      "bearer_required": 401,
+      "onboarding_required": 403,
+      "csrf_refresh_missing": 403,
+      "csrf_refresh_valid": 200,
+      "api_no_store": true
+    },
+    "sessions": {
+      "create": 201,
+      "list_detail_put": 200,
+      "foreign_subject_or_activity": 404,
+      "activity_subject_mismatch": 404,
+      "repeated_transitions": 409,
+      "running_or_paused_slot_conflict": 409,
+      "concurrent_starts": [
+        200,
+        409
+      ],
+      "results": [
+        "completed",
+        "partial",
+        "postponed",
+        "cancelled"
+      ],
+      "other_context_text": "trimmed and preserved"
+    },
+    "timer": {
+      "intervals": 3,
+      "actual_duration_equals_closed_interval_sum": true,
+      "paused_time_excluded": true
+    },
+    "delete": {
+      "confirmation_missing": 422,
+      "planned_without_execution": 204,
+      "get_after_delete": 404,
+      "execution_or_intervals": 409,
+      "history_preserved": true
+    },
+    "regressions": {
+      "subjects_catalog_list": 200,
+      "activities_list_detail_history": 200,
+      "calendar": 200,
+      "calendar_activity_only": true,
+      "resource_snapshots_before_after_equal": true
+    }
+  },
+  "synthetic_inventory_read_only": {
+    "users": 2,
+    "auth_sessions": 2,
+    "unrevoked_auth_sessions": 0,
+    "subjects": 2,
+    "activities": 1,
+    "finished_sessions": 5,
+    "intervals": 5,
+    "running_or_paused": 0,
+    "planned": 0,
+    "outcomes": {
+      "cancelled": 2,
+      "completed": 1,
+      "partial": 1,
+      "postponed": 1
+    }
+  },
+  "synthetic_cleanup": {
+    "deleted_unstarted_plans": 3,
+    "deleted_unreferenced_subjects": 1,
+    "deleted_unreferenced_activities": 1,
+    "auth_sessions_revoked": 2,
+    "credentials_logged_or_committed": false
+  },
+  "harness_note": "The final in-run inventory assertion occurred before cleanup while one blocker plan was still planned. Cleanup completed with zero errors; the subsequent READ ONLY PostgreSQL inventory confirmed the final counts above. All module behavior checks passed."
+}

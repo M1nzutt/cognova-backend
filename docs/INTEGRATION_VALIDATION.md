@@ -1,19 +1,55 @@
 # Validación de integración productiva
 
-## Sesiones — pre-release, 2026-11-02
+## Sesiones — smoke productivo aprobado — 2026-11-02
 
-La implementación está en `feat/study-sessions-0006`, fijada a Database
-`eff87b387345a1d3f286e3a6007d41e707ec9d13` / `0006_study_sessions`. Este bloque no
-ha ejecutado smoke en producción, no ha creado datos ni ha cambiado otros repos.
-La suite local registró 281 pasados y 142 omitidos por ausencia de PostgreSQL local.
-CI [41544468562](https://github.com/M1nzutt/cognova-backend/actions/runs/41544468562)
-pasó con 423 tests, cero omisiones y 11 casos PostgreSQL de Sesiones; el control
-JUnit, Ruff, mypy, build/wheel, runtime aislado, launcher y auditoría también pasaron.
-Localmente pasan Ruff, mypy, build y auditoría de dependencias.
+Backend `main` Live en `56e7caccb247776ed93c63e949faf9b76202ebcf`, deploy
+`dep-dbkhuinlk1mc738rgv90`. Database `0006_study_sessions`, SHA fijado
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Preflight READ ONLY: `cognova_runtime`,
+TLS true, revisión exacta 0006, grants mínimos en tablas/secuencias; sin CREATE,
+TRUNCATE, ownership o DML sobre `alembic_version`.
+[Evidencia sanitizada](evidence/study-sessions-smoke-2026-11-02.json).
 
-No marcar el release como cerrado hasta completar CI, merge/deploy, readiness en
-0006 y smoke real de ownership, ciclo del timer, intervalos, errores, auth/CSRF y
-no-store. Calendario productivo sigue en su versión v1 de solo Actividades.
+| Control | Resultado productivo |
+| --- | --- |
+| Health / readiness / OpenAPI | 200 / 200 `no-store` / 200; ruta Sessions presente |
+| Auth y onboarding | Sin Bearer 401; onboarding incompleto 403; ambos usuarios completos |
+| CSRF y no-store | Refresh sin CSRF 403; refresh con CSRF 200; no-store en respuestas API comprobadas |
+| Planificación CRUD | Crear 201; lista/detalle/PUT 200; actividad opcional válida |
+| Ownership y asignaciones | Sesión ajena/inexistente 404; filtro ajeno vacío; materia ajena 404; actividad ajena o de otra materia 404 |
+| Temporizador | Start/pause/resume/finish 200; tres intervalos; pausas excluidas de `actual_duration` |
+| Conflictos | Doble start/pause/resume/finish 409; start mientras otra sesión está running o paused 409 |
+| Carrera | Dos starts concurrentes: exactamente un 200 y un 409 `STUDY_SESSION_ACTIVE_CONFLICT` |
+| Resultados | completed y partial con ejecución; postponed y cancelled planificados sin start/end ni intervalos |
+| Contexto | `finished_early`; `other` con texto recortado y conservado |
+| DELETE | Confirmación ausente 422; plan sin ejecución 204 y GET 404; ejecución/historial 409 y preservados |
+| Regresión Materias | Catálogo y lista 200 |
+| Regresión Actividades | Lista, detalle e historial 200 |
+| Regresión Calendario | Actividad propia visible, tipo `activity`; snapshots de recursos iguales antes/después |
+
+La suma decimal de los tres intervalos cerrados coincidió con `actual_duration`; el
+intervalo entre `start_at` y `end_at` fue mayor, acreditando que las pausas no se
+contaron. El DELETE de sesión con historial preservó tanto la sesión como sus tres
+intervalos. El winner de la carrera concurrente también quedó finalizado y preservado.
+
+Limpieza comprobada por endpoints y posterior inventario READ ONLY: se borraron tres
+planes sin ejecución, una materia sin dependencias y una actividad sin historial. Se
+retienen dos usuarios/perfiles sintéticos, dos materias, una actividad ligada a sesión,
+cinco sesiones finalizadas y cinco intervalos. PostgreSQL confirmó 0 sesiones
+running/paused/planned y 0 `auth_sessions` sin revocar; ambos accesos devolvieron 401
+tras logout. No hay credenciales en logs, archivos o commits.
+
+Nota del harness: la primera comprobación de inventario se ejecutó antes de limpiar un
+plan de bloqueo aún planificado; el runner salió por esa aserción y su ruta de limpieza
+se completó sin errores. La consulta PostgreSQL READ ONLY posterior confirmó el
+inventario final indicado arriba. Ninguna comprobación de comportamiento del módulo
+falló; readiness volvió a 200 después del smoke.
+
+CI de rama [41545222075](https://github.com/M1nzutt/cognova-backend/actions/runs/41545222075)
+completed/success: 423 tests, cero omisiones, 11 casos PostgreSQL de Sesiones; controles
+JUnit, Ruff, mypy, build/wheel, runtime, launcher y auditoría correctos. CI de merge
+[41547152047](https://github.com/M1nzutt/cognova-backend/actions/runs/41547152047)
+completed/success sobre el SHA productivo. No se cambió código ni se repitió la suite
+local después del merge. **Backend Sesiones queda cerrado; Frontend puede empezar.**
 
 ## Histórico — Calendario — smoke autenticado aprobado 2026-10-26
 
