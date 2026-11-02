@@ -2,10 +2,13 @@
 
 ## Alcance vigente
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
-Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
-nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
+Materias, Actividades y Calendario están cerrados en Backend. Schema productivo:
+0006_study_sessions; el pin Database está en tools/database-ref.json.
+Sesiones de Estudio + temporizador se implementan según
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue siendo
+de solo lectura sobre Actividades; no cambia hasta una ampliación contractual futura.
+Planes, Retos e IA siguen fuera de este bloque.
+
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
 conservan planificación de producto, no endpoints desplegados.
@@ -110,28 +113,21 @@ Representan dependencias reales entre actividades.
 
 ## Sessions
 
-- GET `/sessions`
-- POST `/sessions`
-- GET `/sessions/{id}`
-- DELETE `/sessions/{id}`
-- POST `/sessions/{id}/start`
-- POST `/sessions/{id}/pause`
-- POST `/sessions/{id}/resume`
-- POST `/sessions/{id}/finish`
+Contrato implementado en [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md),
+sobre 0006_study_sessions.
 
-El backend es la fuente de verdad del temporizador.
+- GET /sessions
+- POST /sessions
+- GET /sessions/{id}
+- PUT /sessions/{id} — solo planificación sin iniciar
+- DELETE /sessions/{id}?confirm=true — solo plan sin ejecución
+- POST /sessions/{id}/start
+- POST /sessions/{id}/pause
+- POST /sessions/{id}/resume
+- POST /sessions/{id}/finish
 
-`finish` registra:
-- resultado;
-- motivo cuando corresponda;
-- motivo personalizado opcional;
-- contexto opcional.
-
-Resultados:
-- completed
-- partial
-- postponed
-- cancelled
+Bearer, onboarding completo, ownership, no-store, filtros, paginación,
+transiciones y DTOs están definidos en el contrato específico.
 
 ## Analytics
 

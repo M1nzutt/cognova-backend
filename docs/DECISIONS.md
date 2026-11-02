@@ -1,5 +1,15 @@
 # Cognova — Decisiones Congeladas
 
+## Sesiones de estudio — decisión 2026-11-02
+
+Backend consume el esquema productivo 0006_study_sessions fijado en
+tools/database-ref.json. La planificación usa planned_start_at y
+planned_duration; el ciclo de ejecución se separa del resultado final.
+Backend abre/cierra intervalos con su reloj, excluye pausas de actual_duration
+y serializa cambios por usuario. Database conserva las constraints/FKs y el
+historial físico; Backend no añade triggers ni cambia schema. Contrato:
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 no cambia;
+una futura integración de sesiones requiere contrato y release aparte.
 ## Calendario — decisión 2026-10-25
 
 Calendario v1: vista transversal, solo recursos de Cognova. No eventos libres;
