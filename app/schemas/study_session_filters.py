@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.study_sessions.types import (
     EntityId,
@@ -19,9 +19,16 @@ class StudySessionFilters(BaseModel):
     status: SessionResult | None = None
     planned_start_from: Instant | None = None
     planned_start_to: Instant | None = None
-    limit: Annotated[int, Field(strict=True, ge=1, le=100)] = 50
+    limit: Annotated[int, Field(ge=1, le=100)] = 50
     after_planned_start_at: Instant | None = None
     after_id: EntityId | None = None
+
+    @field_validator("limit", mode="before")
+    @classmethod
+    def reject_boolean_limit(cls, value: object) -> object:
+        if isinstance(value, bool):
+            raise ValueError("Limit must be an integer")
+        return value
 
     @model_validator(mode="after")
     def validate_range_and_cursor(self) -> "StudySessionFilters":

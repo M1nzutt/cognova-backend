@@ -1,7 +1,12 @@
+from types import SimpleNamespace
+
 from fastapi.testclient import TestClient
 
+from app.api.onboarding_dependencies import get_onboarded_user
+from app.api.study_sessions import get_service
 from app.core.settings import Settings
 from app.main import create_app
+from app.schemas.study_session_list_response import StudySessionListResponse
 
 
 def test_study_session_openapi_exposes_only_contract_routes():
@@ -36,3 +41,24 @@ def test_study_session_openapi_exposes_only_contract_routes():
     assert "user_id" not in str(spec["components"]["schemas"])
     assert "StudySessionDetail" in spec["components"]["schemas"]
     assert "StudySessionListResponse" in spec["components"]["schemas"]
+
+
+def test_session_list_parses_limit_from_query_string():
+    class StubService:
+        requested_limit = None
+
+        def list(self, user_id, filters):
+            self.requested_limit = filters.limit
+            return StudySessionListResponse(items=[], next_cursor=None)
+
+    service = StubService()
+    app = create_app(Settings(_env_file=None))
+    app.dependency_overrides[get_onboarded_user] = lambda: SimpleNamespace(id=7)
+    app.dependency_overrides[get_service] = lambda: service
+
+    with TestClient(app) as client:
+        response = client.get("/api/v1/sessions", params={"limit": "2"})
+
+    assert response.status_code == 200
+    assert service.requested_limit == 2
+    assert response.headers["cache-control"] == "no-store"

@@ -90,6 +90,7 @@ def test_other_context_requires_trimmed_nonblank_text_and_caps_length():
 
 
 def test_filters_validate_range_and_cursor_pair():
+    assert StudySessionFilters(limit="2").limit == 2
     assert (
         StudySessionFilters(
             planned_start_from=START,
