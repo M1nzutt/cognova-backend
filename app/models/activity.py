@@ -9,6 +9,7 @@ from sqlalchemy import (
     Integer,
     SmallInteger,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -51,6 +52,9 @@ class Activity(Base):
             name="fk_activities_owner_subject",
             ondelete="RESTRICT",
             onupdate="RESTRICT",
+        ),
+        UniqueConstraint(
+            "user_id", "subject_id", "id", name="uq_activities_user_subject_id"
         ),
         CheckConstraint(
             "char_length(title) BETWEEN 1 AND 50 "

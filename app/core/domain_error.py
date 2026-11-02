@@ -21,6 +21,23 @@ class DomainError(Exception):
             409,
             "La actividad cambió durante la operación; consulta e intenta de nuevo.",
         ),
+        "STUDY_SESSION_NOT_FOUND": (404, "Sesión no encontrada."),
+        "STUDY_SESSION_TRANSITION_CONFLICT": (
+            409,
+            "No puedes realizar esa acción en el estado actual de la sesión.",
+        ),
+        "STUDY_SESSION_ACTIVE_CONFLICT": (
+            409,
+            "Ya tienes una sesión en curso o pausada.",
+        ),
+        "STUDY_SESSION_HISTORY_CONFLICT": (
+            409,
+            "No puedes eliminar una sesión que ya inició o conserva historial.",
+        ),
+        "STUDY_SESSION_WRITE_CONFLICT": (
+            409,
+            "La sesión cambió durante la operación; consulta e intenta de nuevo.",
+        ),
         "SUBJECT_NOT_FOUND": (404, "Materia no encontrada."),
         "SUBJECT_NAME_CONFLICT": (409, "Ya existe una materia con ese nombre."),
         "SUBJECT_ACTIVE_LIMIT": (409, "Puedes tener máximo cinco materias activas."),

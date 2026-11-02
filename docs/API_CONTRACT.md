@@ -2,10 +2,14 @@
 
 ## Alcance vigente
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
-Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
-nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
+Materias, Actividades y Calendario v1 están cerrados en Backend. Database producción
+está en `0006_study_sessions`; el pin está en tools/database-ref.json. Sesiones de
+Estudio + temporizador están implementados en `feat/study-sessions-0006`; el release
+de Backend aún está pendiente; CI pasó. Su contrato específico es
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue siendo de
+solo lectura sobre Actividades hasta una ampliación contractual futura. Planes,
+Retos e IA siguen fuera de este bloque.
+
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
 conservan planificación de producto, no endpoints desplegados.
@@ -61,9 +65,10 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. Materias y Actividades están implementados según sus
-contratos; Calendario v1 añade su consulta transversal en la rama de implementación.
-Los demás módulos son planificación futura.
+sobre el usuario autenticado. No reciben user_id. Materias y Actividades están
+implementados según sus contratos. Calendario v1 está cerrado y consulta Actividades;
+Sesiones está implementado en una rama pendiente de release. Los demás módulos son
+planificación futura.
 
 ## Subjects
 
@@ -110,28 +115,22 @@ Representan dependencias reales entre actividades.
 
 ## Sessions
 
-- GET `/sessions`
-- POST `/sessions`
-- GET `/sessions/{id}`
-- DELETE `/sessions/{id}`
-- POST `/sessions/{id}/start`
-- POST `/sessions/{id}/pause`
-- POST `/sessions/{id}/resume`
-- POST `/sessions/{id}/finish`
+Contrato implementado en la rama `feat/study-sessions-0006` según
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md), sobre 0006_study_sessions.
+El despliegue productivo de estas rutas queda pendiente.
 
-El backend es la fuente de verdad del temporizador.
+- GET /sessions
+- POST /sessions
+- GET /sessions/{id}
+- PUT /sessions/{id} — solo planificación sin iniciar
+- DELETE /sessions/{id}?confirm=true — solo plan sin ejecución
+- POST /sessions/{id}/start
+- POST /sessions/{id}/pause
+- POST /sessions/{id}/resume
+- POST /sessions/{id}/finish
 
-`finish` registra:
-- resultado;
-- motivo cuando corresponda;
-- motivo personalizado opcional;
-- contexto opcional.
-
-Resultados:
-- completed
-- partial
-- postponed
-- cancelled
+Bearer, onboarding completo, ownership, no-store, filtros, paginación,
+transiciones y DTOs están definidos en el contrato específico.
 
 ## Analytics
 

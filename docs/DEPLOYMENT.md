@@ -1,6 +1,18 @@
 # Despliegue existente y transición de base de datos
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
+## Estado actual — 2026-11-02
+
+Database producción está en `0006_study_sessions`, con SHA fijado
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. La rama Backend
+`feat/study-sessions-0006` implementa el módulo; CI pasó, pero todavía no se ha
+mergeado ni desplegado. El último SHA Backend documentado como Live es
+`61a2f98668f0d3452f0582d7a074f1290dbae43d`, cuya readiness exige 0005; no se ha
+revalidado contra el schema 0006 y no debe presentarse como release de Sesiones.
+Se requiere coordinar merge/deploy y smoke autenticado del temporizador.
+
+## Histórico — Calendario productivo al 2026-10-26
+
+Materias y Actividades estaban cerrados en Backend. Schema de entonces: `0005_activities`.
 Calendario está Live y cerrado en 61a2f98668f0d3452f0582d7a074f1290dbae43d.
 El smoke autenticado autorizado pasó el 2026-10-26 17:18:54–17:19:20Z, sin redeploy.
 Readiness200 antes/después, schema esperado0005. Se crearon solo cuentas/datos
@@ -201,7 +213,7 @@ y escucha en 0.0.0.0:10000. No arrancar con Uvicorn directo para eludir el prefl
 en desarrollo es posible, pero producción debe conservar `python scripts/start.py`.
 
 `/api/v1/health` no consulta DB. `/api/v1/ready` comprueba `SELECT 1` y que
-`alembic_version` contenga solo `0005_activities`; si falla responde 503 sin
+`alembic_version` contenga solo `0006_study_sessions`; si falla responde 503 sin
 exponer detalles. No invoca Alembic, no aplica DDL y no verifica drift físico.
 
 ## Operación de migraciones y permisos

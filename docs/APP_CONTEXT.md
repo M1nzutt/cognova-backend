@@ -1,11 +1,15 @@
 # Cognova — Contexto Funcional y Conceptual de la Aplicación
 
-## Estado implementado — 2026-10-25
+## Estado implementado — 2026-11-02
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
-Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
-nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
+Materias, Actividades y Calendario v1 están cerrados en Backend. Database producción
+está en `0006_study_sessions` (pin
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`). Backend Sesiones + temporizador está
+implementado y CI pasó en la rama `feat/study-sessions-0006`; todavía requiere un
+release separado para quedar desplegado. Su contrato vigente es
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue mostrando
+solo Actividades; la integración de Sesiones requiere una ampliación contractual.
+Planes, Retos e IA no forman parte de este bloque.
 
 Las secciones conceptuales siguientes expresan la visión de producto; no acreditan
 implementación ni fijan por sí solas el contrato del próximo módulo. Ver PROJECT_STATE.

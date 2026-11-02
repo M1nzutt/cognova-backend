@@ -1,18 +1,24 @@
 ﻿# Handoff database → backend
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Siguiente módulo funcional: **Calendario**, con contrato aún por definir.
-Este cierre no añade endpoints, DTOs, reglas ni implementación de Calendario.
+## Estado vigente — 2026-11-02
 
-Pin vigente: `604e296e2670d154ba7e18d7afa3f010e66dd42d`. Migración, grants y rollout
-resueltos para estos releases; ver DEPLOYMENT e INTEGRATION_VALIDATION. Los
-registros de corte/implementación conservan pendientes históricos, no bloqueos actuales.
+Database producción está en `0006_study_sessions`; main Database fijado por Backend:
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. La migración y los grants runtime para
+`study_sessions`/`study_session_intervals` están cerrados en Database. Backend consume
+ese contrato en `feat/study-sessions-0006`. No se modifica el repositorio Database
+desde Backend. CI Backend pasó; el release aún requiere merge, deploy y smoke.
+Véanse [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md) y DEPLOYMENT.
+
+Calendario v1 ya está cerrado; sigue mostrando Actividades y no se altera en este
+bloque. Su futura extensión para Sesiones requiere contrato separado.
+
+## Histórico — Handoff de Actividades sobre 0005
 
 Fecha histórica del corte inicial: 2026-10-11. Separación completada y mergeada en main (`3e3ed95`). Render
 ya desplegó ese commit y sus rutas se verificaron. El diagnóstico de fase 1 se
 conserva en `687100c`/`5fa90a3`; este documento conserva la trazabilidad del corte.
 
-## Consumo 0005 — Actividades (2026-10-23)
+### Referencia histórica: consumo 0005 — Actividades (2026-10-23)
 
 Referencia: 604e296e2670d154ba7e18d7afa3f010e66dd42d, revisión 0005_activities.
 Checkout aislado dentro de Backend; no se modifica el repositorio hermano.
@@ -129,8 +135,10 @@ no para generar DDL. Sus nombres se conservan: auth depende de
 el pool en éxito/error; falla sin escuchar y sin imprimir secretos si DB no está
 lista. No hay imports Alembic/database, advisory locks ni upgrade en runtime.
 
-Readiness conserva SELECT 1 y lectura de alembic_version. Solo acepta una fila
-`0005_activities`; ausencia, revisión distinta o múltiples heads dan503.
+Readiness conserva SELECT 1 y lectura de alembic_version. El código de esta rama
+acepta exactamente una fila `0006_study_sessions`; ausencia, revisión distinta o
+múltiples heads dan503. El SHA Live registrado antes de Database 0006 requería
+0005 y necesita un release compatible.
 No hay variable de entorno para eludir esa decisión ni dependencia HTTP con
 cognova-database, que no es un servicio. El identificador queda explícito en
 ReadinessService y la referencia de tooling declara el mismo contrato.

@@ -1,6 +1,21 @@
 # Validación de integración productiva
 
-## Calendario — smoke autenticado aprobado 2026-10-26
+## Sesiones — pre-release, 2026-11-02
+
+La implementación está en `feat/study-sessions-0006`, fijada a Database
+`eff87b387345a1d3f286e3a6007d41e707ec9d13` / `0006_study_sessions`. Este bloque no
+ha ejecutado smoke en producción, no ha creado datos ni ha cambiado otros repos.
+La suite local registró 281 pasados y 142 omitidos por ausencia de PostgreSQL local.
+CI [41544468562](https://github.com/M1nzutt/cognova-backend/actions/runs/41544468562)
+pasó con 423 tests, cero omisiones y 11 casos PostgreSQL de Sesiones; el control
+JUnit, Ruff, mypy, build/wheel, runtime aislado, launcher y auditoría también pasaron.
+Localmente pasan Ruff, mypy, build y auditoría de dependencias.
+
+No marcar el release como cerrado hasta completar CI, merge/deploy, readiness en
+0006 y smoke real de ownership, ciclo del timer, intervalos, errores, auth/CSRF y
+no-store. Calendario productivo sigue en su versión v1 de solo Actividades.
+
+## Histórico — Calendario — smoke autenticado aprobado 2026-10-26
 
 SHA Live61a2f98668f0d3452f0582d7a074f1290dbae43d; sin redeploy ni cambios de código.
 Autorización explícita para dos cuentas sintéticas con credenciales aleatorias solo
@@ -85,7 +100,7 @@ success; incluye instalación runtime sin tooling DB y launcher real del wheel.
 Sin nueva prueba productiva, credenciales/grants de producción ni acceso a otros repos.
 Frontend puede integrar; despliegue y smoke Calendario pertenecen al release siguiente.
 
-## Actividades — smoke productivo final aprobado (2026-10-24)
+## Histórico — Actividades — smoke productivo final aprobado (2026-10-24)
 
 SHA fe5989b86d93d10e724cbf28de4f9d64048bb711, deploy dep-dbeh7u15efls73b1uqag Live.
 Smoke HTTP real 20:25:51–20:26:12Z, Origin frontend existente. Backend exige 0005;
