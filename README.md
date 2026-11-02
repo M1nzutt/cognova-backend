@@ -2,18 +2,24 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-Materias y Actividades están cerrados en producción, junto con auth y onboarding.
+Materias, Actividades y Calendario v1 están cerrados en producción, junto con auth
+y onboarding. Backend Sesiones se implementa en `feat/study-sessions-0006`.
 Contrato Actividades: [ACTIVITIES_CONTRACT.md](docs/ACTIVITIES_CONTRACT.md).
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
-cognova-database. Producción usa `0005_activities`; SHA Live documentado:
+cognova-database. Database producción usa `0006_study_sessions`, fijada en
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. El SHA Live documentado del Backend es
 `61a2f98668f0d3452f0582d7a074f1290dbae43d`. Main tiene auto-deploy en Render;
-este cierre documental usa [skip ci] [skip render], sin redeploy.
-Calendario desplegado y cerrado tras smoke autenticado aprobado.
+ese release ejecuta la versión anterior, que exige 0005. La implementación de
+Sesiones aún no se integró a main ni se desplegó; no asumir que readiness está
+compatible tras el avance de Database. Calendario desplegado y cerrado tras smoke
+autenticado aprobado.
 
-API verificada: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
-ele, no número uno). OpenAPI, health y readiness responden 200; auth exige token.
+API: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra ele, no
+número uno). OpenAPI, health y readiness se verificaron con 200 el 2026-10-26,
+antes de que Database avanzara a 0006. No se ha confirmado readiness del Backend
+actual contra 0006; auth exige token.
 
 ## Calendario v1 — desplegado y cerrado
 
@@ -39,8 +45,9 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-Están implementados auth, health/readiness, perfil académico, cuestionario, Materias y Actividades
-bajo `/api/v1`, según [el contrato](docs/API_CONTRACT.md).
+Están implementados auth, health/readiness, perfil académico, cuestionario, Materias
+y Actividades bajo `/api/v1`. Sesiones está en la rama de implementación. Ver
+[el contrato](docs/API_CONTRACT.md).
 
 `CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
 deniega el acceso entre orígenes; el ejemplo habilita Vite local.
@@ -59,10 +66,11 @@ disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
 No se usa `create_all`. Database conserva `0001_create_users` →
-`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects` → `0005_activities`.
-La referencia exacta requerida es 604e296e2670d154ba7e18d7afa3f010e66dd42d.
+`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects` →
+`0005_activities` → `0006_study_sessions`. El Backend fija el estado productivo
+en `eff87b387345a1d3f286e3a6007d41e707ec9d13`.
 Materias: [contrato de API, catálogo y concurrencia](docs/SUBJECTS_CONTRACT.md).
-`python scripts/start.py` valida disponibilidad y revisión 0005 antes de escuchar,
+`python scripts/start.py` valida disponibilidad y revisión 0006 antes de escuchar,
 sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación

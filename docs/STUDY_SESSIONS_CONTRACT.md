@@ -23,8 +23,9 @@ context, created_at y updated_at. StudySessionDetail añade other_text e interva
 ordenados por started_at,id; cada intervalo expone id, started_at y ended_at (null
 mientras corre). No se expone user_id.
 
-Todos los timestamps llevan zona y se serializan en ISO 8601. actual_duration es
-segundos decimales con seis posiciones, suma de intervalos cerrados. El intervalo
+Todos los timestamps llevan zona y se serializan en ISO 8601. `actual_duration` es
+una cadena JSON decimal de segundos con seis posiciones, suma de intervalos cerrados
+(por ejemplo, `"0.000000"`). El intervalo
 abierto se devuelve con su started_at; el servidor define sus límites al pausar
 o finalizar. El cliente puede animar el intervalo vigente, pero debe reconciliarse
 con cada respuesta del servidor. El plan de 10–180 minutos no limita la ejecución.

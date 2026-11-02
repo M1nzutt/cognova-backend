@@ -1,6 +1,32 @@
 # Cognova — Estado backend
 
-## Backend Calendario cerrado — 2026-10-26
+## Sesiones de estudio + temporizador — implementación en rama, 2026-11-02
+
+Database producción está en `0006_study_sessions`; el SHA fijado es
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Backend implementa Sesiones en
+`feat/study-sessions-0006`, sobre base `7ce75c3` (91 commits iniciales). Código
+validado en `51b17f5289808ff97f510170f5b0a87549d9ade8`; contrato:
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md).
+
+Incluye planificación, filtros y cursor, ownership, PUT/DELETE seguro, ciclo
+planned/running/paused/finished, resultados, intervalos persistentes de ejecución,
+pausas excluidas de `actual_duration`, serialización por usuario y errores 404/409.
+No modifica Database ni Frontend. Calendario v1 permanece sin cambios.
+
+Validación local: 281 pasaron, 142 PostgreSQL se omitieron porque esta máquina no
+tiene `TEST_DATABASE_URL`; los 11 casos de Sesiones se recolectaron y ejecutaron en CI.
+CI [41544468562](https://github.com/M1nzutt/cognova-backend/actions/runs/41544468562)
+pasó con 423 tests, cero omisiones, PostgreSQL, control JUnit, Ruff, mypy, build/wheel,
+runtime aislado, launcher y auditoría. Localmente pasan Ruff lint/formato, mypy, build
+y auditoría; el lock fija dnspython 2.9.1 con hashes de PyPI para corregir
+CVE-2026-114605. Sesiones no está desplegado: el SHA Backend Live
+documentado es `61a2f98668f0d3452f0582d7a074f1290dbae43d`, construido para 0005;
+coordinar un release nuevo antes de dar por lista la readiness sobre Database 0006.
+
+La rama partió de 91 commits; 11 commits de implementación/seguridad/tests y uno
+documental dejan 103 commits antes de su integración, sin squash.
+
+## Histórico — Backend Calendario cerrado — 2026-10-26
 
 SHA productivo Live: 61a2f98668f0d3452f0582d7a074f1290dbae43d, deploy
 dep-dbfoj54s728c73cs1nvg. Sin redeploy ni cambios funcionales. Readiness200 antes

@@ -2,8 +2,10 @@
 
 Vista transversal de recursos propios de Cognova, no calendario personal.
 No eventos libres, calendar_events, persistencia duplicada, migraciones ni grants nuevos.
-Primera fuente: Actividades existentes sobre 0005_activities; pin Database conservado
-604e296e2670d154ba7e18d7afa3f010e66dd42d. No implementa Sesiones, Planes ni Retos.
+Primera fuente: Actividades existentes, añadidas en 0005_activities; ese era el
+schema vigente al cerrar este contrato. Database producción avanzó después a
+0006_study_sessions (pin de Backend `eff87b387345a1d3f286e3a6007d41e707ec9d13`).
+Calendario v1 conserva el mismo endpoint y no implementa Sesiones, Planes ni Retos.
 
 ## Endpoint y filtros
 
@@ -62,3 +64,8 @@ Contrato/código validados con suite local y CI; desplegados el 2026-10-26 en 61
 Smoke público y autenticado aprobados; Backend Calendario cerrado el 2026-10-26.
 Frontend puede empezar la integración contra el servicio productivo.
 Ver PROJECT_STATE e INTEGRATION_VALIDATION.
+
+Estado de extensión a 2026-11-02: Sesiones ahora tiene contrato y backend en
+desarrollo sobre 0006. La v1 de este documento y el endpoint productivo no cambian;
+una futura fuente `study_session` requerirá una versión/decisión explícita sobre
+DTO, filtro y paginación, usando `planned_start_at` como fecha planificada candidata.

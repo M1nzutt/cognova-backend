@@ -1,11 +1,15 @@
 # Cognova — Reglas para Agentes
 
-## Alcance vigente — 2026-10-25
+## Alcance vigente — 2026-11-02
 
-Materias y Actividades están cerrados en Backend. Schema productivo: `0005_activities`.
-Calendario v1 autorizado como vista transversal de solo lectura de Actividades.
-Contrato: [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sin eventos libres, schema
-nuevo ni implementación de Sesiones/Planes/Retos; futuras fuentes requieren contrato.
+Materias, Actividades y Calendario v1 están cerrados en Backend. Database aplicó
+`0006_study_sessions` en producción y el pin vigente es
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Sesiones de Estudio + temporizador
+están implementados en `feat/study-sessions-0006` y CI pasó; falta completar
+merge/deploy/smoke antes de considerarlos cerrados. Contrato:
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 permanece
+solo lectura sobre Actividades; incorporar Sesiones requerirá ampliar su contrato.
+Planes, Retos e IA quedan fuera de esta fase.
 
 Release autorizado y cerrado 2026-10-26: merge --no-ff, deploy Render y smoke.
 La autorización posterior permitió cuentas/datos sintéticos mínimos por API,

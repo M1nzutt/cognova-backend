@@ -10,6 +10,9 @@ y serializa cambios por usuario. Database conserva las constraints/FKs y el
 historial físico; Backend no añade triggers ni cambia schema. Contrato:
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 no cambia;
 una futura integración de sesiones requiere contrato y release aparte.
+La implementación está en `feat/study-sessions-0006`; no se considera desplegada
+hasta completar merge, release y smoke productivo. CI 41544468562 pasó.
+
 ## Calendario — decisión 2026-10-25
 
 Calendario v1: vista transversal, solo recursos de Cognova. No eventos libres;
@@ -116,8 +119,9 @@ Reemplaza el diseño anterior de JWT persistido.
 ## Historial de cambios a decisiones congeladas
 
 Los pins, restricciones de fase y pendientes siguientes corresponden a sus fechas.
-Estado vigente: Materias y Actividades cerrados sobre 0005. Calendario es el
-módulo siguiente, ahora definido en CALENDAR_CONTRACT. Ver PROJECT_STATE.
+La sección siguiente es histórica. El estado vigente incluye Materias, Actividades
+y Calendario cerrados; Backend Sesiones está en desarrollo sobre 0006. Ver
+PROJECT_STATE y STUDY_SESSIONS_CONTRACT.
 
 ### Materias — 2026-10-18
 

@@ -2,12 +2,13 @@
 
 ## Alcance vigente
 
-Materias, Actividades y Calendario están cerrados en Backend. Schema productivo:
-0006_study_sessions; el pin Database está en tools/database-ref.json.
-Sesiones de Estudio + temporizador se implementan según
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue siendo
-de solo lectura sobre Actividades; no cambia hasta una ampliación contractual futura.
-Planes, Retos e IA siguen fuera de este bloque.
+Materias, Actividades y Calendario v1 están cerrados en Backend. Database producción
+está en `0006_study_sessions`; el pin está en tools/database-ref.json. Sesiones de
+Estudio + temporizador están implementados en `feat/study-sessions-0006`; el release
+de Backend aún está pendiente; CI pasó. Su contrato específico es
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue siendo de
+solo lectura sobre Actividades hasta una ampliación contractual futura. Planes,
+Retos e IA siguen fuera de este bloque.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
@@ -64,9 +65,10 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. Materias y Actividades están implementados según sus
-contratos; Calendario v1 añade su consulta transversal en la rama de implementación.
-Los demás módulos son planificación futura.
+sobre el usuario autenticado. No reciben user_id. Materias y Actividades están
+implementados según sus contratos. Calendario v1 está cerrado y consulta Actividades;
+Sesiones está implementado en una rama pendiente de release. Los demás módulos son
+planificación futura.
 
 ## Subjects
 
@@ -113,8 +115,9 @@ Representan dependencias reales entre actividades.
 
 ## Sessions
 
-Contrato implementado en [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md),
-sobre 0006_study_sessions.
+Contrato implementado en la rama `feat/study-sessions-0006` según
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md), sobre 0006_study_sessions.
+El despliegue productivo de estas rutas queda pendiente.
 
 - GET /sessions
 - POST /sessions
