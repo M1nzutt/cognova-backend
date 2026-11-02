@@ -52,7 +52,7 @@ def test_planned_crud_pagination_and_safe_delete(client, registration):
     assert original["status"] is None
     assert original["start_at"] is None and original["end_at"] is None
     assert original["activity_id"] is None
-    assert original["actual_duration"] == 0
+    assert original["actual_duration"] == "0.000000"
     assert "user_id" not in original
     assert original["intervals"] == []
     assert original["created_at"] <= original["updated_at"]
@@ -154,7 +154,7 @@ def test_timer_counts_only_closed_intervals_and_preserves_multiple_pauses(
     assert started.json()["execution_state"] == "running"
     assert started.json()["start_at"] == clock["now"].isoformat().replace("+00:00", "Z")
     assert started.json()["intervals"][0]["ended_at"] is None
-    assert started.json()["actual_duration"] == 0
+    assert started.json()["actual_duration"] == "0.000000"
 
     clock["now"] += timedelta(seconds=10)
     paused = client.post(path + "/pause", headers=headers)
@@ -247,7 +247,7 @@ def test_unstarted_postpone_cancel_and_completed_precondition(client, registrati
     assert postponed.json()["status"] == "postponed"
     assert postponed.json()["start_at"] is None
     assert postponed.json()["end_at"] is None
-    assert postponed.json()["actual_duration"] == 0
+    assert postponed.json()["actual_duration"] == "0.000000"
     assert postponed.json()["intervals"] == []
     assert (
         client.put(path, headers=headers, json=plan_body(subject["id"])).status_code
