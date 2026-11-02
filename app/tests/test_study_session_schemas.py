@@ -91,6 +91,15 @@ def test_other_context_requires_trimmed_nonblank_text_and_caps_length():
 
 def test_filters_validate_range_and_cursor_pair():
     assert StudySessionFilters(limit="2").limit == 2
+    parsed_query_ids = StudySessionFilters(
+        subject_id="3",
+        activity_id="5",
+        after_planned_start_at=START,
+        after_id="7",
+    )
+    assert parsed_query_ids.subject_id == 3
+    assert parsed_query_ids.activity_id == 5
+    assert parsed_query_ids.after_id == 7
     assert (
         StudySessionFilters(
             planned_start_from=START,
@@ -105,6 +114,7 @@ def test_filters_validate_range_and_cursor_pair():
         {"after_id": 2},
         {"after_planned_start_at": START},
         {"limit": True},
+        {"subject_id": True},
     ):
         with pytest.raises(ValidationError):
             StudySessionFilters(**params)

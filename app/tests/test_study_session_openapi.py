@@ -45,10 +45,8 @@ def test_study_session_openapi_exposes_only_contract_routes():
 
 def test_session_list_parses_limit_from_query_string():
     class StubService:
-        requested_limit = None
-
         def list(self, user_id, filters):
-            self.requested_limit = filters.limit
+            self.requested = filters
             return StudySessionListResponse(items=[], next_cursor=None)
 
     service = StubService()
@@ -57,8 +55,20 @@ def test_session_list_parses_limit_from_query_string():
     app.dependency_overrides[get_service] = lambda: service
 
     with TestClient(app) as client:
-        response = client.get("/api/v1/sessions", params={"limit": "2"})
+        response = client.get(
+            "/api/v1/sessions",
+            params={
+                "limit": "2",
+                "subject_id": "3",
+                "activity_id": "5",
+                "after_planned_start_at": "2030-01-01T00:00:00Z",
+                "after_id": "7",
+            },
+        )
 
     assert response.status_code == 200
-    assert service.requested_limit == 2
+    assert service.requested.limit == 2
+    assert service.requested.subject_id == 3
+    assert service.requested.activity_id == 5
+    assert service.requested.after_id == 7
     assert response.headers["cache-control"] == "no-store"

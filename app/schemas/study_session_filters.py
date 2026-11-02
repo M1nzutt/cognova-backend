@@ -3,7 +3,6 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.study_sessions.types import (
-    EntityId,
     Instant,
     SessionExecutionState,
     SessionResult,
@@ -13,15 +12,22 @@ from app.study_sessions.types import (
 class StudySessionFilters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    subject_id: EntityId | None = None
-    activity_id: EntityId | None = None
+    subject_id: Annotated[int, Field(gt=0, le=2147483647)] | None = None
+    activity_id: Annotated[int, Field(gt=0, le=2147483647)] | None = None
     execution_state: SessionExecutionState | None = None
     status: SessionResult | None = None
     planned_start_from: Instant | None = None
     planned_start_to: Instant | None = None
     limit: Annotated[int, Field(ge=1, le=100)] = 50
     after_planned_start_at: Instant | None = None
-    after_id: EntityId | None = None
+    after_id: Annotated[int, Field(gt=0, le=2147483647)] | None = None
+
+    @field_validator("subject_id", "activity_id", "after_id", mode="before")
+    @classmethod
+    def reject_boolean_ids(cls, value: object) -> object:
+        if isinstance(value, bool):
+            raise ValueError("IDs must be integers")
+        return value
 
     @field_validator("limit", mode="before")
     @classmethod

@@ -88,6 +88,7 @@ def test_planned_crud_pagination_and_safe_delete(client, registration):
             "planned_start_to": "2030-03-01T00:00:00Z",
         },
     )
+    assert filtered.status_code == 200, filtered.text
     assert [item["id"] for item in filtered.json()["items"]] == [original["id"]]
 
     assert client.delete(path, headers=headers).status_code == 422
@@ -371,6 +372,7 @@ def test_filters_cursor_ownership_and_no_store(client, registration):
             "after_id": cursor["after_id"],
         },
     )
+    assert second.status_code == 200, second.text
     assert len(second.json()["items"]) == 1
     assert second.json()["next_cursor"] is None
     filtered = client.get(
