@@ -2,13 +2,12 @@
 
 ## Alcance vigente
 
-Materias, Actividades y Calendario v1 están cerrados en Backend. Database producción
-está en `0006_study_sessions`; el pin está en tools/database-ref.json. Sesiones de
-Estudio + temporizador están implementados en `feat/study-sessions-0006`; el release
-de Backend aún está pendiente; CI pasó. Su contrato específico es
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 sigue siendo de
-solo lectura sobre Actividades hasta una ampliación contractual futura. Planes,
-Retos e IA siguen fuera de este bloque.
+Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están cerrados
+en Backend. Database producción está en `0006_study_sessions`; el pin está en
+tools/database-ref.json. Calendario es de solo lectura sobre Actividades y Sesiones,
+según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes, Retos e IA siguen
+fuera de este bloque.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
@@ -65,9 +64,8 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. Materias y Actividades están
-implementados según sus contratos. Calendario v1 está cerrado y consulta Actividades;
-Sesiones está implementado en una rama pendiente de release. Los demás módulos son
+sobre el usuario autenticado. No reciben user_id. Materias, Actividades, Sesiones y
+Calendario están implementados según sus contratos. Los demás módulos son
 planificación futura.
 
 ## Subjects
@@ -100,10 +98,10 @@ La especificación anterior de type y /prioritized queda fuera de esta fase.
 
 ## Calendar
 
-GET `/calendar`: rango obligatorio, filtros y paginación según
-[CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Solo lectura de Actividades;
-no eventos libres ni mutaciones propias. Desplegado en 61a2f98; smoke autenticado
-aprobado y Backend Calendario cerrado (ver PROJECT_STATE).
+GET `/calendar`: rango obligatorio, filtro de tipo y filtros/paginación según
+[CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Solo lectura de Actividades y Sesiones;
+no eventos libres ni mutaciones propias. El orden es cronológico con desempate
+estable por tipo e ID.
 
 ## Dependencies
 
@@ -115,9 +113,8 @@ Representan dependencias reales entre actividades.
 
 ## Sessions
 
-Contrato implementado en la rama `feat/study-sessions-0006` según
+Contrato implementado y desplegado según
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md), sobre 0006_study_sessions.
-El despliegue productivo de estas rutas queda pendiente.
 
 - GET /sessions
 - POST /sessions
