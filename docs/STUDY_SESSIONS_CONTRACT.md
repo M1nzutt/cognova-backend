@@ -107,9 +107,10 @@ ella.
 Filtros de listados siempre incluyen user_id del Bearer; filtrar por una materia o
 actividad ajena devuelve lista vacía. Auth, cookies, CSRF y rate limiting existentes
 no cambian. Los endpoints de sesión usan Bearer; el middleware global aplica
-no-store a éxito y error. Calendario conserva su contrato v1 de solo Actividades:
-planned_start_at queda definido como fecha canónica para una futura ampliación
-explícita, sin cambiar ahora su endpoint, DTO ni Frontend.
+no-store a éxito y error. Calendario incluye sesiones como `study_session`, usa
+`planned_start_at` para ubicarlas y proyecta lifecycle, resultado y timestamps de
+ejecución según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Es una vista de solo
+lectura y no altera estos recursos.
 
 ## Responsabilidades
 

@@ -2,33 +2,27 @@
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
 Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-Materias, Actividades y Calendario v1 están cerrados en producción, junto con auth
-y onboarding. Backend Sesiones se implementa en `feat/study-sessions-0006`.
+Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están
+desplegados y cerrados en Backend, junto con auth y onboarding.
 Contrato Actividades: [ACTIVITIES_CONTRACT.md](docs/ACTIVITIES_CONTRACT.md).
 Consultar [estado real](docs/PROJECT_STATE.md),
 [traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
 ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
 cognova-database. Database producción usa `0006_study_sessions`, fijada en
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`. El SHA Live documentado del Backend es
-`61a2f98668f0d3452f0582d7a074f1290dbae43d`. Main tiene auto-deploy en Render;
-ese release ejecuta la versión anterior, que exige 0005. La implementación de
-Sesiones aún no se integró a main ni se desplegó; no asumir que readiness está
-compatible tras el avance de Database. Calendario desplegado y cerrado tras smoke
-autenticado aprobado.
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Render despliega `main` automáticamente;
+el estado Live y el SHA validado están en [DEPLOYMENT](docs/DEPLOYMENT.md).
 
 API: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra ele, no
-número uno). OpenAPI, health y readiness se verificaron con 200 el 2026-10-26,
-antes de que Database avanzara a 0006. No se ha confirmado readiness del Backend
-actual contra 0006; auth exige token.
+número uno). Health, readiness y OpenAPI se validaron después del release 0006;
+auth exige token.
 
 ## Calendario v1 — desplegado y cerrado
 
-GET /api/v1/calendar ofrece Actividades por rango y filtros, con ownership,
-onboarding y paginación cronológica. Solo consulta recursos existentes; sin eventos
-libres, tablas ni migraciones. [Contrato](docs/CALENDAR_CONTRACT.md).
-SHA Live61a2f98; smoke público y autenticado aprobados: filtros, ownership,
-paginación y regresión Actividades. Recursos sintéticos limpiados y sesiones
-revocadas; Frontend puede empezar (ver PROJECT_STATE e INTEGRATION_VALIDATION).
+GET /api/v1/calendar ofrece Actividades y Sesiones por rango, con filtros,
+ownership, onboarding y paginación cronológica mixta. Solo consulta recursos
+existentes; sin eventos libres, tablas ni migraciones. [Contrato](docs/CALENDAR_CONTRACT.md).
+El smoke y SHA de esta ampliación se registran en PROJECT_STATE e
+INTEGRATION_VALIDATION.
 
 ## Entorno local
 
@@ -45,8 +39,8 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-Están implementados auth, health/readiness, perfil académico, cuestionario, Materias
-y Actividades bajo `/api/v1`. Sesiones está en la rama de implementación. Ver
+Están implementados auth, health/readiness, perfil académico, cuestionario, Materias,
+Actividades, Sesiones y Calendario bajo `/api/v1`. Ver
 [el contrato](docs/API_CONTRACT.md).
 
 `CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se

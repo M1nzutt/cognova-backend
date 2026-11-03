@@ -1,71 +1,91 @@
-# Calendario — contrato v1 (2026-10-25)
+# Calendario — contrato API v1 ampliado (2026-11-02)
 
-Vista transversal de recursos propios de Cognova, no calendario personal.
-No eventos libres, calendar_events, persistencia duplicada, migraciones ni grants nuevos.
-Primera fuente: Actividades existentes, añadidas en 0005_activities; ese era el
-schema vigente al cerrar este contrato. Database producción avanzó después a
-0006_study_sessions (pin de Backend `eff87b387345a1d3f286e3a6007d41e707ec9d13`).
-Calendario v1 conserva el mismo endpoint y no implementa Sesiones, Planes ni Retos.
+Vista transversal, autenticada, de solo lectura y limitada a recursos propios. El
+calendario no crea ni modifica recursos, no admite eventos libres, no duplica datos y
+no tiene tablas, migraciones ni grants propios. Sus fuentes son Actividades (0005)
+y Sesiones de Estudio (0006).
 
 ## Endpoint y filtros
 
-GET /api/v1/calendar, Bearer y onboarding completo obligatorios; no-store.
-Query extra=forbid:
+`GET /api/v1/calendar`, Bearer y onboarding completo obligatorios; todas las
+respuestas usan `Cache-Control: no-store`. Query estricta (`extra=forbid`):
 
-- deadline_from y deadline_to obligatorios: ISO 8601 con zona, no fecha sola ni epoch.
-- Rango semiabierto [from,to), from < to, máximo 366 días de tiempo transcurrido.
-  Filtra el deadline vigente, no el original. Frontend calcula los límites de su zona
-  y los envía con offset; no se infiere zona de servidor ni se agrupan días aquí.
-- subject_id entero positivo int32 opcional, status y priority de ACTIVITIES_CONTRACT.
-  Filtros por AND; todos los estados y materias archivadas incluidos por defecto.
-  Materia ajena/inexistente: lista vacía indistinguible, sin consultar su existencia.
-- limit=50, entre 1 y 100. Orden deadline ASC, id ASC.
-- after_deadline y after_id opcionales pero inseparables: cursor exclusivo por
-  (deadline,id), con fecha dentro del rango y ID positivo int32. No exige que el
-  recurso del cursor siga existiendo. Conservar rango/filtros al paginar.
+- `deadline_from` y `deadline_to` obligatorios: ISO 8601 con zona; no fecha sola ni
+  epoch. El rango es semiabierto `[from,to)`, `from < to`, máximo 366 días de tiempo
+  transcurrido. Se compara contra `deadline` vigente de Actividades y
+  `planned_start_at` de Sesiones. Frontend calcula límites de su zona y los envía
+  con offset; no se infiere zona del servidor ni se agrupan días aquí.
+- `type` opcional: `activity` o `study_session`. Omitirlo devuelve ambas fuentes.
+- `subject_id` entero positivo int32 opcional, aplicable a ambas fuentes. Materia
+  ajena o inexistente devuelve lista vacía, sin consultar su existencia.
+- `status` y `priority` mantienen los valores y significado anteriores, aplicados
+  solo a Actividades. Si se suministra cualquiera, las Sesiones no forman parte de
+  los resultados. Combinarlos con `type=study_session` es inválido (422).
+- `limit=50`, entre 1 y 100. Se lee como máximo `limit+1` elementos.
+- Cursor exclusivo: `after_deadline`, `after_type` y `after_id`. La fecha es el
+  instante cronológico del elemento (deadline de actividad o planned_start_at de
+  sesión). En solicitudes nuevas los tres campos vienen juntos. Para compatibilidad,
+  la pareja anterior `after_deadline` + `after_id` se acepta sin `after_type` y se
+  interpreta como cursor de `activity`. El cursor debe caer dentro del rango y el
+  ID debe ser positivo int32. No se exige que el recurso del cursor aún exista.
+  Conservar rango y filtros al paginar.
 
-200: {items:[CalendarActivityItem],next_cursor:{after_deadline,after_id}|null}.
-CalendarActivityItem: id (ID original Activity), type literal "activity", title,
-subject_id, deadline, original_deadline, priority, status, estimated_duration.
-Sin user_id, notas ni copia del historial. Fechas ISO 8601 con zona. La identidad
-pública es (type,id); nunca asumir IDs globales entre futuros tipos.
-No se incluye un evento por cambio de fecha: hay un único elemento por actividad.
-Lista vacía devuelve items=[] y next_cursor=null. Se leen como máximo limit+1 filas.
-Sin snapshot entre páginas: si cambia deadline durante recorrido, refrescar rango;
-puede moverse un elemento entre páginas. No prometer vista congelada ni total_count.
+Los filtros aplicables se combinan con AND. Todos los estados de ambas fuentes y
+las materias archivadas se incluyen por defecto. Las respuestas vacías tienen
+`items=[]` y `next_cursor=null`.
 
-## Ejemplo de consulta
+## Respuesta y orden
 
+`200: {items:[CalendarItem], next_cursor: CalendarCursor|null}`. La identidad
+pública es `(type,id)`; los IDs no son globales entre tipos. Un recurso original
+produce como máximo un elemento. No se copia historial, user_id ni datos de otras
+tablas que el cliente ya puede obtener desde sus endpoints propios.
+
+`CalendarActivityItem` conserva sin cambios el DTO anterior: `id`, `type` literal
+`activity`, `title`, `subject_id`, `deadline`, `original_deadline`, `priority`,
+`status` y `estimated_duration`. Su posición usa el `deadline` vigente; los cambios
+de fecha no crean eventos adicionales.
+
+`CalendarStudySessionItem` expone `id`, `type` literal `study_session`, `subject_id`,
+`activity_id` nullable, `planned_start_at`, `planned_duration`, `lifecycle`, `result`
+nullable, `start_at` nullable y `end_at` nullable. `lifecycle` conserva los estados
+`planned`, `running`, `paused` y `finished`; `result` usa los resultados definidos en
+`STUDY_SESSIONS_CONTRACT`. Las fechas son ISO 8601 con zona. La posición usa siempre
+`planned_start_at`, incluso si la sesión ya se inició o terminó.
+
+Orden total ascendente: instante del evento, rango de tipo y luego ID. Para empates
+temporales, `activity` precede a `study_session`; dentro de cada tipo se ordena por
+ID ascendente. `next_cursor` conserva `after_deadline` y `after_id` e incluye
+`after_type` para definir completamente el elemento de continuación. La forma antigua
+de cursor sigue aceptándose para Actividades. Se conserva rango y filtros durante la
+paginación. No hay snapshot entre páginas: si cambia la fecha de un recurso durante
+el recorrido, puede moverse de página; refrescar el rango. No se devuelve
+`total_count`.
+
+Ejemplo:
+
+```text
 GET /api/v1/calendar?deadline_from=2030-01-01T00:00:00Z&deadline_to=2030-02-01T00:00:00Z&limit=50
+```
 
-Conservar estos filtros y añadir los campos devueltos en next_cursor a la siguiente
-petición. Codificar el signo + de offsets positivos como %2B al construir la query.
-Al recibir next_cursor=null terminó el recorrido. Volver a consultar el rango tras
-editar la actividad original; no insertar ni actualizar elementos de calendario.
+Copiar todos los campos de `next_cursor` a la siguiente petición junto con los
+filtros originales. Codificar el signo `+` de offsets positivos como `%2B`.
 
 ## Escrituras, seguridad y errores
 
-No POST/PUT/PATCH/DELETE de Calendario: 405. Sin endpoint de detalle duplicado.
-Usar /activities/{id}, sus mutaciones y /deadline-history para detalle/edición.
-El servicio de Calendario solo ejecuta SELECT con ownership en SQL; no toca historia,
-no adquiere locks de escritura, no hace commit ni registra eventos. Auth conserva
-su propio comportamiento existente. No recibir user_id del cliente.
-401 auth, 403 ONBOARDING_REQUIRED, 422 VALIDATION_ERROR (query inválida),
-503 SERVICE_UNAVAILABLE (DB), formato global {error:{code,message}} sin SQL.
-Un listado no produce 404 por falta de resultados. CSRF y auth existentes sin cambios.
+Calendario solo expone GET; POST/PUT/PATCH/DELETE responden 405. No hay endpoint de
+detalle duplicado. El servicio ejecuta SELECT con ownership por `user_id` derivado
+del Bearer; no recibe `user_id` del cliente, no toca recursos ni historial, no toma
+locks de escritura ni confirma transacciones. No se consulta la existencia de
+materias ajenas para filtros.
 
-## Extensión y entrega
+401 auth, 403 `ONBOARDING_REQUIRED`, 422 `VALIDATION_ERROR` (query inválida), 503
+`SERVICE_UNAVAILABLE` (DB); formato global `{error:{code,message}}` sin SQL. Una
+consulta sin resultados no produce 404. CSRF y auth existentes no cambian.
 
-DTO de actividad separado, discriminado por type dentro del contenedor de calendario;
-servicio de consulta separado de mutaciones. Al incorporar fuentes futuras, ampliar
-mediante contrato explícito la unión de DTOs y la paginación/orden total entre tipos.
-No reservar endpoints, enums ni tablas ficticias para Sesiones/Planes/Retos ahora.
-Contrato/código validados con suite local y CI; desplegados el 2026-10-26 en 61a2f98.
-Smoke público y autenticado aprobados; Backend Calendario cerrado el 2026-10-26.
-Frontend puede empezar la integración contra el servicio productivo.
-Ver PROJECT_STATE e INTEGRATION_VALIDATION.
+## Estado
 
-Estado de extensión a 2026-11-02: Sesiones ahora tiene contrato y backend en
-desarrollo sobre 0006. La v1 de este documento y el endpoint productivo no cambian;
-una futura fuente `study_session` requerirá una versión/decisión explícita sobre
-DTO, filtro y paginación, usando `planned_start_at` como fecha planificada candidata.
+La ampliación es transversal y de solo lectura sobre las tablas ya existentes; no
+requiere cambios en Database. Implementación, pruebas, integración y evidencia de
+release se registran en `PROJECT_STATE.md`, `DEPLOYMENT.md` e
+`INTEGRATION_VALIDATION.md`.
