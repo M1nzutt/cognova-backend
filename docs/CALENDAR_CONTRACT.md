@@ -1,4 +1,4 @@
-# Calendario — contrato API v1 ampliado (2026-11-02)
+# Calendario — contrato API v1 ampliado y Live (2026-11-02)
 
 Vista transversal, autenticada, de solo lectura y limitada a recursos propios. El
 calendario no crea ni modifica recursos, no admite eventos libres, no duplica datos y
@@ -89,3 +89,8 @@ La ampliación es transversal y de solo lectura sobre las tablas ya existentes; 
 requiere cambios en Database. Implementación, pruebas, integración y evidencia de
 release se registran en `PROJECT_STATE.md`, `DEPLOYMENT.md` e
 `INTEGRATION_VALIDATION.md`.
+
+Release cerrado: merge `4735a697aed69f66f3055c902a00507b66a556e0`, Render Live
+deploy `dep-dbkjld7lk1mc73duk6jg`, DB `0006_study_sessions` sin cambios. CI de rama
+`41560379932` y de merge `41560869679` pasó; smoke autenticado mixto aprobado. Frontend
+puede continuar con este contrato.

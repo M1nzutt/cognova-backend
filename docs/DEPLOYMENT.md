@@ -1,6 +1,26 @@
 # Despliegue existente y transición de base de datos
 
-## Estado actual — Backend Sesiones Live y cerrado — 2026-11-02
+## Estado actual — Calendario ampliado Live y cerrado — 2026-11-02
+
+El release `4735a697aed69f66f3055c902a00507b66a556e0` se integró a `main` con
+`--no-ff`, se publicó y Render lo confirmó Live en el servicio existente
+`srv-db2j6nqj9qps73crqa0g`, deploy `dep-dbkjld7lk1mc73duk6jg`:
+https://cognova-backend-lpsi.onrender.com. Database sigue en
+`0006_study_sessions` con pin `eff87b387345a1d3f286e3a6007d41e707ec9d13`; esta
+ampliación no crea tabla ni requiere migración, grants o cambio de esquema.
+
+Health, readiness y OpenAPI respondieron 200. El smoke autenticado productivo verificó
+items `activity` y `study_session`, filtros, límites, ownership, onboarding,
+paginación/orden mixtos, compatibilidad de cursor anterior y `no-store`, y confirmó
+que los GET no alteraron snapshots de recursos. Evidencia sanitizada y resultados en
+[INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md). CI de rama
+[41560379932](https://github.com/M1nzutt/cognova-backend/actions/runs/41560379932)
+y merge [41560869679](https://github.com/M1nzutt/cognova-backend/actions/runs/41560869679)
+pasaron con la suite y controles de seguridad/calidad. El cierre documental usa
+`[skip ci] [skip render]`; no cambia el SHA productivo. **Backend Calendario ampliado
+cerrado; Frontend puede continuar.**
+
+## Histórico — Backend Sesiones Live y cerrado — 2026-11-02
 
 Database producción está en `0006_study_sessions`, pin
 `eff87b387345a1d3f286e3a6007d41e707ec9d13`. Release Backend integrado sin squash:

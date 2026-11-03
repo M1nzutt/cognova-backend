@@ -1,6 +1,39 @@
 # Cognova — Estado backend
 
-## Sesiones de estudio y temporizador — Backend cerrado — 2026-11-02
+## Calendario ampliado — Backend cerrado — 2026-11-02
+
+GET `/api/v1/calendar` integra ahora Actividades (`deadline`) y Sesiones de Estudio
+(`planned_start_at`) como una vista transversal, autenticada y de solo lectura. El
+contrato devuelve items discriminados por `type`; filtros, cursor y orden total están
+definidos en [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). No hubo migración ni cambios
+de Database: producción permanece en `0006_study_sessions`, pin
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`.
+
+Merge `--no-ff` `4735a697aed69f66f3055c902a00507b66a556e0` está **Live** en Render,
+deploy `dep-dbkjld7lk1mc73duk6jg`. Health, readiness y OpenAPI respondieron 200; el
+smoke autenticado confirmó onboarding, ownership, rango `[from,to)`, filtros por tipo
+y materia, estado/prioridad sobre Actividades, paginación mixta, desempate temporal,
+contrato anterior de cursor de Actividades y `no-store`. Las consultas conservaron
+iguales las instantáneas de Actividades, Sesiones, historias, Materias y cuestionarios.
+Se limpiaron recursos sintéticos; los dos perfiles/cuestionarios iniciales y filas de
+auth revocadas se retienen porque no existe endpoint de borrado de cuenta. Evidencia
+sanitizada: [smoke de Calendario ampliado](evidence/calendar-study-sessions-smoke-2026-11-02.json).
+
+CI de rama [41560379932](https://github.com/M1nzutt/cognova-backend/actions/runs/41560379932)
+y CI del merge [41560869679](https://github.com/M1nzutt/cognova-backend/actions/runs/41560869679)
+pasaron. Incluyen suite pytest/PostgreSQL con resultados JUnit sin omisiones, Ruff,
+formato, mypy, build/wheel, runtime y launcher, auditoría de dependencias y Gitleaks.
+Localmente pasaron 36 pruebas focalizadas y 433 de la suite completa; una prueba quedó
+deseleccionada porque el rol de la DB local carece de `CREATEROLE` y auto-review no
+autorizó elevar ese privilegio. CI ejecutó la suite completa. Ruff, mypy, build y
+`pip-audit` locales también pasaron.
+
+Commits de esta entrega: `68f3b00` (contrato/documentación), `81ae375` (implementación
+y pruebas), merge `4735a69` y cierre documental/evidencia. El total del repositorio
+pasa de 105 a 109, sin squash ni commits vacíos; faltan 392 para 501. **Backend
+Calendario ampliado queda cerrado; Frontend puede continuar.**
+
+## Histórico — Sesiones de estudio y temporizador — Backend cerrado — 2026-11-02
 
 Database producción permanece en `0006_study_sessions`, fijada a
 `eff87b387345a1d3f286e3a6007d41e707ec9d13`. Backend integró

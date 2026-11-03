@@ -1,6 +1,43 @@
 # Validación de integración productiva
 
-## Sesiones — smoke productivo aprobado — 2026-11-02
+## Calendario ampliado — smoke productivo aprobado — 2026-11-02
+
+Backend `main` Live en `4735a697aed69f66f3055c902a00507b66a556e0`, deploy Render
+`dep-dbkjld7lk1mc73duk6jg`. Database sigue en `0006_study_sessions` (pin
+`eff87b387345a1d3f286e3a6007d41e707ec9d13`), sin migración ni cambios de Database.
+[Evidencia sanitizada](evidence/calendar-study-sessions-smoke-2026-11-02.json).
+
+| Control | Resultado productivo |
+| --- | --- |
+| Health / readiness / OpenAPI | 200 / 200 `no-store` / 200; Calendar y Sessions presentes |
+| Auth y onboarding | Sin Bearer 401; onboarding incompleto 403; dos cuentas sintéticas completadas |
+| Contrato mixto | `activity` por deadline vigente; `study_session` por planned_start_at con campos requeridos y nulls conservados |
+| Orden | Ascendente por instante, `activity` antes de `study_session`, ID ascendente dentro del tipo |
+| Rango | `[from,to)`: incluye inicio, excluye fin; sesión anterior fuera del rango |
+| Filtros | Tipo, materia en ambas fuentes, estado/prioridad en Actividades; combinación incompatible 422 |
+| Cursor y paginación | `limit=1`, tres páginas sin duplicados; cursor tipado mixto y cursor antiguo de Actividades aceptado |
+| Ownership | Solo elementos propios; filtros de materia ajena vacíos en ambos sentidos |
+| Solo lectura | Snapshots antes/después idénticos para Actividades, Sesiones/detalles, historial, Materias y cuestionario |
+| Cache | `no-store` en respuestas API comprobadas |
+| Limpieza | Actividades, sesiones y materias sintéticas borradas y GET posterior 404; ambos tokens revocados y 401 |
+
+El smoke terminó sin errores de limpieza. Se retienen los dos perfiles sintéticos,
+cuestionarios iniciales inmutables y filas de auth revocadas: no existe borrado de
+cuenta. No se retienen Actividades, Sesiones ni Materias creadas por este smoke.
+Credenciales aleatorias permanecieron en memoria. Evidencia contiene IDs sintéticos,
+hashes de snapshots y resultados HTTP; no contiene credenciales.
+
+CI de rama [41560379932](https://github.com/M1nzutt/cognova-backend/actions/runs/41560379932)
+y CI de merge [41560869679](https://github.com/M1nzutt/cognova-backend/actions/runs/41560869679)
+completed/success. Ambos validaron pytest con PostgreSQL y JUnit sin omisiones, Ruff,
+formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks. Localmente: 36
+pruebas focalizadas aprobadas; suite completa con 433 aprobadas y 1 deseleccionada por
+falta de `CREATEROLE` en el rol de la DB local (el auto-review rechazó otorgar ese
+privilegio). CI sí ejecutó la suite completa. Ruff, mypy, build y `pip-audit` también
+pasaron localmente. **Backend Calendario ampliado queda cerrado; Frontend puede
+continuar.**
+
+## Histórico — Sesiones — smoke productivo aprobado — 2026-11-02
 
 Backend `main` Live en `56e7caccb247776ed93c63e949faf9b76202ebcf`, deploy
 `dep-dbkhuinlk1mc738rgv90`. Database `0006_study_sessions`, SHA fijado

@@ -1,0 +1,466 @@
+{
+  "validated_at_utc": "2026-11-03T01:40:22.228509+00:00",
+  "production_sha": "4735a697aed69f66f3055c902a00507b66a556e0",
+  "checks": {
+    "production health": {
+      "http": 200,
+      "no_store": true
+    },
+    "production readiness": {
+      "http": 200,
+      "no_store": true
+    },
+    "production OpenAPI": {
+      "http": 200,
+      "calendar": true,
+      "sessions": true
+    },
+    "calendar requires bearer": {
+      "http": 401,
+      "no_store": true
+    },
+    "A synthetic register": {
+      "http": 201,
+      "no_store": true
+    },
+    "A onboarding gate": {
+      "http": 403,
+      "no_store": true
+    },
+    "A academic profile": {
+      "http": 200,
+      "no_store": true
+    },
+    "A catalog": {
+      "http": 200,
+      "no_store": true
+    },
+    "A initial questionnaire": {
+      "http": 201,
+      "no_store": true
+    },
+    "A onboarded": {
+      "http": 200,
+      "no_store": true
+    },
+    "A subject": {
+      "http": 201,
+      "no_store": true
+    },
+    "B synthetic register": {
+      "http": 201,
+      "no_store": true
+    },
+    "B onboarding gate": {
+      "http": 403,
+      "no_store": true
+    },
+    "B academic profile": {
+      "http": 200,
+      "no_store": true
+    },
+    "B catalog": {
+      "http": 200,
+      "no_store": true
+    },
+    "B initial questionnaire": {
+      "http": 201,
+      "no_store": true
+    },
+    "B onboarded": {
+      "http": 200,
+      "no_store": true
+    },
+    "B subject": {
+      "http": 201,
+      "no_store": true
+    },
+    "A activity A start": {
+      "http": 201,
+      "no_store": true
+    },
+    "A activity A end": {
+      "http": 201,
+      "no_store": true
+    },
+    "A planned session": {
+      "http": 201,
+      "no_store": true
+    },
+    "B activity B start": {
+      "http": 201,
+      "no_store": true
+    },
+    "B planned session": {
+      "http": 201,
+      "no_store": true
+    },
+    "A before calendar activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar session list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar activity detail 33": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar activity history 33": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar activity detail 34": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar activity history 34": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar session detail 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar session detail 36": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar session detail 37": {
+      "http": 200,
+      "no_store": true
+    },
+    "A before calendar session detail 38": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar session list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar activity detail 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar activity history 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "B before calendar session detail 39": {
+      "http": 200,
+      "no_store": true
+    },
+    "mixed response": {
+      "http": 200,
+      "no_store": true
+    },
+    "activity type": {
+      "http": 200,
+      "no_store": true
+    },
+    "session type": {
+      "http": 200,
+      "no_store": true
+    },
+    "subject filter": {
+      "http": 200,
+      "no_store": true
+    },
+    "status filter": {
+      "http": 200,
+      "no_store": true
+    },
+    "priority filter": {
+      "http": 200,
+      "no_store": true
+    },
+    "incompatible filter": {
+      "http": 422,
+      "no_store": true
+    },
+    "bounded range": {
+      "http": 200,
+      "no_store": true
+    },
+    "before boundary": {
+      "http": 200,
+      "no_store": true
+    },
+    "legacy activity cursor": {
+      "http": 200,
+      "no_store": true
+    },
+    "mixed page 0": {
+      "http": 200,
+      "no_store": true
+    },
+    "mixed page 1": {
+      "http": 200,
+      "no_store": true
+    },
+    "mixed page 2": {
+      "http": 200,
+      "no_store": true
+    },
+    "owner A": {
+      "http": 200,
+      "no_store": true
+    },
+    "owner B": {
+      "http": 200,
+      "no_store": true
+    },
+    "foreign B subject": {
+      "http": 200,
+      "no_store": true
+    },
+    "foreign A subject": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar session list": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar activity detail 33": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar activity history 33": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar activity detail 34": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar activity history 34": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar session detail 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar session detail 36": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar session detail 37": {
+      "http": 200,
+      "no_store": true
+    },
+    "A after calendar session detail 38": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar activity list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar session list": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar questionnaire": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar activity detail 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar activity history 35": {
+      "http": 200,
+      "no_store": true
+    },
+    "B after calendar session detail 39": {
+      "http": 200,
+      "no_store": true
+    },
+    "cleanup session 35": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify session 35": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup session 36": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify session 36": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup session 37": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify session 37": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup session 38": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify session 38": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup activity 33": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify activity 33": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup activity 34": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify activity 34": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup subject 61": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify subject 61": {
+      "http": 404,
+      "no_store": true
+    },
+    "A auth sessions": {
+      "http": 200,
+      "no_store": true
+    },
+    "A logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "A revoked access": {
+      "http": 401,
+      "no_store": true
+    },
+    "cleanup session 39": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify session 39": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup activity 35": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify activity 35": {
+      "http": 404,
+      "no_store": true
+    },
+    "cleanup subject 62": {
+      "http": 204,
+      "no_store": true
+    },
+    "cleanup verify subject 62": {
+      "http": 404,
+      "no_store": true
+    },
+    "B auth sessions": {
+      "http": 200,
+      "no_store": true
+    },
+    "B logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "B revoked access": {
+      "http": 401,
+      "no_store": true
+    }
+  },
+  "users": [
+    37,
+    38
+  ],
+  "created_subject_ids": [
+    61,
+    62
+  ],
+  "created_activity_ids": [
+    33,
+    34,
+    35
+  ],
+  "created_session_ids": [
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "cleanup_errors": [],
+  "render_deploy_id": "dep-dbkjld7lk1mc73duk6jg",
+  "status": "passed",
+  "resource_comparison": {
+    "equal": true,
+    "before_sha256": "0c6f4b68a68d759e13071e4f54dc31072098233d724a69723ddaf3f177db8516",
+    "after_sha256": "0c6f4b68a68d759e13071e4f54dc31072098233d724a69723ddaf3f177db8516",
+    "scope": "synthetic users' activity/session lists, details, history, subjects and questionnaire"
+  },
+  "pagination": {
+    "limit": 1,
+    "pages": 3,
+    "cursor_types": [
+      "activity",
+      "study_session"
+    ]
+  },
+  "revoked_user_ids": [
+    37,
+    38
+  ],
+  "retained": "synthetic user profiles, one immutable initial questionnaire per user, and revoked auth-session rows; no account-deletion endpoint",
+  "completed_at_utc": "2026-11-03T01:40:47.391047+00:00"
+}
