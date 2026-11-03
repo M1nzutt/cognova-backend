@@ -31,6 +31,7 @@ WINDOW = {
         {"deadline_to": "2031-01-03T00:00:00Z"},
         {"after_id": 1},
         {"after_deadline": WINDOW["deadline_from"]},
+        {"after_type": "activity"},
         {"after_id": 1, "after_deadline": WINDOW["deadline_to"]},
         {"after_id": 1, "after_deadline": "2029-01-01T00:00:00Z"},
         {"limit": 0},
@@ -72,8 +73,10 @@ def test_openapi_read_only_and_contract():
         "subject_id",
         "status",
         "priority",
+        "type",
         "limit",
         "after_deadline",
+        "after_type",
         "after_id",
     }
     assert params["deadline_from"]["required"] and params["deadline_to"]["required"]
@@ -90,6 +93,55 @@ def test_openapi_read_only_and_contract():
         "estimated_duration",
     }
     assert item["type"]["const"] == "activity"
+    session_item = spec["components"]["schemas"]["CalendarStudySessionItem"][
+        "properties"
+    ]
+    assert set(session_item) == {
+        "id",
+        "type",
+        "subject_id",
+        "activity_id",
+        "planned_start_at",
+        "planned_duration",
+        "lifecycle",
+        "result",
+        "start_at",
+        "end_at",
+    }
+    assert session_item["type"]["const"] == "study_session"
+    response_items = spec["components"]["schemas"]["CalendarResponse"]["properties"][
+        "items"
+    ]["items"]
+    assert {
+        schema["$ref"].rsplit("/", 1)[-1] for schema in response_items["oneOf"]
+    } == {
+        "CalendarActivityItem",
+        "CalendarStudySessionItem",
+    }
+
+
+def test_legacy_activity_filters_and_cursor_remain_supported():
+    filters = CalendarFilters(
+        **WINDOW,
+        status="completed",
+        priority="high",
+        after_deadline="2030-01-10T00:00:00Z",
+        after_id=12,
+    )
+    assert filters.type is None
+    assert filters.after_type is None
+    with pytest.raises(ValidationError):
+        CalendarFilters(**WINDOW, type="study_session", status="completed")
+
+
+def test_calendar_filter_accepts_typed_mixed_cursor():
+    filters = CalendarFilters(
+        **WINDOW,
+        after_deadline="2030-01-10T00:00:00Z",
+        after_id=12,
+        after_type="study_session",
+    )
+    assert filters.after_type == "study_session"
 
 
 def test_db_failure_is_sanitized_and_not_retried():
@@ -109,14 +161,17 @@ def test_db_failure_is_sanitized_and_not_retried():
 
 def test_empty_service_performs_only_bounded_select():
     db = MagicMock()
-    db.scalars.return_value.all.return_value = []
+    db.execute.return_value.mappings.return_value.all.return_value = []
     assert CalendarService(db).list(7, CalendarFilters(**WINDOW)).model_dump() == {
         "items": [],
         "next_cursor": None,
     }
-    statement = db.scalars.call_args.args[0]
-    assert statement.is_select and statement.compile().params["user_id_1"] == 7
-    assert 51 in statement.compile().params.values()
+    statement = db.execute.call_args.args[0]
+    compiled = statement.compile()
+    assert statement.is_select
+    assert "activities" in str(statement) and "study_sessions" in str(statement)
+    assert 7 in compiled.params.values()
+    assert 51 in compiled.params.values()
     db.commit.assert_not_called()
-    db.execute.assert_not_called()
+    db.execute.assert_called_once()
     db.add.assert_not_called()
