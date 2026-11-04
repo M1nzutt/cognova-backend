@@ -6,6 +6,7 @@ from app.api.calendar import router as calendar_router
 from app.api.health import router as health_router
 from app.api.onboarding import router as onboarding_router
 from app.api.questionnaire import router as questionnaire_router
+from app.api.study_plans import router as study_plans_router
 from app.api.study_sessions import router as study_sessions_router
 from app.api.subjects import router as subjects_router
 
@@ -21,3 +22,4 @@ api_router.include_router(activities_router)
 api_router.include_router(calendar_router)
 
 api_router.include_router(study_sessions_router)
+api_router.include_router(study_plans_router)

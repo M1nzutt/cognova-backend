@@ -64,6 +64,44 @@ class DomainError(Exception):
             409,
             "Tu identidad histórica requiere revisión antes de actualizar el perfil.",
         ),
+        "STUDY_PLAN_NOT_FOUND": (404, "Plan de estudio no encontrado."),
+        "STUDY_CHALLENGE_NOT_FOUND": (404, "Reto no encontrado."),
+        "STUDY_PLAN_STATE_CONFLICT": (
+            409,
+            "El Plan no permite esa acción en su estado actual.",
+        ),
+        "STUDY_PLAN_RESOURCE_CONFLICT": (
+            409,
+            "Los recursos vinculados no pertenecen al Plan o no conservan su contexto.",
+        ),
+        "STUDY_PLAN_WRITE_CONFLICT": (
+            409,
+            "El Plan cambió durante la operación; consulta e intenta de nuevo.",
+        ),
+        "STUDY_PLAN_DEPENDENCY_CONFLICT": (
+            409,
+            "Las dependencias del Reto deben pertenecer al Plan y no formar ciclos.",
+        ),
+        "STUDY_PLAN_HISTORY_CONFLICT": (
+            409,
+            "La operación modificaría historia conservada del Plan.",
+        ),
+        "STUDY_PLAN_GENERATION_UNAVAILABLE": (
+            503,
+            "La generación de Planes no está disponible en este momento.",
+        ),
+        "STUDY_CHALLENGE_STATE_CONFLICT": (
+            409,
+            "El Reto no permite esa acción en su estado actual.",
+        ),
+        "STUDY_CHALLENGE_TARGET_CONFLICT": (
+            409,
+            "El objetivo del Reto no corresponde con sus recursos vinculados.",
+        ),
+        "STUDY_CHALLENGE_WRITE_CONFLICT": (
+            409,
+            "El Reto cambió durante la operación; consulta e intenta de nuevo.",
+        ),
     }
 
     def __init__(self, code: str) -> None:
