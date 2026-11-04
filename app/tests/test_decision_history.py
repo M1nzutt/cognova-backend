@@ -9,11 +9,27 @@ def test_decision_history_returns_recent_proposal_edit_first():
         1, "edited", "name", "Original", "Draft", datetime.now(timezone.utc)
     )
     second = DecisionEntry(
-        2, "edited", "objective", "Learn", "Prepare for exam", datetime.now(timezone.utc)
+        2,
+        "edited",
+        "objective",
+        "Learn",
+        "Prepare for exam",
+        datetime.now(timezone.utc),
     )
     history = DecisionHistory([first, second])
 
     assert history.latest() == second
     assert history.undo_latest() == second
+    history.record(
+        DecisionEntry(
+            3,
+            "edited",
+            f"undo:{second.id}:{second.field_path}",
+            second.chosen_value,
+            second.proposed_value,
+            datetime.now(timezone.utc),
+        )
+    )
     assert history.undo_latest() == first
     assert history.undo_latest() is None
+    assert len(history) == 3
