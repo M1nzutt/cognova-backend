@@ -1,13 +1,27 @@
 # Despliegue existente y transición de base de datos
 
-## Estado actual — Calendario ampliado Live y cerrado — 2026-11-02
+## Planes + Retos — release pendiente — 2026-11-03
+
+Database está en `0007_study_plans_and_challenges`, pero el Backend Live sigue en
+`4735a697aed69f66f3055c902a00507b66a556e0`, cuya readiness exige 0006. La rama
+`feat/study-plans-challenges-0007` fija el pin y exige 0007, pero aún no se integró ni
+desplegó. CI de la rama pasó en
+[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`, con 464 pruebas totales (incluidas
+las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
+runtime/launcher, `pip-audit` y Gitleaks. Faltan merge `--no-ff`, deploy Render y
+smoke productivo de readiness, auth/onboarding, Planes/Retos, ownership, no-store y regresiones de
+Materias/Actividades/Sesiones/Calendario. No se ejecutó smoke de Planes contra
+producción.
+
+## Histórico — Calendario ampliado Live y cerrado — 2026-11-02
 
 El release `4735a697aed69f66f3055c902a00507b66a556e0` se integró a `main` con
 `--no-ff`, se publicó y Render lo confirmó Live en el servicio existente
 `srv-db2j6nqj9qps73crqa0g`, deploy `dep-dbkjld7lk1mc73duk6jg`:
-https://cognova-backend-lpsi.onrender.com. Database sigue en
-`0006_study_sessions` con pin `eff87b387345a1d3f286e3a6007d41e707ec9d13`; esta
-ampliación no crea tabla ni requiere migración, grants o cambio de esquema.
+https://cognova-backend-lpsi.onrender.com. Al cerrar Calendario, Database estaba en
+`0006_study_sessions` con pin `eff87b387345a1d3f286e3a6007d41e707ec9d13`; esa
+ampliación no creó tabla ni requirió migración, grants o cambio de esquema.
 
 Health, readiness y OpenAPI respondieron 200. El smoke autenticado productivo verificó
 items `activity` y `study_session`, filtros, límites, ownership, onboarding,

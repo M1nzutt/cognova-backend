@@ -1,12 +1,32 @@
 # Cognova — Estado backend
 
+## Planes de Estudio + Retos — Backend validado en rama — 2026-11-03
+
+Database producción quedó en `0007_study_plans_and_challenges`, commit
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`. La rama
+`feat/study-plans-challenges-0007` actualiza readiness/launcher a esa revisión y
+añade mappings ORM, rutas autenticadas de Planes y Retos, validación de ownership,
+decisiones append-only y seis estructuras de dominio usadas en las proyecciones.
+No cambia DDL ni otros repositorios.
+
+El Backend Live de Render sigue en `4735a697aed69f66f3055c902a00507b66a556e0` y
+su readiness exige 0006; hace falta integrar esta rama y desplegarla para recuperar
+compatibilidad con la DB 0007. La rama quedó publicada en
+`e281e035f124dc8e07b5f395c37c1f4731fbcc0d`; todavía no hubo merge, deploy ni smoke
+productivo. CI integral [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
+omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+La creación disponible es manual; Gemini no
+está integrado y regenerar responde 503 sin persistir una falsa decisión.
+Contrato: [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
+
 ## Calendario ampliado — Backend cerrado — 2026-11-02
 
 GET `/api/v1/calendar` integra ahora Actividades (`deadline`) y Sesiones de Estudio
 (`planned_start_at`) como una vista transversal, autenticada y de solo lectura. El
 contrato devuelve items discriminados por `type`; filtros, cursor y orden total están
 definidos en [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). No hubo migración ni cambios
-de Database: producción permanece en `0006_study_sessions`, pin
+de Database: al cerrar Calendario, producción estaba en `0006_study_sessions`, pin
 `eff87b387345a1d3f286e3a6007d41e707ec9d13`.
 
 Merge `--no-ff` `4735a697aed69f66f3055c902a00507b66a556e0` está **Live** en Render,

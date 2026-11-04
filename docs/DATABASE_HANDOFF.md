@@ -1,16 +1,26 @@
 ﻿# Handoff database → backend
 
-## Estado vigente — 2026-11-02
+## Estado vigente — 2026-11-03
 
-Database producción está en `0006_study_sessions`; main Database fijado por Backend:
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`. La migración y los grants runtime para
-`study_sessions`/`study_session_intervals` están cerrados en Database. Backend consume
-ese contrato en `feat/study-sessions-0006`. No se modifica el repositorio Database
-desde Backend. CI Backend pasó; el release aún requiere merge, deploy y smoke.
-Véanse [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md) y DEPLOYMENT.
+Database producción está en `0007_study_plans_and_challenges`; Backend fija
+`M1nzutt/cognova-database` al commit
+`0835447ac9b96b5e01c201deebdb9ae862e4892b` en `tools/database-ref.json`. La revisión
+añade `study_plans`, tres tablas de relaciones, `study_plan_decisions` y
+`study_challenges`. Migración/grants ya están cerrados en Database; Backend solo
+mantiene mappings y consultas, sin DDL.
 
-Calendario v1 ya está cerrado; sigue mostrando Actividades y no se altera en este
-bloque. Su futura extensión para Sesiones requiere contrato separado.
+La rama `feat/study-plans-challenges-0007` exige exactamente 0007 y añade Planes y
+Retos. Backend Live aún exige 0006, así que falta integrar/desplegar esta rama para
+restaurar compatibilidad de readiness. CI de rama
+[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+pasó sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`: 464 pruebas totales (incluidas
+las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
+runtime/launcher, `pip-audit` y Gitleaks.
+No se modifica el repositorio Database desde Backend. Ver STUDY_PLANS_CONTRACT y
+DEPLOYMENT.
+
+Calendario consume Actividades y Sesiones en modo read-only; Planes las referencia sin
+crear copias. No hay cambios Database ni migraciones requeridas por Backend.
 
 ## Histórico — Handoff de Actividades sobre 0005
 
@@ -135,13 +145,15 @@ no para generar DDL. Sus nombres se conservan: auth depende de
 el pool en éxito/error; falla sin escuchar y sin imprimir secretos si DB no está
 lista. No hay imports Alembic/database, advisory locks ni upgrade en runtime.
 
-Readiness conserva SELECT 1 y lectura de alembic_version. El código de esta rama
-acepta exactamente una fila `0006_study_sessions`; ausencia, revisión distinta o
-múltiples heads dan503. El SHA Live registrado antes de Database 0006 requería
-0005 y necesita un release compatible.
+Readiness conserva SELECT 1 y lectura de alembic_version. El Backend Live
+`4735a697aed69f66f3055c902a00507b66a556e0` acepta exactamente
+`0006_study_sessions`; ausencia, revisión distinta o múltiples heads dan 503. La
+rama `feat/study-plans-challenges-0007` exige exactamente
+`0007_study_plans_and_challenges` y necesita merge/deploy para ser compatible con la
+producción actual. El SHA Live anterior a 0006 requería 0005 y es histórico.
 No hay variable de entorno para eludir esa decisión ni dependencia HTTP con
-cognova-database, que no es un servicio. El identificador queda explícito en
-ReadinessService y la referencia de tooling declara el mismo contrato.
+cognova-database, que no es un servicio. Cada release mantiene explícito el
+identificador de ReadinessService y el SHA de tooling que declara ese contrato.
 
 Una nueva revisión exige pruebas de compatibilidad y un release backend que
 admita explícitamente el conjunto de heads previsto antes de aplicar DDL.

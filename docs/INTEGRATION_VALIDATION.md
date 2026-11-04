@@ -1,10 +1,23 @@
 # Validación de integración productiva
 
+## Planes + Retos — pre-release
+
+Database está en `0007_study_plans_and_challenges` (SHA
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`). La rama Backend
+`e281e035f124dc8e07b5f395c37c1f4731fbcc0d` actualiza readiness y añade endpoints; no
+se ha mergeado ni ejecutado contra producción. CI integral
+[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
+omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+No hubo cambios ni datos sintéticos en producción para esta funcionalidad. El smoke
+productivo se hará después del merge/deploy; ver DEPLOYMENT.
+
 ## Calendario ampliado — smoke productivo aprobado — 2026-11-02
 
 Backend `main` Live en `4735a697aed69f66f3055c902a00507b66a556e0`, deploy Render
-`dep-dbkjld7lk1mc73duk6jg`. Database sigue en `0006_study_sessions` (pin
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`), sin migración ni cambios de Database.
+`dep-dbkjld7lk1mc73duk6jg`. Al cerrar este smoke, Database estaba en
+`0006_study_sessions` (pin `eff87b387345a1d3f286e3a6007d41e707ec9d13`), sin
+migración ni cambios de Database.
 [Evidencia sanitizada](evidence/calendar-study-sessions-smoke-2026-11-02.json).
 
 | Control | Resultado productivo |

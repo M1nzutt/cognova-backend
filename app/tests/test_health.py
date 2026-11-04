@@ -42,6 +42,8 @@ def test_readiness_requires_current_migration():
     session.scalars.return_value.all.return_value = ["0001_create_users"]
     assert not ReadinessService(database).check()
     session.scalars.return_value.all.return_value = ["0006_study_sessions"]
+    assert not ReadinessService(database).check()
+    session.scalars.return_value.all.return_value = ["0007_study_plans_and_challenges"]
     assert ReadinessService(database).check()
 
 
@@ -54,6 +56,8 @@ def test_readiness_requires_current_migration():
         ["0003_unknown"],
         ["0004_subjects"],
         ["0005_activities"],
+        ["0006_study_sessions"],
+        ["0007_unknown"],
         ["0004_subjects", "another_head"],
     ],
 )
