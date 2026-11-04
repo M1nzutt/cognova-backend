@@ -16,8 +16,8 @@ onboarding y ownership. `StudyPlanService` coordina transacciones y decisiones,
 un Plan y sus relaciones/contexto se validan antes de escribir. Los servicios usan
 `LearningPlanMap`, `PriorityPlanner`, `DependencyNetwork`, `DecisionHistory`,
 `WeeklyRhythm` y `StudySlots` en lógica de dominio. La interfaz del proveedor IA queda
-preparada; Gemini no está conectado. La rama de Backend que exige 0007 aún no está
-desplegada.
+preparada; Gemini no está conectado. El Backend que exige 0007 está Live en Render
+desde el merge `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`.
 
 ```text
 Usuario

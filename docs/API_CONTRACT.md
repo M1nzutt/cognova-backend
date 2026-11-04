@@ -9,8 +9,9 @@ Sesiones, según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes y Retos se rigen por
 [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md); Gemini real sigue pendiente y ningún
 endpoint declara generado por IA un Plan manual. La API de Planes/Retos está
-implementada en `feat/study-plans-challenges-0007`; el Backend Live aún requiere 0006
-y el release de esa rama está pendiente de CI, merge, deploy y smoke.
+desplegada en Backend `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` sobre Database
+0007. CI del merge y smoke autenticado productivo pasaron. Los flujos de
+propuesta `ai` se probaron con fixtures sintéticos; Gemini real sigue pendiente.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos

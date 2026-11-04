@@ -1,6 +1,6 @@
 ﻿# Handoff database → backend
 
-## Estado vigente — 2026-11-03
+## Estado vigente — 2026-11-04
 
 Database producción está en `0007_study_plans_and_challenges`; Backend fija
 `M1nzutt/cognova-database` al commit
@@ -9,15 +9,20 @@ añade `study_plans`, tres tablas de relaciones, `study_plan_decisions` y
 `study_challenges`. Migración/grants ya están cerrados en Database; Backend solo
 mantiene mappings y consultas, sin DDL.
 
-La rama `feat/study-plans-challenges-0007` exige exactamente 0007 y añade Planes y
-Retos. Backend Live aún exige 0006, así que falta integrar/desplegar esta rama para
-restaurar compatibilidad de readiness. CI de rama
-[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`: 464 pruebas totales (incluidas
-las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
-runtime/launcher, `pip-audit` y Gitleaks.
-No se modifica el repositorio Database desde Backend. Ver STUDY_PLANS_CONTRACT y
-DEPLOYMENT.
+Backend Live `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` exige exactamente 0007;
+readiness respondió 200 después del deploy `dep-dblah617lnhs739gllq0`. Preflight
+y verificación posterior READ ONLY confirmaron `cognova_runtime`, TLS y revisión
+exacta. Runtime tiene SELECT/INSERT/UPDATE/DELETE en `study_plans`;
+SELECT/INSERT/DELETE en las tres relaciones; SELECT/INSERT en decisiones;
+SELECT/INSERT/UPDATE en Retos; USAGE/SELECT en sus tres secuencias. No tiene
+TRUNCATE, CREATE en `public` ni UPDATE de secuencias. No hubo DDL ni cambios en el
+repositorio Database desde Backend. Ver
+[evidencia de release](evidence/study-plans-challenges-smoke-2026-11-04.json).
+
+[CI de rama 41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+y [CI del merge 41768331457](https://github.com/M1nzutt/cognova-backend/actions/runs/41768331457)
+pasaron con 464 pruebas totales, incluidas las de PostgreSQL, sin omisiones;
+Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
 
 Calendario consume Actividades y Sesiones en modo read-only; Planes las referencia sin
 crear copias. No hay cambios Database ni migraciones requeridas por Backend.

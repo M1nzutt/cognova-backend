@@ -1,14 +1,14 @@
 # Cognova — Reglas para Agentes
 
-## Alcance vigente — 2026-11-03
+## Alcance vigente — 2026-11-04
 
-Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están
-desplegados y cerrados en Backend. Database aplicó `0007_study_plans_and_challenges`
-en producción; su SHA fijado es `0835447ac9b96b5e01c201deebdb9ae862e4892b`.
-Planes y Retos están en implementación Backend en
-`feat/study-plans-challenges-0007`; esa rama actualiza readiness a 0007. El Backend
-Live aún exige 0006 y requiere release coordinado. Esta fase no modifica Frontend ni
-Database, no agrega migraciones y no integra Gemini real. Contratos:
+Materias, Actividades, Sesiones de Estudio + temporizador, Calendario y Planes +
+Retos están desplegados y cerrados en Backend. Database está en
+`0007_study_plans_and_challenges`, SHA fijado
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`. El Backend Live
+`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` exige esa revisión y pasó smoke
+productivo. Gemini real sigue pendiente; regenerate responde 503 sin mutaciones.
+No se modificaron Frontend ni Database. Contratos:
 [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md),
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md) y
 [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md).

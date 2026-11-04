@@ -1,16 +1,41 @@
 # Validación de integración productiva
 
-## Planes + Retos — pre-release
+## Planes + Retos — smoke productivo aprobado — 2026-11-04
 
-Database está en `0007_study_plans_and_challenges` (SHA
-`0835447ac9b96b5e01c201deebdb9ae862e4892b`). La rama Backend
-`e281e035f124dc8e07b5f395c37c1f4731fbcc0d` actualiza readiness y añade endpoints; no
-se ha mergeado ni ejecutado contra producción. CI integral
-[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
-omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
-No hubo cambios ni datos sintéticos en producción para esta funcionalidad. El smoke
-productivo se hará después del merge/deploy; ver DEPLOYMENT.
+Backend `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` Live en Render
+`dep-dblah617lnhs739gllq0`. Database `0007_study_plans_and_challenges`, pin
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`; runtime `cognova_runtime` con
+TLS y grants mínimos. [Evidencia sanitizada de 87 comprobaciones API](evidence/study-plans-challenges-smoke-2026-11-04.json).
+
+| Control | Resultado productivo |
+| --- | --- |
+| Health / readiness / OpenAPI | 200 / 200 `no-store` / 200; rutas de Planes y Retos presentes |
+| Auth y onboarding | Sin Bearer 401; incompleto 403; dos cuentas sintéticas completadas |
+| Planes | Crear/listar/detalle/editar/undo; vínculos a Materia, Actividades y Sesión válidos; activar/completar/abandonar; borrado vacío 204, con historia 409 |
+| Ownership/contexto | Plan/Reto ajeno 404; recursos ajenos o relaciones incoherentes 409; duplicados y fechas inválidas 422 |
+| Decisiones | `edited` conserva valor anterior/elegido; undo agrega decisión inversa; propuestas fixture `ai` aceptada y rechazada conservan valores propuestos/elegidos |
+| Gemini ausente | `regenerate` sobre fixture `ai` devolvió 503; detalle idéntico antes/después, cero decisiones falsas |
+| Retos | Crear/listar/detalle/editar; start/complete/fail/cancel; contexto de Materia, Actividad y Sesión; fechas, objetivos y estados inválidos rechazados |
+| Estructuras | `LearningPlanMap` en jerarquía; `PriorityPlanner` en orden urgente/low; `DependencyNetwork` en orden y rechazo de ciclo; `DecisionHistory` en undo; `WeeklyRhythm` en minutos; `StudySlots` en huecos |
+| Concurrencia | Dos starts de Reto y dos activaciones de Plan: exactamente un 200 y un 409; transiciones repetidas 409, sin decisiones duplicadas |
+| Regresiones | Auth refresh/CSRF/logout; onboarding; Materias, Actividades e historial, Sesiones y temporizador con dos intervalos; Calendario `activity`+`study_session` en el mismo instante y snapshots conservados |
+| Limpieza | Segundo usuario: Sesión, Actividad y Materia eliminadas; primer usuario retiene filas por FKs/historial; ambas auth revocadas, cero sesiones activas |
+
+Las propuestas `ai` fueron tres fixtures de prueba insertados por el rol runtime
+bajo un usuario sintético creado por API, rotulados explícitamente como
+`TEST FIXTURE ONLY`; no hubo llamada a Gemini ni se atribuyó origen real de IA.
+Se retienen por RESTRICT/historial cinco Planes, cuatro decisiones, tres Retos,
+una Materia, dos Actividades, una Sesión y dos intervalos, además de dos
+usuarios/perfiles, cuestionarios iniciales y sesiones auth revocadas. Los counts de
+tablas previas cambiaron solo por esas filas sintéticas; el resto se preservó.
+Las 87 respuestas API comprobaron `no-store` y el smoke terminó sin errores.
+
+[CI de rama 41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+y [CI del merge 41768331457](https://github.com/M1nzutt/cognova-backend/actions/runs/41768331457)
+completed/success: 464 pruebas totales con PostgreSQL real, cero omisiones;
+Ruff, formato, mypy, build/wheel, runtime/launcher, `pip-audit` sin vulnerabilidades
+conocidas y Gitleaks. **Backend Planes + Retos queda cerrado; Frontend puede
+comenzar con el contrato publicado.**
 
 ## Calendario ampliado — smoke productivo aprobado — 2026-11-02
 

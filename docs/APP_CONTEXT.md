@@ -1,14 +1,15 @@
 # Cognova — Contexto Funcional y Conceptual de la Aplicación
 
-## Estado implementado — 2026-11-02
+## Estado implementado — 2026-11-04
 
-Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están
-cerrados en Backend. Database producción está en `0006_study_sessions` (pin
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`). Calendario muestra Actividades y
-Sesiones como recursos existentes, en una vista transversal de solo lectura y según
+Materias, Actividades, Sesiones de Estudio + temporizador, Calendario y Planes +
+Retos están cerrados en Backend. Database producción está en
+`0007_study_plans_and_challenges` (pin
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`). Calendario muestra Actividades
+y Sesiones como recursos existentes en una vista de solo lectura según
 [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes, Retos e IA no forman
-parte de este bloque.
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md); Planes y Retos por
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md). Gemini real sigue pendiente.
 
 Las secciones conceptuales siguientes expresan la visión de producto; no acreditan
 implementación ni fijan por sí solas el contrato del próximo módulo. Ver PROJECT_STATE.

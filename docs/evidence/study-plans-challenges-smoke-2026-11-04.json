@@ -1,0 +1,647 @@
+{
+  "release_sha": "d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0",
+  "render_deploy": "dep-dblah617lnhs739gllq0",
+  "render_live": true,
+  "database_revision": "0007_study_plans_and_challenges",
+  "runtime_role": "cognova_runtime",
+  "tls": true,
+  "runtime_grants": {
+    "study_plans": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": true,
+      "DELETE": true,
+      "TRUNCATE": false
+    },
+    "study_plan_subjects": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": false,
+      "DELETE": true,
+      "TRUNCATE": false
+    },
+    "study_plan_activities": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": false,
+      "DELETE": true,
+      "TRUNCATE": false
+    },
+    "study_plan_sessions": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": false,
+      "DELETE": true,
+      "TRUNCATE": false
+    },
+    "study_plan_decisions": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    },
+    "study_challenges": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": true,
+      "DELETE": false,
+      "TRUNCATE": false
+    }
+  },
+  "runtime_sequences": {
+    "public.study_plans_id_seq": {
+      "USAGE": true,
+      "SELECT": true,
+      "UPDATE": false
+    },
+    "public.study_plan_decisions_id_seq": {
+      "USAGE": true,
+      "SELECT": true,
+      "UPDATE": false
+    },
+    "public.study_challenges_id_seq": {
+      "USAGE": true,
+      "SELECT": true,
+      "UPDATE": false
+    }
+  },
+  "runtime_schema_create": false,
+  "preflight_before_release": {
+    "database_revision": "0007_study_plans_and_challenges",
+    "render_sha": "4735a697aed69f66f3055c902a00507b66a556e0",
+    "health_ready_openapi": "timed out through inherited proxy; later direct requests succeeded",
+    "visible_idle_transactions": 0
+  },
+  "observed_at_utc": "2026-11-04T23:29:48.788004+00:00",
+  "smoke_started_at_utc": "2026-11-04T23:28:57.414626+00:00",
+  "smoke_completed_at_utc": "2026-11-04T23:29:30.301232+00:00",
+  "public_http": {
+    "/api/v1/health": {
+      "status": 200,
+      "cache_control": "no-store"
+    },
+    "/api/v1/ready": {
+      "status": 200,
+      "cache_control": "no-store"
+    },
+    "/openapi.json": {
+      "status": 200,
+      "cache_control": null
+    }
+  },
+  "api_checks": {
+    "GET /health": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /ready": {
+      "http": 200,
+      "no_store": true
+    },
+    "plans auth required": {
+      "http": 401,
+      "no_store": true
+    },
+    "A register": {
+      "http": 201,
+      "no_store": true
+    },
+    "A onboarding incomplete": {
+      "http": 403,
+      "no_store": true
+    },
+    "PUT /onboarding/academic-profile": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /questionnaire/catalog": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /questionnaire": {
+      "http": 201,
+      "no_store": true
+    },
+    "GET /auth/me": {
+      "http": 200,
+      "no_store": true
+    },
+    "B register": {
+      "http": 201,
+      "no_store": true
+    },
+    "B onboarding incomplete": {
+      "http": 403,
+      "no_store": true
+    },
+    "POST /subjects": {
+      "http": 201,
+      "no_store": true
+    },
+    "POST /activities": {
+      "http": 201,
+      "no_store": true
+    },
+    "POST /sessions": {
+      "http": 201,
+      "no_store": true
+    },
+    "POST /study-plans": {
+      "http": 201,
+      "no_store": true
+    },
+    "GET /study-plans/1": {
+      "http": 200,
+      "no_store": true
+    },
+    "manual accept rejected": {
+      "http": 409,
+      "no_store": true
+    },
+    "manual reject rejected": {
+      "http": 409,
+      "no_store": true
+    },
+    "manual regenerate rejected": {
+      "http": 409,
+      "no_store": true
+    },
+    "foreign plan detail": {
+      "http": 404,
+      "no_store": true
+    },
+    "foreign plan edit": {
+      "http": 404,
+      "no_store": true
+    },
+    "foreign plan delete": {
+      "http": 404,
+      "no_store": true
+    },
+    "foreign subject_ids": {
+      "http": 409,
+      "no_store": true
+    },
+    "foreign activity_ids": {
+      "http": 409,
+      "no_store": true
+    },
+    "foreign study_session_ids": {
+      "http": 409,
+      "no_store": true
+    },
+    "missing subject context": {
+      "http": 409,
+      "no_store": true
+    },
+    "missing activity context": {
+      "http": 409,
+      "no_store": true
+    },
+    "duplicate relation": {
+      "http": 422,
+      "no_store": true
+    },
+    "invalid plan dates": {
+      "http": 422,
+      "no_store": true
+    },
+    "PUT /study-plans/1": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /study-plans/1/undo": {
+      "http": 200,
+      "no_store": true
+    },
+    "nothing left to undo": {
+      "http": 409,
+      "no_store": true
+    },
+    "history prevents delete": {
+      "http": 409,
+      "no_store": true
+    },
+    "safe delete": {
+      "http": 204,
+      "no_store": true
+    },
+    "deleted absent": {
+      "http": 404,
+      "no_store": true
+    },
+    "POST /study-plans/3/abandon": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /study-plans": {
+      "http": 200,
+      "no_store": true
+    },
+    "invalid plan state": {
+      "http": 422,
+      "no_store": true
+    },
+    "POST /study-plans/1/challenges": {
+      "http": 201,
+      "no_store": true
+    },
+    "GET /study-plans/1/challenges/1": {
+      "http": 200,
+      "no_store": true
+    },
+    "PUT /study-plans/1/challenges/1": {
+      "http": 200,
+      "no_store": true
+    },
+    "foreign challenge": {
+      "http": 404,
+      "no_store": true
+    },
+    "foreign plan challenge": {
+      "http": 404,
+      "no_store": true
+    },
+    "challenge outside plan": {
+      "http": 404,
+      "no_store": true
+    },
+    "foreign challenge resource": {
+      "http": 409,
+      "no_store": true
+    },
+    "invalid challenge dates": {
+      "http": 422,
+      "no_store": true
+    },
+    "invalid challenge status": {
+      "http": 422,
+      "no_store": true
+    },
+    "invalid target": {
+      "http": 422,
+      "no_store": true
+    },
+    "cyclic dependency": {
+      "http": 409,
+      "no_store": true
+    },
+    "race /study-plans/1/challenges/1/start": {
+      "statuses": [
+        200,
+        409
+      ],
+      "no_store": true,
+      "conflict": "STUDY_CHALLENGE_STATE_CONFLICT"
+    },
+    "started challenge immutable": {
+      "http": 409,
+      "no_store": true
+    },
+    "POST /study-plans/1/challenges/1/complete": {
+      "http": 200,
+      "no_store": true
+    },
+    "terminal challenge conflict": {
+      "http": 409,
+      "no_store": true
+    },
+    "POST /study-plans/1/challenges/2/start": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /study-plans/1/challenges/2/fail": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /study-plans/1/challenges/3/cancel": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /study-plans/1/challenges": {
+      "http": 200,
+      "no_store": true
+    },
+    "race /study-plans/1/activate": {
+      "statuses": [
+        200,
+        409
+      ],
+      "no_store": true,
+      "conflict": "STUDY_PLAN_STATE_CONFLICT"
+    },
+    "POST /study-plans/1/complete": {
+      "http": 200,
+      "no_store": true
+    },
+    "double plan complete": {
+      "http": 409,
+      "no_store": true
+    },
+    "POST /study-plans/4/accept": {
+      "http": 200,
+      "no_store": true
+    },
+    "double accept": {
+      "http": 409,
+      "no_store": true
+    },
+    "POST /study-plans/4/complete": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /study-plans/5/reject": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /study-plans/6": {
+      "http": 200,
+      "no_store": true
+    },
+    "unconfigured regenerate": {
+      "http": 503,
+      "no_store": true
+    },
+    "POST /study-plans/6/abandon": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /sessions/42/start": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /sessions/42/pause": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /sessions/42/resume": {
+      "http": 200,
+      "no_store": true
+    },
+    "POST /sessions/42/finish": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /subjects": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /activities": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /sessions": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /activities/38/deadline-history": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /subjects/65": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /activities/38": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /sessions/42": {
+      "http": 200,
+      "no_store": true
+    },
+    "GET /calendar": {
+      "http": 200,
+      "no_store": true
+    },
+    "A refresh csrf required": {
+      "http": 403,
+      "no_store": true
+    },
+    "A refresh": {
+      "http": 200,
+      "no_store": true
+    },
+    "B refresh csrf required": {
+      "http": 403,
+      "no_store": true
+    },
+    "B refresh": {
+      "http": 200,
+      "no_store": true
+    },
+    "A logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "A revoked access": {
+      "http": 401,
+      "no_store": true
+    },
+    "B logout": {
+      "http": 204,
+      "no_store": true
+    },
+    "B revoked access": {
+      "http": 401,
+      "no_store": true
+    }
+  },
+  "domain_structures": {
+    "LearningPlanMap": "hierarchy populated",
+    "PriorityPlanner": "urgent activity before low priority",
+    "WeeklyRhythm": "30 linked planned minutes",
+    "StudySlots": "nonempty unoccupied candidate slots",
+    "DecisionHistory": "edit then inverse append-only undo; repeated undo 409",
+    "DependencyNetwork": "dependency changes projection order; reverse edge rejected 409"
+  },
+  "ai_fixture_setup": [
+    {
+      "plan_id": 4,
+      "purpose": "accept",
+      "setup": "runtime INSERT for API-created synthetic owner; not Gemini output"
+    },
+    {
+      "plan_id": 5,
+      "purpose": "reject",
+      "setup": "runtime INSERT for API-created synthetic owner; not Gemini output"
+    },
+    {
+      "plan_id": 6,
+      "purpose": "regenerate",
+      "setup": "runtime INSERT for API-created synthetic owner; not Gemini output"
+    }
+  ],
+  "regenerate": {
+    "status": 503,
+    "snapshot_unchanged": true,
+    "false_decisions": 0,
+    "provider": "not configured"
+  },
+  "decisions": {
+    "edited": {
+      "id": 1,
+      "action": "edited",
+      "field_path": "name",
+      "proposed_value": "Synthetic release plan",
+      "chosen_value": "Synthetic edited plan",
+      "created_at": "2026-11-04T23:29:08.820385Z"
+    },
+    "accepted": {
+      "id": 3,
+      "action": "accepted",
+      "field_path": null,
+      "proposed_value": {
+        "name": "Synthetic proposal fixture accept",
+        "end_at": "2030-01-10T00:00:00+00:00",
+        "start_at": "2030-01-01T00:00:00+00:00",
+        "objective": "TEST FIXTURE ONLY; not generated by Gemini",
+        "subject_ids": [],
+        "activity_ids": [],
+        "study_session_ids": []
+      },
+      "chosen_value": {
+        "name": "Synthetic proposal fixture accept",
+        "end_at": "2030-01-10T00:00:00+00:00",
+        "start_at": "2030-01-01T00:00:00+00:00",
+        "objective": "TEST FIXTURE ONLY; not generated by Gemini",
+        "subject_ids": [],
+        "activity_ids": [],
+        "study_session_ids": []
+      },
+      "created_at": "2026-11-04T23:29:18.977061Z"
+    },
+    "rejected": {
+      "id": 4,
+      "action": "rejected",
+      "field_path": null,
+      "proposed_value": {
+        "name": "Synthetic proposal fixture reject",
+        "end_at": "2030-01-10T00:00:00+00:00",
+        "start_at": "2030-01-01T00:00:00+00:00",
+        "objective": "TEST FIXTURE ONLY; not generated by Gemini",
+        "subject_ids": [],
+        "activity_ids": [],
+        "study_session_ids": []
+      },
+      "chosen_value": null,
+      "created_at": "2026-11-04T23:29:19.585803Z"
+    },
+    "undo_count": 2
+  },
+  "timer": {
+    "intervals": 2,
+    "actual_duration": "0.394619"
+  },
+  "calendar": {
+    "mixed": true,
+    "same_instant_order": true,
+    "resource_snapshots_equal": true
+  },
+  "synthetic_user_ids": [
+    40,
+    41
+  ],
+  "cleanup": [
+    {
+      "owner": 40,
+      "kind": "sessions",
+      "id": 42,
+      "status": 409,
+      "retained": true
+    },
+    {
+      "owner": 40,
+      "kind": "activities",
+      "id": 38,
+      "status": 409,
+      "retained": true
+    },
+    {
+      "owner": 40,
+      "kind": "activities",
+      "id": 40,
+      "status": 409,
+      "retained": true
+    },
+    {
+      "owner": 40,
+      "kind": "subjects",
+      "id": 65,
+      "status": 409,
+      "retained": true
+    },
+    {
+      "owner": 41,
+      "kind": "sessions",
+      "id": 43,
+      "status": 204,
+      "retained": false
+    },
+    {
+      "owner": 41,
+      "kind": "activities",
+      "id": 39,
+      "status": 204,
+      "retained": false
+    },
+    {
+      "owner": 41,
+      "kind": "subjects",
+      "id": 66,
+      "status": 204,
+      "retained": false
+    }
+  ],
+  "synthetic_auth_sessions_unrevoked": 0,
+  "synthetic_retained_counts": {
+    "subjects": 1,
+    "activities": 2,
+    "study_sessions": 1,
+    "study_plans": 5,
+    "study_plan_decisions": 4,
+    "study_challenges": 3,
+    "study_session_intervals": 2
+  },
+  "table_counts_before": {
+    "activities": 10,
+    "activity_deadline_events": 8,
+    "alembic_version": 1,
+    "auth_sessions": 49,
+    "questionnaire_responses": 46,
+    "rate_limit_buckets": 1,
+    "study_challenges": 0,
+    "study_plan_activities": 0,
+    "study_plan_decisions": 0,
+    "study_plan_sessions": 0,
+    "study_plan_subjects": 0,
+    "study_plans": 0,
+    "study_session_intervals": 21,
+    "study_sessions": 20,
+    "subjects": 21,
+    "user_academic_goal_legacy": 1,
+    "users": 39
+  },
+  "table_counts_after": {
+    "activities": 12,
+    "activity_deadline_events": 8,
+    "alembic_version": 1,
+    "auth_sessions": 51,
+    "questionnaire_responses": 48,
+    "rate_limit_buckets": 1,
+    "study_challenges": 3,
+    "study_plan_activities": 2,
+    "study_plan_decisions": 4,
+    "study_plan_sessions": 1,
+    "study_plan_subjects": 1,
+    "study_plans": 5,
+    "study_session_intervals": 23,
+    "study_sessions": 21,
+    "subjects": 22,
+    "user_academic_goal_legacy": 1,
+    "users": 41
+  },
+  "preexisting_data_counts_preserved": true,
+  "contains_credentials_or_tokens": false
+}

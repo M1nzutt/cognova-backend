@@ -1,24 +1,38 @@
 # Cognova — Estado backend
 
-## Planes de Estudio + Retos — Backend validado en rama — 2026-11-03
+## Planes de Estudio + Retos — Backend cerrado en producción — 2026-11-04
 
-Database producción quedó en `0007_study_plans_and_challenges`, commit
-`0835447ac9b96b5e01c201deebdb9ae862e4892b`. La rama
-`feat/study-plans-challenges-0007` actualiza readiness/launcher a esa revisión y
-añade mappings ORM, rutas autenticadas de Planes y Retos, validación de ownership,
-decisiones append-only y seis estructuras de dominio usadas en las proyecciones.
-No cambia DDL ni otros repositorios.
+Database producción está en `0007_study_plans_and_challenges`, commit
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`. Backend integró los 22 commits de
+`feat/study-plans-challenges-0007` a `main` mediante merge `--no-ff`
+`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`, sin squash. Render confirmó ese
+SHA Live en `dep-dblah617lnhs739gllq0`. Health, readiness sobre 0007 y OpenAPI
+respondieron 200; health/readiness y todas las respuestas API comprobadas llevan
+`no-store`.
 
-El Backend Live de Render sigue en `4735a697aed69f66f3055c902a00507b66a556e0` y
-su readiness exige 0006; hace falta integrar esta rama y desplegarla para recuperar
-compatibilidad con la DB 0007. La rama quedó publicada en
-`e281e035f124dc8e07b5f395c37c1f4731fbcc0d`; todavía no hubo merge, deploy ni smoke
-productivo. CI integral [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
-omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
-La creación disponible es manual; Gemini no
-está integrado y regenerar responde 503 sin persistir una falsa decisión.
-Contrato: [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
+El smoke autenticado productivo validó Planes, Retos, decisiones, ownership,
+consistencia de relaciones, concurrencia 200/409, las seis estructuras por sus
+proyecciones y las regresiones de Auth, Onboarding, Materias, Actividades, Sesiones,
+Timer y Calendario mixto. Tres propuestas `ai` fueron fixtures sintéticos aislados
+del usuario creado por API, expresamente rotulados como prueba y sin llamada Gemini.
+`accept`/`reject` conservaron `proposed_value`/`chosen_value`; `regenerate`
+respondió 503, no agregó decisión y dejó el detalle idéntico. Gemini real sigue
+pendiente; la creación API disponible es manual. Evidencia sanitizada:
+[smoke Planes + Retos](evidence/study-plans-challenges-smoke-2026-11-04.json).
+
+Se revocaron ambas sesiones auth sintéticas; cero quedaron activas. Se eliminaron los
+recursos académicos eliminables del segundo usuario. Quedan por RESTRICT/historial
+cinco Planes, cuatro decisiones, tres Retos, una Materia, dos Actividades, una
+Sesión y dos intervalos del primer usuario, más las dos cuentas/perfiles,
+cuestionarios iniciales y auth revocada. Los counts previos cambiaron solo por esas
+filas sintéticas; no se tocaron datos de otros usuarios.
+
+[CI de rama 41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+y [CI del merge 41768331457](https://github.com/M1nzutt/cognova-backend/actions/runs/41768331457)
+pasaron: 464 pruebas totales con PostgreSQL real y cero omisiones, Ruff, formato,
+mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks. Contrato:
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md). **Backend Planes + Retos queda
+cerrado; Frontend puede empezar con los flujos publicados.**
 
 ## Calendario ampliado — Backend cerrado — 2026-11-02
 

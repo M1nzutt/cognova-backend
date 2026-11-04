@@ -8,8 +8,8 @@ decisión explícita; no se aplica automáticamente. El Backend entrega creació
 y flujos de aceptación/rechazo para propuestas existentes; Gemini aún no está
 integrado y regeneración responde 503. Las decisiones se conservan append-only,
 incluidos los deshacer. Las seis estructuras implementadas se consumen en
-validación/proyección real. Database 0007 ya está en producción, pero Backend aún no
-se ha desplegado con esta compatibilidad. Ver STUDY_PLANS_CONTRACT y PROJECT_STATE.
+validación/proyección real. Database 0007 y Backend compatible están en producción;
+smoke autenticado aprobado. Ver STUDY_PLANS_CONTRACT y PROJECT_STATE.
 
 ## Sesiones de estudio — decisión 2026-11-02
 

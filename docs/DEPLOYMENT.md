@@ -1,18 +1,25 @@
 # Despliegue existente y transición de base de datos
 
-## Planes + Retos — release pendiente — 2026-11-03
+## Planes + Retos — Live y cerrado — 2026-11-04
 
-Database está en `0007_study_plans_and_challenges`, pero el Backend Live sigue en
-`4735a697aed69f66f3055c902a00507b66a556e0`, cuya readiness exige 0006. La rama
-`feat/study-plans-challenges-0007` fija el pin y exige 0007, pero aún no se integró ni
-desplegó. CI de la rama pasó en
-[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`, con 464 pruebas totales (incluidas
-las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
-runtime/launcher, `pip-audit` y Gitleaks. Faltan merge `--no-ff`, deploy Render y
-smoke productivo de readiness, auth/onboarding, Planes/Retos, ownership, no-store y regresiones de
-Materias/Actividades/Sesiones/Calendario. No se ejecutó smoke de Planes contra
-producción.
+Database está en `0007_study_plans_and_challenges`. El SHA anterior Live
+`4735a697aed69f66f3055c902a00507b66a556e0` exigía 0006; el preflight
+confirmó ese estado de código y 0007 en Database. Las consultas HTTP previas
+agotaron el timeout por el proxy heredado por `httpx`; no se acreditó un 503
+productivo previo. Conexión directa respondió 200 tras el rollout.
+
+Merge `--no-ff` `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` conserva los 22
+commits de rama. Render auto-deploy del servicio `srv-db2j6nqj9qps73crqa0g`
+terminó Live como `dep-dblah617lnhs739gllq0`, mismo SHA, en
+https://cognova-backend-lpsi.onrender.com. Health 200, readiness 200 sobre 0007,
+OpenAPI 200 con `/api/v1/study-plans`. Health/readiness y las respuestas API
+verificadas enviaron `no-store`. El smoke autenticado y sus counts READ ONLY están en
+[INTEGRATION_VALIDATION](INTEGRATION_VALIDATION.md) y
+[evidencia sanitizada](evidence/study-plans-challenges-smoke-2026-11-04.json).
+CI de rama [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+y merge [41768331457](https://github.com/M1nzutt/cognova-backend/actions/runs/41768331457)
+pasaron la suite y compuertas de calidad/seguridad. El cierre documental usa
+`[skip ci] [skip render]`, conservando el SHA productivo validado.
 
 ## Histórico — Calendario ampliado Live y cerrado — 2026-11-02
 
