@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-
 from app.schemas.study_plan_activity_resource import StudyPlanActivityResource
 from app.schemas.study_plan_decision_response import StudyPlanDecisionResponse
 from app.schemas.study_plan_session_resource import StudyPlanSessionResource

@@ -64,15 +64,13 @@ class StudySlots:
             if cursor >= end_at:
                 break
         if end_at - cursor >= duration:
-            available.append(ScheduleEntry(cursor, cursor + duration, None, "candidate"))
+            available.append(
+                ScheduleEntry(cursor, cursor + duration, None, "candidate")
+            )
         return available
 
     def entries(self) -> list[ScheduleEntry]:
-        return [
-            entry
-            for entry in self._entries[: self._size]
-            if entry is not None
-        ]
+        return [entry for entry in self._entries[: self._size] if entry is not None]
 
 
 __all__ = ["StudySlots"]

@@ -43,9 +43,7 @@ def test_plan_schema_normalizes_text_and_rejects_duplicate_or_invalid_dates():
     with pytest.raises(ValidationError):
         StudyPlanWrite.model_validate(plan_write(activity_ids=[8, 8]))
     with pytest.raises(ValidationError):
-        StudyPlanWrite.model_validate(
-            plan_write(end_at="2030-01-07T00:00:00Z")
-        )
+        StudyPlanWrite.model_validate(plan_write(end_at="2030-01-07T00:00:00Z"))
 
 
 @pytest.mark.parametrize(
@@ -93,6 +91,4 @@ def test_challenge_schema_rejects_incompatible_targets_and_bad_dates():
             )
         )
     with pytest.raises(ValidationError):
-        StudyChallengeWrite.model_validate(
-            challenge_write(generation_criteria={})
-        )
+        StudyChallengeWrite.model_validate(challenge_write(generation_criteria={}))

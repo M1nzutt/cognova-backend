@@ -63,7 +63,9 @@ class DependencyNetwork:
         for dependents in self._dependents.values():
             for dependent in dependents:
                 incoming[dependent] += 1
-        ready = [activity_id for activity_id in all_activities if incoming[activity_id] == 0]
+        ready = [
+            activity_id for activity_id in all_activities if incoming[activity_id] == 0
+        ]
         ready.sort()
         ordered: list[int] = []
         while ready:

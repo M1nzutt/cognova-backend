@@ -8,9 +8,7 @@ class LearningPlanMap:
         self.root = PlanBranch(f"plan:{plan_id}", "plan", name)
         self._branches = {self.root.key: self.root}
 
-    def add(
-        self, *, key: str, kind: str, label: str, parent_key: str
-    ) -> PlanBranch:
+    def add(self, *, key: str, kind: str, label: str, parent_key: str) -> PlanBranch:
         if key in self._branches:
             raise ValueError("Plan resource keys must be unique")
         parent = self._branches.get(parent_key)

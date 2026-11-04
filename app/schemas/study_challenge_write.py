@@ -82,15 +82,24 @@ class StudyChallengeWrite(BaseModel):
         if self.target_type == "study_minutes":
             minutes = value.get("minutes")
             if (
-                self.subject_id is None and self.study_session_id is None
-            ) or set(value) != {"minutes"} or type(minutes) is not int or not 1 <= minutes <= 1440:
-                raise ValueError("study_minutes requires a contextual 1–1440 minute target")
+                (self.subject_id is None and self.study_session_id is None)
+                or set(value) != {"minutes"}
+                or type(minutes) is not int
+                or not 1 <= minutes <= 1440
+            ):
+                raise ValueError(
+                    "study_minutes requires a contextual 1–1440 minute target"
+                )
         elif self.target_type == "activity_completion":
             if self.activity_id is None or value != {"status": "completed"}:
-                raise ValueError("activity_completion requires a completed activity target")
+                raise ValueError(
+                    "activity_completion requires a completed activity target"
+                )
         elif self.target_type == "session_completion":
             if self.study_session_id is None or value != {"lifecycle": "finished"}:
-                raise ValueError("session_completion requires a finished session target")
+                raise ValueError(
+                    "session_completion requires a finished session target"
+                )
         elif self.target_type == "subject_mastery":
             criterion = value.get("criterion")
             threshold = value.get("threshold")
@@ -103,7 +112,9 @@ class StudyChallengeWrite(BaseModel):
                 or type(threshold) is not int
                 or not 1 <= threshold <= 100
             ):
-                raise ValueError("subject_mastery requires a criterion and a 1–100 threshold")
+                raise ValueError(
+                    "subject_mastery requires a criterion and a 1–100 threshold"
+                )
         elif self.target_type == "custom" and not value:
             raise ValueError("custom target cannot be empty")
         if (

@@ -38,9 +38,10 @@ def test_learning_plan_map_builds_and_walks_resource_hierarchy():
         "session:16",
     ]
     assert hierarchy.find("challenge:21") is not None
-    assert hierarchy.as_dict()["children"][0]["children"][0]["children"][0][
-        "kind"
-    ] == "challenge"
+    assert (
+        hierarchy.as_dict()["children"][0]["children"][0]["children"][0]["kind"]
+        == "challenge"
+    )
 
 
 def test_learning_plan_map_rejects_duplicate_or_missing_parent():

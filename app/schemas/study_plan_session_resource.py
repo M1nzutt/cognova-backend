@@ -3,7 +3,11 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from app.study_sessions.types import SessionContext, SessionExecutionState, SessionResult
+from app.study_sessions.types import (
+    SessionContext,
+    SessionExecutionState,
+    SessionResult,
+)
 
 
 class StudyPlanSessionResource(BaseModel):
