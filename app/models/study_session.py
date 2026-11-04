@@ -11,6 +11,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -65,6 +66,19 @@ class StudySession(Base):
             name="fk_study_sessions_owner_subject_activity",
             ondelete="RESTRICT",
             onupdate="RESTRICT",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "subject_id",
+            "id",
+            name="uq_study_sessions_user_subject_id",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "subject_id",
+            "activity_id",
+            "id",
+            name="uq_study_sessions_user_subject_activity_id",
         ),
         CheckConstraint(
             "isfinite(planned_start_at)", name="ck_study_sessions_planned_start"
