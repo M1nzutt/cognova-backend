@@ -215,8 +215,8 @@ class StudyPlanDecision(Base):
     plan_id: Mapped[int] = mapped_column(Integer, nullable=False)
     action: Mapped[str] = mapped_column(Text, nullable=False)
     field_path: Mapped[str | None] = mapped_column(Text)
-    proposed_value: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
-    chosen_value: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    proposed_value: Mapped[Any | None] = mapped_column(JSONB)
+    chosen_value: Mapped[Any | None] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

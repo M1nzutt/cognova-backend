@@ -40,6 +40,7 @@ def test_plan_schema_normalizes_text_and_rejects_duplicate_or_invalid_dates():
 
     assert value.name == "Semana de cálculo"
     assert value.subject_ids == [3]
+    assert StudyPlanWrite.model_validate(plan_write(subject_ids=[])).subject_ids == []
     with pytest.raises(ValidationError):
         StudyPlanWrite.model_validate(plan_write(activity_ids=[8, 8]))
     with pytest.raises(ValidationError):

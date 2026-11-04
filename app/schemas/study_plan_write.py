@@ -24,7 +24,9 @@ class StudyPlanWrite(BaseModel):
     ]
     start_at: Instant
     end_at: Instant
-    subject_ids: Annotated[list[EntityId], Field(min_length=1, max_length=100)]
+    subject_ids: Annotated[list[EntityId], Field(max_length=100)] = Field(
+        default_factory=list
+    )
     activity_ids: Annotated[list[EntityId], Field(max_length=200)] = Field(
         default_factory=list
     )
