@@ -10,9 +10,13 @@ añade `study_plans`, tres tablas de relaciones, `study_plan_decisions` y
 mantiene mappings y consultas, sin DDL.
 
 La rama `feat/study-plans-challenges-0007` exige exactamente 0007 y añade Planes y
-Retos. El Backend Live aún exige 0006, así que falta integrar/desplegar esta rama para
-restaurar compatibilidad de readiness. CI de esta implementación pendiente; no se
-modifica el repositorio Database desde Backend. Ver STUDY_PLANS_CONTRACT y DEPLOYMENT.
+Retos. Backend Live aún exige 0006, así que falta integrar/desplegar esta rama para
+restaurar compatibilidad de readiness. CI de rama
+[41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+pasó sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`: 464 pruebas PostgreSQL sin
+omisiones, Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+No se modifica el repositorio Database desde Backend. Ver STUDY_PLANS_CONTRACT y
+DEPLOYMENT.
 
 Calendario consume Actividades y Sesiones en modo read-only; Planes las referencia sin
 crear copias. No hay cambios Database ni migraciones requeridas por Backend.

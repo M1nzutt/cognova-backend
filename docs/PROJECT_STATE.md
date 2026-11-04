@@ -1,6 +1,6 @@
 # Cognova — Estado backend
 
-## Planes de Estudio + Retos — implementación de Backend en rama — 2026-11-03
+## Planes de Estudio + Retos — Backend validado en rama — 2026-11-03
 
 Database producción quedó en `0007_study_plans_and_challenges`, commit
 `0835447ac9b96b5e01c201deebdb9ae862e4892b`. La rama
@@ -11,9 +11,12 @@ No cambia DDL ni otros repositorios.
 
 El Backend Live de Render sigue en `4735a697aed69f66f3055c902a00507b66a556e0` y
 su readiness exige 0006; hace falta integrar esta rama y desplegarla para recuperar
-compatibilidad con la DB 0007. Todavía no hubo merge, deploy ni smoke productivo.
-CI integral pendiente de la publicación de la rama. La creación disponible es manual;
-Gemini no está integrado y regenerar responde 503 sin persistir una falsa decisión.
+compatibilidad con la DB 0007. La rama quedó publicada en
+`e281e035f124dc8e07b5f395c37c1f4731fbcc0d`; todavía no hubo merge, deploy ni smoke
+productivo. CI integral [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
+pasó: 464 pruebas PostgreSQL sin omisiones, Ruff/formato, mypy, build/wheel,
+runtime/launcher, `pip-audit` y Gitleaks. La creación disponible es manual; Gemini no
+está integrado y regenerar responde 503 sin persistir una falsa decisión.
 Contrato: [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
 
 ## Calendario ampliado — Backend cerrado — 2026-11-02
