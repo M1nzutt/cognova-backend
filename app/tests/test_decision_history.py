@@ -31,5 +31,15 @@ def test_decision_history_returns_recent_proposal_edit_first():
         )
     )
     assert history.undo_latest() == first
+    history.record(
+        DecisionEntry(
+            4,
+            "edited",
+            f"undo:{first.id}:{first.field_path}",
+            first.chosen_value,
+            first.proposed_value,
+            datetime.now(timezone.utc),
+        )
+    )
     assert history.undo_latest() is None
-    assert len(history) == 3
+    assert len(history) == 4

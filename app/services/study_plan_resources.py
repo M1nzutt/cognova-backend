@@ -151,6 +151,7 @@ class StudyPlanResources:
                     study_session_id=session_id,
                 )
             )
+        self._db.flush()
 
     def snapshot(self, plan: StudyPlan) -> dict[str, object]:
         return {

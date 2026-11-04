@@ -18,8 +18,6 @@ class StudySlots:
     def reserve(self, entry: ScheduleEntry) -> None:
         if entry.end_at <= entry.start_at:
             raise ValueError("Study slot must end after it starts")
-        if self._size == len(self._entries):
-            raise OverflowError("Study slot capacity exceeded")
         insert_at = 0
         while insert_at < self._size:
             current = self._entries[insert_at]
@@ -37,6 +35,8 @@ class StudySlots:
         following = self._entries[insert_at] if insert_at < self._size else None
         if following is not None and entry.end_at > following.start_at:
             raise ValueError("Study slot overlaps an existing session")
+        if self._size == len(self._entries):
+            raise OverflowError("Study slot capacity exceeded")
         for index in range(self._size, insert_at, -1):
             self._entries[index] = self._entries[index - 1]
         self._entries[insert_at] = entry

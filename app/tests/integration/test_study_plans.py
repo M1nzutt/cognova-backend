@@ -174,6 +174,12 @@ def test_plan_list_pagination_safe_delete_and_manual_abandon(client, registratio
     delete = client.delete(f"{BASE}/{empty_plan['id']}?confirm=true", headers=headers)
     assert delete.status_code == 204
     assert client.get(f"{BASE}/{empty_plan['id']}", headers=headers).status_code == 404
+    changed = client.put(
+        f"{BASE}/{first['id']}",
+        headers=headers,
+        json=plan_body(name="Plan con historial"),
+    )
+    assert changed.status_code == 200
     assert (
         client.delete(f"{BASE}/{first['id']}?confirm=true", headers=headers).status_code
         == 409
