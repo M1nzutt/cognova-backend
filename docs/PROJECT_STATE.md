@@ -21,9 +21,10 @@ pendiente; la creación API disponible es manual. Evidencia sanitizada:
 [smoke Planes + Retos](evidence/study-plans-challenges-smoke-2026-11-04.json).
 
 Se revocaron ambas sesiones auth sintéticas; cero quedaron activas. Se eliminaron los
-recursos académicos eliminables del segundo usuario. Quedan por RESTRICT/historial
-cinco Planes, cuatro decisiones, tres Retos, una Materia, dos Actividades, una
-Sesión y dos intervalos del primer usuario, más las dos cuentas/perfiles,
+recursos académicos eliminables del segundo usuario. Se conservan por las reglas
+de borrado seguro, FKs e historial: cinco Planes, cuatro decisiones, tres Retos,
+una Materia, dos Actividades, una Sesión y dos intervalos del primer usuario, más
+las dos cuentas/perfiles,
 cuestionarios iniciales y auth revocada. Los counts previos cambiaron solo por esas
 filas sintéticas; no se tocaron datos de otros usuarios.
 

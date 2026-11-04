@@ -24,8 +24,9 @@ TLS y grants mínimos. [Evidencia sanitizada de 87 comprobaciones API](evidence/
 Las propuestas `ai` fueron tres fixtures de prueba insertados por el rol runtime
 bajo un usuario sintético creado por API, rotulados explícitamente como
 `TEST FIXTURE ONLY`; no hubo llamada a Gemini ni se atribuyó origen real de IA.
-Se retienen por RESTRICT/historial cinco Planes, cuatro decisiones, tres Retos,
-una Materia, dos Actividades, una Sesión y dos intervalos, además de dos
+Se retienen según reglas de borrado seguro, FKs e historial: cinco Planes, cuatro
+decisiones, tres Retos, una Materia, dos Actividades, una Sesión y dos intervalos,
+además de dos
 usuarios/perfiles, cuestionarios iniciales y sesiones auth revocadas. Los counts de
 tablas previas cambiaron solo por esas filas sintéticas; el resto se preservó.
 Las 87 respuestas API comprobaron `no-store` y el smoke terminó sin errores.
