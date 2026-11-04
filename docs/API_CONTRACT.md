@@ -8,7 +8,9 @@ está en tools/database-ref.json. Calendario es de solo lectura sobre Actividade
 Sesiones, según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes y Retos se rigen por
 [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md); Gemini real sigue pendiente y ningún
-endpoint declara generado por IA un Plan manual.
+endpoint declara generado por IA un Plan manual. La API de Planes/Retos está
+implementada en `feat/study-plans-challenges-0007`; el Backend Live aún requiere 0006
+y el release de esa rama está pendiente de CI, merge, deploy y smoke.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos

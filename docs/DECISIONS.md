@@ -1,23 +1,31 @@
 # Cognova — Decisiones Congeladas
 
+## Planes de Estudio + Retos — decisión 2026-11-03
+
+Los Planes relacionan Materias, Actividades y Sesiones existentes; no duplican ni
+modifican esos recursos. Retos viven dentro de un Plan. Toda propuesta de IA requiere
+decisión explícita; no se aplica automáticamente. El Backend entrega creación manual
+y flujos de aceptación/rechazo para propuestas existentes; Gemini aún no está
+integrado y regeneración responde 503. Las decisiones se conservan append-only,
+incluidos los deshacer. Las seis estructuras implementadas se consumen en
+validación/proyección real. Database 0007 ya está en producción, pero Backend aún no
+se ha desplegado con esta compatibilidad. Ver STUDY_PLANS_CONTRACT y PROJECT_STATE.
+
 ## Sesiones de estudio — decisión 2026-11-02
 
-Backend consume el esquema productivo 0006_study_sessions fijado en
-tools/database-ref.json. La planificación usa planned_start_at y
+Sesiones se introdujeron en 0006_study_sessions y usan planned_start_at y
 planned_duration; el ciclo de ejecución se separa del resultado final.
 Backend abre/cierra intervalos con su reloj, excluye pausas de actual_duration
 y serializa cambios por usuario. Database conserva las constraints/FKs y el
-historial físico; Backend no añade triggers ni cambia schema. Contrato:
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Calendario v1 no cambia;
-una futura integración de sesiones requiere contrato y release aparte.
-La implementación está en `feat/study-sessions-0006`; no se considera desplegada
-hasta completar merge, release y smoke productivo. CI 41544468562 pasó.
+historial físico; Backend no añade triggers ni cambia schema. El pin actual es
+Database 0007 (aditivo); Planes relaciona Sesiones sin tocar su ciclo. Contrato:
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Las Sesiones se desplegaron
+con Calendario; Planes las referencia sin duplicarlas ni alterar su ciclo.
 
 ## Calendario — decisión 2026-10-25
 
 Calendario v1: vista transversal, solo recursos de Cognova. No eventos libres;
-consulta Actividades sin persistir copias. Contrato CALENDAR_CONTRACT; fuentes
-futuras requieren ampliar contrato, no tablas ficticias en esta fase.
+consulta Actividades y Sesiones sin persistir copias. Contrato CALENDAR_CONTRACT.
 
 ## Actividades — decisión 2026-10-23
 
@@ -119,9 +127,9 @@ Reemplaza el diseño anterior de JWT persistido.
 ## Historial de cambios a decisiones congeladas
 
 Los pins, restricciones de fase y pendientes siguientes corresponden a sus fechas.
-La sección siguiente es histórica. El estado vigente incluye Materias, Actividades
-y Calendario cerrados; Backend Sesiones está en desarrollo sobre 0006. Ver
-PROJECT_STATE y STUDY_SESSIONS_CONTRACT.
+La sección siguiente es histórica. El estado vigente incluye Materias, Actividades,
+Sesiones y Calendario desplegados; Planes/Retos se implementan para el esquema 0007.
+Ver PROJECT_STATE y STUDY_PLANS_CONTRACT.
 
 ### Materias — 2026-10-18
 

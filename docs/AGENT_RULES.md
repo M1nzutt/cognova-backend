@@ -1,14 +1,17 @@
 # Cognova — Reglas para Agentes
 
-## Alcance vigente — 2026-11-02
+## Alcance vigente — 2026-11-03
 
 Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están
-desplegados y cerrados en Backend. Database aplicó `0006_study_sessions` en
-producción y el pin vigente es `eff87b387345a1d3f286e3a6007d41e707ec9d13`.
-Calendario es una vista transversal de solo lectura sobre Actividades y Sesiones;
-su contrato está en [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). La ampliación actual no
-requiere Database ni migraciones. Planes, Retos e IA quedan fuera de esta fase.
+desplegados y cerrados en Backend. Database aplicó `0007_study_plans_and_challenges`
+en producción; su SHA fijado es `0835447ac9b96b5e01c201deebdb9ae862e4892b`.
+Planes y Retos están en implementación Backend en
+`feat/study-plans-challenges-0007`; esa rama actualiza readiness a 0007. El Backend
+Live aún exige 0006 y requiere release coordinado. Esta fase no modifica Frontend ni
+Database, no agrega migraciones y no integra Gemini real. Contratos:
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md),
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md) y
+[CALENDAR_CONTRACT](CALENDAR_CONTRACT.md).
 
 Release autorizado y cerrado 2026-10-26: merge --no-ff, deploy Render y smoke.
 La autorización posterior permitió cuentas/datos sintéticos mínimos por API,

@@ -1,10 +1,23 @@
 # Cognova — Arquitectura Backend
 
-## Calendario — decisión 2026-10-25
+## Calendario — decisión 2026-10-25, ampliado 2026-11-02
 
 Calendario v1 separa router, DTO discriminado y servicio de consulta read-only.
-Lee Activities con ownership y paginación cronológica; no ORM/migración nuevos.
-Cambios siguen pasando por Actividades. Ver CALENDAR_CONTRACT.
+Lee Actividades por deadline y Sesiones por planned_start_at con ownership y
+paginación cronológica; no persiste copias ni necesita migración. Cambios siguen
+pasando por los recursos originales. Ver CALENDAR_CONTRACT.
+
+## Planes de Estudio + Retos — implementación backend 2026-11-03
+
+El ORM refleja Database 0007; Database conserva DDL y grants. El router exige auth,
+onboarding y ownership. `StudyPlanService` coordina transacciones y decisiones,
+`StudyPlanResources` valida vínculos a registros originales y
+`StudyPlanProjection` arma el detalle sin duplicar datos. Retos se operan solo bajo
+un Plan y sus relaciones/contexto se validan antes de escribir. Los servicios usan
+`LearningPlanMap`, `PriorityPlanner`, `DependencyNetwork`, `DecisionHistory`,
+`WeeklyRhythm` y `StudySlots` en lógica de dominio. La interfaz del proveedor IA queda
+preparada; Gemini no está conectado. La rama de Backend que exige 0007 aún no está
+desplegada.
 
 ```text
 Usuario
@@ -158,12 +171,11 @@ Producción debe contar con:
 - Database administra migraciones Alembic, constraints, índices y recuperación.
 - Backend conserva el ORM, consultas, transacciones y autorización por usuario.
 - Rol migrador con DDL y rol runtime con DML deben separarse durante el corte.
-- El launcher de esta rama exige conectividad y `0006_study_sessions` antes de
+- El launcher de la rama productiva exige conectividad y `0006_study_sessions` antes de
   Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
-- Database migra antes del release; backend no migra ni repara esquema al arrancar.
-  La separación se desplegó con3e3ed95; onboarding, Materias y Actividades están
-  cerrados. Database producción está en 0006; el release de Backend Sesiones aún
-  está pendiente (ver DEPLOYMENT).
+- Database ya aplicó 0007; esta rama cambia readiness y launcher a la revisión exacta.
+  El release de Backend sigue pendiente. Ninguna instancia migra o repara esquema al
+  arrancar (ver DEPLOYMENT y DATABASE_HANDOFF).
 - Una revisión futura requiere coordinación de compatibilidad antes de aplicarse;
   consultar la secuencia de corte en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md)
   y el estado operativo en [DEPLOYMENT.md](DEPLOYMENT.md).

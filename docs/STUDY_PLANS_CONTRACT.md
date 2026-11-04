@@ -53,7 +53,7 @@ editan ni borran Actividades, Sesiones o Materias.
 ### Escritura y respuesta
 
 `POST`/`PUT` aceptan `name` (1–100), `objective` (1–2000), `start_at`, `end_at`
-ISO 8601 con zona horaria, `subject_ids` (1–100), `activity_ids` (0–200) y
+ISO 8601 con zona horaria, `subject_ids` (0–100), `activity_ids` (0–200) y
 `study_session_ids` (0–200). IDs positivos y sin duplicados; `end_at > start_at`.
 Las Materias deben ser del usuario. Cada Actividad y Sesión debe ser del usuario y
 su Materia debe pertenecer al Plan. Si una Sesión referencia Actividad, el Plan
@@ -63,13 +63,17 @@ en `[start_at, end_at)`.
 La lista devuelve `items` y `next_after_id` nullable. El detalle devuelve los
 campos del Plan, resúmenes de recursos originales, `decisions`, `challenge_count`,
 `hierarchy`, `priority_order`, `activity_dependency_order`, `weekly_rhythm` y
-`candidate_slots`. Las proyecciones no se persisten y no copian recursos.
+`candidate_slots` y `schedule_conflict`. Las proyecciones no se persisten y no copian recursos.
 `candidate_slots` significa espacio no ocupado por Sesiones del Plan; no afirma
 disponibilidad personal ni consulta calendarios externos.
+Si dos Sesiones existentes se solapan, se conservan ambas relaciones y el detalle
+indica `schedule_conflict: true` con `candidate_slots` vacío. Vincularlas no las edita.
 
 `study_plan_decisions` registra `accepted`, `edited`, `rejected` y `regenerated`.
-Los valores propuestos/elegidos se limitan a los campos afectados. La historia es
-append-only; undo añade evidencia inversa.
+Para `edited` se conservan `field_path`, `proposed_value` y `chosen_value`; aceptar
+y rechazar conservan la propuesta completa. La historia es append-only. Undo añade
+una decisión inversa con `field_path` `undo:<decision_id>:<campo>` para identificar
+qué edición original revierte y permitir deshacer cambios anteriores sin borrar filas.
 
 ## Retos
 
