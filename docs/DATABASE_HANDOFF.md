@@ -13,8 +13,9 @@ La rama `feat/study-plans-challenges-0007` exige exactamente 0007 y añade Plane
 Retos. Backend Live aún exige 0006, así que falta integrar/desplegar esta rama para
 restaurar compatibilidad de readiness. CI de rama
 [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`: 464 pruebas PostgreSQL sin
-omisiones, Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+pasó sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`: 464 pruebas totales (incluidas
+las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
+runtime/launcher, `pip-audit` y Gitleaks.
 No se modifica el repositorio Database desde Backend. Ver STUDY_PLANS_CONTRACT y
 DEPLOYMENT.
 

@@ -14,8 +14,9 @@ su readiness exige 0006; hace falta integrar esta rama y desplegarla para recupe
 compatibilidad con la DB 0007. La rama quedó publicada en
 `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`; todavía no hubo merge, deploy ni smoke
 productivo. CI integral [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó: 464 pruebas PostgreSQL sin omisiones, Ruff/formato, mypy, build/wheel,
-runtime/launcher, `pip-audit` y Gitleaks. La creación disponible es manual; Gemini no
+pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
+omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+La creación disponible es manual; Gemini no
 está integrado y regenerar responde 503 sin persistir una falsa decisión.
 Contrato: [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
 

@@ -7,10 +7,10 @@ Database está en `0007_study_plans_and_challenges` (SHA
 `e281e035f124dc8e07b5f395c37c1f4731fbcc0d` actualiza readiness y añade endpoints; no
 se ha mergeado ni ejecutado contra producción. CI integral
 [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-pasó: 464 pruebas PostgreSQL sin omisiones, Ruff/formato, mypy, build/wheel,
-runtime/launcher, `pip-audit` y Gitleaks. No hubo cambios ni datos sintéticos en
-producción para esta funcionalidad. El smoke productivo se hará después del
-merge/deploy; ver DEPLOYMENT.
+pasó: 464 pruebas totales (incluidas las de integración con PostgreSQL), sin
+omisiones; Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit` y Gitleaks.
+No hubo cambios ni datos sintéticos en producción para esta funcionalidad. El smoke
+productivo se hará después del merge/deploy; ver DEPLOYMENT.
 
 ## Calendario ampliado — smoke productivo aprobado — 2026-11-02
 

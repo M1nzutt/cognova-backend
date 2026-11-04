@@ -7,10 +7,10 @@ Database está en `0007_study_plans_and_challenges`, pero el Backend Live sigue 
 `feat/study-plans-challenges-0007` fija el pin y exige 0007, pero aún no se integró ni
 desplegó. CI de la rama pasó en
 [41766432773](https://github.com/M1nzutt/cognova-backend/actions/runs/41766432773)
-sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`, con 464 pruebas PostgreSQL sin
-omisiones y compuertas Ruff/formato, mypy, build/wheel, runtime/launcher, `pip-audit`
-y Gitleaks. Faltan merge `--no-ff`, deploy Render y smoke productivo de readiness,
-auth/onboarding, Planes/Retos, ownership, no-store y regresiones de
+sobre `e281e035f124dc8e07b5f395c37c1f4731fbcc0d`, con 464 pruebas totales (incluidas
+las de integración con PostgreSQL), sin omisiones; Ruff/formato, mypy, build/wheel,
+runtime/launcher, `pip-audit` y Gitleaks. Faltan merge `--no-ff`, deploy Render y
+smoke productivo de readiness, auth/onboarding, Planes/Retos, ownership, no-store y regresiones de
 Materias/Actividades/Sesiones/Calendario. No se ejecutó smoke de Planes contra
 producción.
 
