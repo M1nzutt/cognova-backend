@@ -3,11 +3,12 @@
 ## Alcance vigente
 
 Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están cerrados
-en Backend. Database producción está en `0006_study_sessions`; el pin está en
-tools/database-ref.json. Calendario es de solo lectura sobre Actividades y Sesiones,
-según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
-[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes, Retos e IA siguen
-fuera de este bloque.
+en Backend. Database producción está en `0007_study_plans_and_challenges`; el pin
+está en tools/database-ref.json. Calendario es de solo lectura sobre Actividades y
+Sesiones, según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
+[STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes y Retos se rigen por
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md); Gemini real sigue pendiente y ningún
+endpoint declara generado por IA un Plan manual.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos
@@ -64,9 +65,8 @@ Contrato vigente de onboarding y cuestionario: [ONBOARDING_CONTRACT.md](ONBOARDI
 Incluye GET `/questionnaire/catalog`, GET `/questionnaire/history` y
 PUT `/onboarding/academic-profile`. Los tres endpoints existentes se conservan.
 Todas estas rutas requieren Bearer; permiten onboarding incompleto y solo operan
-sobre el usuario autenticado. No reciben user_id. Materias, Actividades, Sesiones y
-Calendario están implementados según sus contratos. Los demás módulos son
-planificación futura.
+sobre el usuario autenticado. No reciben user_id. Materias, Actividades, Sesiones,
+Calendario, Planes y Retos están definidos en sus contratos específicos.
 
 ## Subjects
 
@@ -105,11 +105,9 @@ estable por tipo e ID.
 
 ## Dependencies
 
-- GET `/dependencies`
-- POST `/dependencies`
-- DELETE `/dependencies/{id}`
-
-Representan dependencias reales entre actividades.
+Las dependencias entre Actividades se declaran dentro del criterio de generación
+de un Reto bajo un Plan y se validan como acíclicas. No existe un módulo ni tabla
+independiente `/dependencies` en esta entrega.
 
 ## Sessions
 
@@ -185,12 +183,14 @@ Feedback debe poder expresar:
 
 ## Challenges
 
-- GET `/challenges`
-- POST `/challenges/{id}/accept`
-- POST `/challenges/{id}/reject`
-- POST `/challenges/{id}/complete`
+Los Retos viven dentro de Planes; no existe `/challenges` independiente. Ver
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
 
-Un reto aceptado no se edita.
+## Study Plans
+
+Contrato vigente según [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md).
+Incluye Planes, decisiones de usuario y Retos anidados. La generación Gemini es
+un proveedor futuro; hasta conectarlo, solo se crean Planes y Retos manuales.
 
 ## Profile
 
