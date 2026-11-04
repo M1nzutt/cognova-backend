@@ -171,6 +171,21 @@ def test_challenge_state_transitions_edits_and_cycle_validation(client, registra
     assert repeated.status_code == 409
     assert repeated.json()["error"]["code"] == "STUDY_CHALLENGE_STATE_CONFLICT"
 
+    failed = client.post(
+        base,
+        headers=headers,
+        json=challenge_body(
+            subject_id=subject_id,
+            target_type="study_minutes",
+            target_value={"minutes": 25},
+        ),
+    ).json()
+    failed_path = f"{base}/{failed['id']}"
+    assert client.post(failed_path + "/start", headers=headers).status_code == 200
+    failed_response = client.post(failed_path + "/fail", headers=headers)
+    assert failed_response.status_code == 200
+    assert failed_response.json()["status"] == "failed"
+
     pending = client.post(
         base,
         headers=headers,
@@ -182,6 +197,44 @@ def test_challenge_state_transitions_edits_and_cycle_validation(client, registra
     ).json()
     cancelled = client.post(f"{base}/{pending['id']}/cancel", headers=headers)
     assert cancelled.status_code == 200 and cancelled.json()["status"] == "cancelled"
+
+
+def test_session_completion_challenge_uses_a_session_linked_to_the_plan(
+    client, registration
+):
+    _, headers, activity_data, activity = setup_activity(client, registration)
+    session = client.post(
+        "/api/v1/sessions",
+        headers=headers,
+        json={
+            "subject_id": activity_data["subject_id"],
+            "activity_id": activity["id"],
+            "planned_start_at": "2030-01-03T12:00:00Z",
+            "planned_duration": 30,
+        },
+    )
+    assert session.status_code == 201, session.text
+    plan = create_study_plan(
+        client,
+        headers,
+        subject_ids=[activity_data["subject_id"]],
+        activity_ids=[activity["id"]],
+        study_session_ids=[session.json()["id"]],
+    )
+
+    response = client.post(
+        f"{PLANS}/{plan['id']}/challenges",
+        headers=headers,
+        json=challenge_body(
+            subject_id=activity_data["subject_id"],
+            activity_id=activity["id"],
+            study_session_id=session.json()["id"],
+            target_type="session_completion",
+            target_value={"lifecycle": "finished"},
+        ),
+    )
+    assert response.status_code == 201, response.text
+    assert response.json()["study_session_id"] == session.json()["id"]
 
 
 def test_challenge_ownership_targets_and_onboarding_errors(client, registration):
