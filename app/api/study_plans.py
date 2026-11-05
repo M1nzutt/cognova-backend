@@ -1,11 +1,14 @@
+import os
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Path, Query, Response
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from sqlalchemy.orm import Session
 
+from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.api.onboarding_dependencies import get_onboarded_user
 from app.database.dependencies import get_session
 from app.models.user import User
+from app.schemas.ai_plan_generation_response import AiPlanGenerationResponse
 from app.schemas.error_response import ErrorResponse
 from app.schemas.study_challenge_list_response import StudyChallengeListResponse
 from app.schemas.study_challenge_response import StudyChallengeResponse
@@ -30,8 +33,13 @@ ChallengeId = Annotated[int, Path(gt=0, le=2147483647)]
 
 def get_plan_service(
     db: Annotated[Session, Depends(get_session)],
+    request: Request,
 ) -> StudyPlanService:
-    return StudyPlanService(db)
+    provider = GeminiProvider(
+        os.environ.get("GEMINI_API_KEY"),
+        request_id=getattr(request.state, "request_id", None),
+    )
+    return StudyPlanService(db, proposal_provider=provider)
 
 
 def get_challenge_service(
@@ -60,6 +68,14 @@ def create_plan(
     data: StudyPlanWrite, user: CurrentUser, service: PlanService
 ) -> StudyPlanDetail:
     return service.create(user.id, data)
+
+
+@router.post("/generate", status_code=201, response_model=AiPlanGenerationResponse)
+def generate_plan(
+    user: CurrentUser, service: PlanService, request: Request
+) -> AiPlanGenerationResponse:
+    request.app.state.rate_limiter.check("gemini-plan", str(user.id))
+    return service.generate(user.id)
 
 
 @router.get("/{plan_id}", response_model=StudyPlanDetail)
@@ -106,8 +122,9 @@ def reject_plan(
 
 @router.post("/{plan_id}/regenerate", response_model=StudyPlanDetail)
 def regenerate_plan(
-    plan_id: PlanId, user: CurrentUser, service: PlanService
+    plan_id: PlanId, user: CurrentUser, service: PlanService, request: Request
 ) -> StudyPlanDetail:
+    request.app.state.rate_limiter.check("gemini-plan", str(user.id))
     return service.regenerate(user.id, plan_id)
 
 
