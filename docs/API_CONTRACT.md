@@ -1,5 +1,9 @@
 # Cognova — Contrato API v1
 
+La generación Gemini y el primer análisis de comportamiento se definen en
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md). Las nuevas rutas conservan
+auth, onboarding, ownership, errores seguros y `no-store` de esta API.
+
 ## Alcance vigente
 
 Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están cerrados
