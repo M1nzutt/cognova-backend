@@ -231,3 +231,22 @@ Solo mediante:
 2. impacto documentado;
 3. actualización de contratos/docs;
 4. migración de código y pruebas.
+## Integración Gemini y observación — 2026-11-05
+
+- Se selecciona `gemini-3.8-flash` por el contrato explícito del usuario y su
+  soporte oficial de salidas estructuradas. Backend usa `google-genai`, respuesta
+  JSON Schema/Pydantic, timeout y un único reintento corto para 429/500/503.
+- Generación y regeneración crean o sustituyen solo propuestas en borrador. La
+  decisión `regenerated` conserva un snapshot anterior y se confirma en la misma
+  transacción que el Plan y los Retos. Retos antiguos se cancelan y mantienen
+  sus relaciones para respetar RESTRICT; Retos editados/en progreso bloquean el
+  reemplazo. El usuario debe aceptar o editar explícitamente.
+- Los retos IA usan tipos de objetivo verificables de 0007 y evidencia vinculada
+  a recursos propios; `custom` queda reservado para flujo manual porque su
+  condición libre no se puede verificar de forma segura en esta primera fase.
+- El primer análisis no persiste inferencias. Antes de cinco Sesiones válidas
+  finalizadas devuelve únicamente conteo y pregunta. Las observaciones IA con
+  cinco o más son hipótesis y se validan contra ownership.
+- Database 0007 no tiene campos para conservar explicación/resumen del Plan.
+  Se entregan en la respuesta inicial; conservarlos tras refresh requiere una
+  migración futura del repositorio Database.

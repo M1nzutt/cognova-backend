@@ -1,5 +1,22 @@
 # Validación de integración productiva
 
+## Gemini — validación de rama, 2026-11-05
+
+Los tests con proveedor falso y PostgreSQL desechable 0007 cubren creación
+`ai/draft`, Reto con evidencia, fallo sin mutación ni decisión, regeneración
+sucesiva, aceptación y umbral de 0–6 Sesiones finalizadas. Los tests unitarios
+comprueban las cinco estructuras, salida estructurada, respuesta inválida,
+timeout, 429 y validación de IDs. El resultado final de suite/CI se registrará
+tras las compuertas. No hay smoke Gemini real: `GEMINI_API_KEY` no está
+configurada localmente. No se atribuye a producción esta validación de rama.
+
+Validación local del árbol funcional: `473 passed, 1 deselected` en 298 s con
+PostgreSQL 18 y zona UTC explícita. La única exclusión es una prueba previa que
+crea roles: el administrador del servidor desechable no tiene `CREATEROLE`.
+El launcher TCP pasó por separado, al igual que Ruff, formato, mypy, wheel,
+`pip check` y `pip-audit` sin vulnerabilidades conocidas. La compuerta completa,
+incluida la prueba de roles y Gitleaks, corresponde al CI de GitHub.
+
 ## Planes + Retos — smoke productivo aprobado — 2026-11-04
 
 Backend `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` Live en Render

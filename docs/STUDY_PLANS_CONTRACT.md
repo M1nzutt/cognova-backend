@@ -13,22 +13,26 @@ Este contrato es de Backend; Database conserva la autoridad de DDL.
   cambia esos recursos. Sesiones asociadas conservan su Materia y Actividad.
 - Planes y Retos son privados del Plan. No existe CRUD independiente de Retos ni
   una tabla de dependencias de Actividades.
-- Hasta integrar un proveedor Gemini real, POST solo crea Planes manuales y Retos
-  manuales. No se simula generación. Una solicitud de generación/regeneración sin
-  proveedor devuelve `503 STUDY_PLAN_GENERATION_UNAVAILABLE`.
+- `POST /study-plans` conserva la creación manual. La rama
+  `feat/gemini-behavior` añade propuestas reales mediante
+  `POST /study-plans/generate`; sin `GEMINI_API_KEY` del proceso Backend,
+  generación y regeneración devuelven `503 STUDY_PLAN_GENERATION_UNAVAILABLE`.
+  Contrato de salida y límites: [AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
 - Ningún contenido generado se aplica a recursos académicos. El usuario acepta,
   edita o rechaza una propuesta explícitamente.
 
 ## Planes
 
 Estados: `draft`, `active`, `completed`, `abandoned`. Fuente: `ai` o `manual`;
-esta entrega crea `manual`.
+`POST /study-plans` crea `manual`; `POST /study-plans/generate` crea `ai/draft`.
 
 ### Rutas
 
 - `GET /study-plans?status=&limit=&after_id=` — cursor ascendente por ID;
   `status` admite los cuatro estados y `all`. `limit` va de 1 a 100.
 - `POST /study-plans` — crea un Plan manual en `draft`.
+- `POST /study-plans/generate` — crea una propuesta `ai/draft` desde registros
+  propios, con Retos `ai/pending` solo si existe evidencia verificable.
 - `GET /study-plans/{id}` — detalle, recursos existentes, historial de decisiones
   y proyecciones algorítmicas del Plan.
 - `PUT /study-plans/{id}` — reemplaza nombre, objetivo, fechas y relaciones; solo
@@ -40,7 +44,8 @@ esta entrega crea `manual`.
 - `POST /study-plans/{id}/reject` — solo propuesta `ai` en `draft`; guarda `rejected`
   y abandona el Plan.
 - `POST /study-plans/{id}/regenerate` — solicita una nueva propuesta al proveedor;
-  por ahora responde 503 sin fingir una llamada ni escribir una decisión.
+  valida y aplica el borrador nuevo en una transacción. Conserva la propuesta
+  anterior en una decisión `regenerated`; un fallo no escribe nada.
 - `POST /study-plans/{id}/activate` — Plan manual `draft` a `active`.
 - `POST /study-plans/{id}/complete` — Plan `active` a `completed`.
 - `POST /study-plans/{id}/abandon` — Plan `draft` o `active` a `abandoned`.
@@ -125,6 +130,8 @@ no tiene ese privilegio para Retos; se conserva la historia.
 - `409 STUDY_PLAN_HISTORY_CONFLICT`: borrar/editar violaría historia conservada.
 - `409 STUDY_CHALLENGE_STATE_CONFLICT`: transición de Reto inválida.
 - `409 STUDY_CHALLENGE_TARGET_CONFLICT`: objetivo no compatible con su contexto.
-- `503 STUDY_PLAN_GENERATION_UNAVAILABLE`: no existe proveedor IA configurado.
+- `503 STUDY_PLAN_GENERATION_UNAVAILABLE`: falta proveedor/clave o su salida es
+  inválida o temporalmente no disponible.
+- `503 GEMINI_RATE_LIMIT`: cuota del proveedor agotada; incluye `Retry-After`.
 
 La envoltura de error es `{ "error": { "code": "...", "message": "..." } }`.

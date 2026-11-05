@@ -406,3 +406,17 @@ El agente frontend es responsable de su configuración y documentación.
 Estos controles se repiten cuando corresponda a un nuevo release; no son bloqueos
 abiertos de Materias/Actividades. Evidencia del cierre vigente al inicio.
 No se acredita una verificación productiva nueva en esta revisión documental.
+## Preparación de Gemini — rama `feat/gemini-behavior`, 2026-11-05
+
+La integración de IA requiere `GEMINI_API_KEY` en el gestor de secretos del
+servicio Backend Render. Nunca ponerla en Netlify, Git, logs, chat ni DTOs.
+`google-genai` está en `requirements.lock` y se instala con el build habitual.
+Sin clave, las rutas que necesitan Gemini devuelven 503; el análisis con menos
+de cinco Sesiones válidas funciona con hechos deterministas. Las llamadas al
+modelo usan timeout de 15 segundos, hasta un reintento corto para 429/500/503,
+cuota por usuario en PostgreSQL y logs solo de metadatos. No hay migración:
+readiness y launcher siguen exigiendo exactamente Database 0007.
+
+La rama no está desplegada; el SHA productivo previo y el smoke anterior se
+mantienen como evidencia histórica. El smoke real de Gemini requiere primero
+configurar el secreto Backend.

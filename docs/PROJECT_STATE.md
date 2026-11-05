@@ -1,5 +1,27 @@
 # Cognova — Estado backend
 
+## Gemini y observación académica — desarrollo 2026-11-05
+
+La rama `feat/gemini-behavior` integra `google-genai` con
+`gemini-3.8-flash`, salida JSON Schema/Pydantic, generación inicial de
+Planes `ai/draft`, regeneración transaccional y Retos `ai/pending` con evidencia.
+`POST /analysis/behavior` aplica el umbral de cinco Sesiones válidas: antes
+devuelve hechos y pregunta sin invocar al modelo; después valida hipótesis e IDs
+propios. Cinco estructuras manuales procesan contexto y viabilidad en memoria.
+Database permanece en 0007, sin cambios de schema. Ver
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
+
+Esta rama aún no se integró ni desplegó. El Backend productivo sigue en
+`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`; allí `regenerate` continúa
+respondiendo 503. La clave no está disponible en el entorno local; el smoke
+Gemini real queda pendiente hasta configurarla como secreto Backend.
+
+Validación local: 473 pruebas verdes sobre PostgreSQL 0007; se excluyó solo
+la prueba preexistente de creación de roles por falta de `CREATEROLE` en el
+administrador del servidor desechable. El launcher TCP aislado, Ruff, formato,
+mypy, wheel, `pip check` y `pip-audit` pasaron. CI de rama está en curso; su
+PostgreSQL verifica la compuerta completa y Gitleaks.
+
 ## Planes de Estudio + Retos — Backend cerrado en producción — 2026-11-04
 
 Database producción está en `0007_study_plans_and_challenges`, commit

@@ -139,6 +139,14 @@ La DB sigue siendo la fuente persistente; las estructuras no sustituyen PostgreS
 
 ## IA
 
+La implementación de la rama `feat/gemini-behavior` separa
+`AcademicContext` (consultas acotadas por `user_id` y estructuras en memoria),
+`GeminiProvider` (SDK/JSON Schema), `validate_proposal` (IDs/fechas/contexto),
+`StudyPlanService` (transacción única de propuesta y Retos) y
+`BehaviorAnalysisService` (umbral y observaciones de solo lectura). La clave
+no entra en DTO ni Frontend. Database permanece en 0007; los textos de explicación
+inicial del Plan son efímeros porque 0007 no tiene columnas para guardarlos.
+
 Flujo:
 
 ```text
@@ -171,10 +179,10 @@ Producción debe contar con:
 - Database administra migraciones Alembic, constraints, índices y recuperación.
 - Backend conserva el ORM, consultas, transacciones y autorización por usuario.
 - Rol migrador con DDL y rol runtime con DML deben separarse durante el corte.
-- El launcher de la rama productiva exige conectividad y `0006_study_sessions` antes de
-  Uvicorn; readiness mantiene el mismo control. No depende de Alembic para leerlo.
-- Database ya aplicó 0007; esta rama cambia readiness y launcher a la revisión exacta.
-  El release de Backend sigue pendiente. Ninguna instancia migra o repara esquema al
+- El launcher productivo exige conectividad y `0007_study_plans_and_challenges`
+  antes de Uvicorn; readiness mantiene el mismo control sin depender de Alembic.
+- Database 0007 y Backend Planes + Retos están desplegados. La rama Gemini no
+  cambia schema ni revisión requerida. Ninguna instancia migra o repara esquema al
   arrancar (ver DEPLOYMENT y DATABASE_HANDOFF).
 - Una revisión futura requiere coordinación de compatibilidad antes de aplicarse;
   consultar la secuencia de corte en [DATABASE_HANDOFF.md](DATABASE_HANDOFF.md)

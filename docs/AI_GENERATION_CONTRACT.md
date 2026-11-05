@@ -24,7 +24,9 @@ campos. El proveedor devuelve y Backend valida `name`, `objective`, `start_date`
 `end_date`, `explanation`, `subject_ids`, `activity_ids`, `session_ids`,
 `proposed_challenges` y `reasoning_summary`. Las fechas se convierten a
 `start_at`/`end_at` con zona. IDs duplicados, inexistentes, ajenos o incoherentes,
-fechas inválidas y retos sin evidencia invalidan toda la propuesta. No se
+fechas inválidas y retos sin evidencia invalidan toda la propuesta. Cada cita
+de evidencia debe ser una clave exacta del catálogo de hechos que Backend
+construyó desde recursos propios; se rechazan claves inventadas. No se
 crean ni modifican Materias, Actividades o Sesiones. El Plan nace `ai/draft`;
 los Retos propuestos nacen `ai/pending` y solo dentro de ese Plan.
 
@@ -77,7 +79,7 @@ psicológicas.
 
 - 401/403/404/409/422 conservan las reglas existentes.
 - 429 `TOO_MANY_REQUESTS`: cuota compartida para llamadas costosas; header
-  `Retry-After`. Un 429 del proveedor se traduce a respuesta segura 503 con
+  `Retry-After`. Un 429 del proveedor se traduce a `503 GEMINI_RATE_LIMIT` con
   `Retry-After` corto, sin filtrar detalles internos.
 - 503 `STUDY_PLAN_GENERATION_UNAVAILABLE`: falta de clave, timeout, 500/503,
   respuesta vacía, JSON o esquema inválido, o salida insegura del modelo.
