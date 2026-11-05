@@ -80,6 +80,17 @@ def validate_proposal(
             seen.add(key)
             if subject_id not in subjects:
                 raise ValueError("Unknown subject")
+            linked_evidence = {
+                f"subject:{subject_id}",
+                f"activity:{activity_id}",
+                f"session:{session_id}",
+            }
+            if any(
+                token not in context.evidence_catalog for token in candidate.evidence
+            ):
+                raise ValueError("Invented challenge evidence")
+            if not any(token in linked_evidence for token in candidate.evidence):
+                raise ValueError("Challenge evidence is unrelated")
             if not (
                 any(row.subject_id == subject_id for row in context.activities)
                 or any(row.subject_id == subject_id for row in context.sessions)
@@ -98,7 +109,10 @@ def validate_proposal(
                     deadline=candidate.deadline,
                     generation_criteria={
                         "explanation": candidate.explanation,
-                        "evidence": candidate.evidence,
+                        "evidence": [
+                            context.evidence_catalog[token]
+                            for token in candidate.evidence
+                        ],
                         "measurable_condition": candidate.measurable_condition,
                     },
                 )

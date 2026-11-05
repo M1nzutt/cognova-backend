@@ -82,6 +82,30 @@ class AcademicContext:
         self.subject_ids = {row.id for row in self.subjects}
         self.activity_ids = {row.id for row in self.activities}
         self.session_ids = {row.id for row in self.sessions}
+        self.evidence_catalog = {
+            **{
+                f"subject:{row.id}": (
+                    f"Materia {row.name}: estado {row.status}; "
+                    f"dificultad {row.difficulty}."
+                )
+                for row in self.subjects
+            },
+            **{
+                f"activity:{row.id}": (
+                    f"Actividad {row.title}: estado {row.status}; "
+                    f"prioridad {row.priority}; "
+                    f"fecha límite {row.deadline.isoformat()}."
+                )
+                for row in self.activities
+            },
+            **{
+                f"session:{row.id}": (
+                    f"Sesión {row.id}: {row.planned_duration} minutos planificados, "
+                    f"{float(row.actual_duration)} reales, resultado {row.status}."
+                )
+                for row in self.sessions
+            },
+        }
         self._journey = AcademicJourney()
         self._schedule = ScheduleIndex()
         self._pending = PendingAnalysisFlow()
@@ -126,6 +150,7 @@ class AcademicContext:
         while (item := self._pending.take()) is not None:
             pending.append({"kind": item.kind, "id": item.resource_id})
         data = {
+            "evidence_catalog": self.evidence_catalog,
             "questionnaire_answers": self.questionnaire.answers
             if self.questionnaire
             else {},

@@ -23,7 +23,7 @@ router = APIRouter(
     prefix="/study-plans",
     tags=["study-plans"],
     responses={
-        code: {"model": ErrorResponse} for code in (401, 403, 404, 409, 422, 503)
+        code: {"model": ErrorResponse} for code in (401, 403, 404, 409, 422, 429, 503)
     },
 )
 CurrentUser = Annotated[User, Depends(get_onboarded_user)]

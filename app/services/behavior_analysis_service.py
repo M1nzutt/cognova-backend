@@ -49,12 +49,22 @@ class BehaviorAnalysisService:
         proposal = self._provider.behavior(evidence)
         for item in proposal.observations:
             lower = f"{item.observation} {item.question}".casefold()
+            linked_evidence = (
+                {f"subject:{identifier}" for identifier in item.related_subject_ids}
+                | {f"activity:{identifier}" for identifier in item.related_activity_ids}
+                | {f"session:{identifier}" for identifier in item.related_session_ids}
+            )
             if (
                 not item.question.endswith("?")
                 or not set(item.related_subject_ids) <= context.subject_ids
                 or not set(item.related_activity_ids) <= context.activity_ids
                 or not set(item.related_session_ids) <= context.session_ids
                 or len(item.evidence) == 0
+                or any(token not in context.evidence_catalog for token in item.evidence)
+                or (
+                    linked_evidence
+                    and not any(token in linked_evidence for token in item.evidence)
+                )
                 or any(
                     marker in lower
                     for marker in (
@@ -70,6 +80,7 @@ class BehaviorAnalysisService:
                 )
             ):
                 raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
+            item.evidence = [context.evidence_catalog[token] for token in item.evidence]
         return BehaviorAnalysisResponse(
             finished_session_count=count,
             pattern_eligible=True,
