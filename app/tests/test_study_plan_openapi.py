@@ -9,6 +9,8 @@ def test_study_plan_openapi_matches_nested_plan_and_challenge_contract():
         spec = client.get("/openapi.json").json()
 
     paths = spec["paths"]
+    assert set(paths["/api/v1/study-plans/generate"]) == {"post"}
+    assert set(paths["/api/v1/analysis/behavior"]) == {"post"}
     assert set(paths["/api/v1/study-plans"]) == {"get", "post"}
     assert set(paths["/api/v1/study-plans/{plan_id}"]) == {
         "get",

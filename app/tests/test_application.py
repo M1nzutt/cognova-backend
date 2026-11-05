@@ -11,7 +11,9 @@ def test_openapi_does_not_advertise_unimplemented_endpoints():
     assert response.json()["info"]["title"] == "Cognova API"
     assert set(response.json()["paths"]) == {
         "/api/v1/calendar",
+        "/api/v1/analysis/behavior",
         "/api/v1/study-plans",
+        "/api/v1/study-plans/generate",
         "/api/v1/study-plans/{plan_id}",
         "/api/v1/study-plans/{plan_id}/accept",
         "/api/v1/study-plans/{plan_id}/reject",
