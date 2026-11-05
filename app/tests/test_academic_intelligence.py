@@ -14,6 +14,7 @@ from app.academic_intelligence.gemini_schemas import (
     BehaviorObservation,
     BehaviorProposal,
     PlanProposal,
+    ProposedChallenge,
 )
 from app.academic_intelligence.pending_analysis import PendingAnalysis
 from app.academic_intelligence.pending_analysis_flow import PendingAnalysisFlow
@@ -240,3 +241,53 @@ def test_behavior_rejects_diagnosis_and_unowned_evidence(monkeypatch):
         analyze("Podría haber una diferencia.", ["subject:999"])
     good = analyze("Podría haber una diferencia.", ["subject:1"])
     assert good.observations[0].evidence == ["Materia propia registrada."]
+
+
+def test_contextual_challenge_requires_matching_target_and_owned_evidence():
+    start = datetime(2030, 1, 1, tzinfo=timezone.utc)
+    context = SimpleNamespace(
+        subject_ids={1},
+        activity_ids={2},
+        session_ids=set(),
+        subjects=[SimpleNamespace(id=1)],
+        activities=[SimpleNamespace(id=2, subject_id=1)],
+        sessions=[],
+        evidence_catalog={
+            "subject:1": "Materia propia.",
+            "activity:2": "Actividad propia.",
+        },
+    )
+    base = ProposedChallenge(
+        title="Cerrar actividad",
+        objective="Completar lo pendiente.",
+        explanation="Actividad registrada.",
+        evidence=["activity:2"],
+        target_type="activity_completion",
+        target_id=2,
+        subject_id=1,
+        activity_id=2,
+        target_value={"status": "completed"},
+        measurable_condition="Actividad completada.",
+    )
+    plan = PlanProposal(
+        name="Plan",
+        objective="Practicar.",
+        start_date=start,
+        end_date=start + timedelta(days=7),
+        explanation="Actividad pendiente.",
+        subject_ids=[1],
+        activity_ids=[2],
+        session_ids=[],
+        proposed_challenges=[base],
+        reasoning_summary="Actividad existente.",
+    )
+    _, challenges = validate_proposal(plan, context)
+    assert challenges[0].generation_criteria["evidence"] == ["Actividad propia."]
+    for bad in (
+        base.model_copy(update={"target_id": 1}),
+        base.model_copy(update={"evidence": ["activity:999"]}),
+    ):
+        with pytest.raises(DomainError):
+            validate_proposal(
+                plan.model_copy(update={"proposed_challenges": [bad]}), context
+            )

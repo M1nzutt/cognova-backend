@@ -18,6 +18,7 @@ from app.models.activity import Activity
 from app.models.questionnaire_response import QuestionnaireResponseRecord
 from app.models.study_plans import StudyChallenge, StudyPlan, StudyPlanDecision
 from app.models.study_session import StudySession
+from app.models.study_session_interval import StudySessionInterval
 from app.models.subject import Subject
 from app.study_plans.decision_entry import DecisionEntry
 
@@ -82,6 +83,15 @@ class AcademicContext:
         self.subject_ids = {row.id for row in self.subjects}
         self.activity_ids = {row.id for row in self.activities}
         self.session_ids = {row.id for row in self.sessions}
+        interval_rows = db.execute(
+            select(StudySessionInterval.session_id, func.count())
+            .where(StudySessionInterval.session_id.in_(self.session_ids))
+            .group_by(StudySessionInterval.session_id)
+        ).all()
+        self.pause_counts = {
+            session_id: max(interval_count - 1, 0)
+            for session_id, interval_count in interval_rows
+        }
         self.evidence_catalog = {
             **{
                 f"subject:{row.id}": (
@@ -101,7 +111,8 @@ class AcademicContext:
             **{
                 f"session:{row.id}": (
                     f"Sesión {row.id}: {row.planned_duration} minutos planificados, "
-                    f"{float(row.actual_duration)} reales, resultado {row.status}."
+                    f"{float(row.actual_duration)} reales, resultado {row.status}, "
+                    f"{self.pause_counts.get(row.id, 0)} pausas."
                 )
                 for row in self.sessions
             },
@@ -186,6 +197,7 @@ class AcademicContext:
                     "actual_minutes": float(row.actual_duration),
                     "lifecycle": row.execution_state,
                     "result": row.status,
+                    "pause_count": self.pause_counts.get(row.id, 0),
                 }
                 for row in self.sessions
             ],
@@ -213,7 +225,11 @@ class AcademicContext:
                 for row in self.challenges
             ],
             "user_decisions": [
-                {"action": row.action, "field_path": row.field_path}
+                {
+                    "action": row.action,
+                    "field_path": row.field_path,
+                    "chosen_value_excerpt": str(row.chosen_value)[:300],
+                }
                 for row in self._trail.backward()
             ],
             "finished_valid_sessions": self.finished_count,

@@ -74,6 +74,17 @@ def validate_proposal(
                 session_id,
             }:
                 raise ValueError("Challenge target is unrelated")
+            expected_target = {
+                "activity_completion": activity_id,
+                "session_completion": session_id,
+                "subject_mastery": subject_id,
+            }.get(candidate.target_type)
+            if (
+                candidate.target_id is not None
+                and expected_target is not None
+                and candidate.target_id != expected_target
+            ):
+                raise ValueError("Challenge target type and ID disagree")
             key = (candidate.target_type, subject_id, activity_id, session_id)
             if key in seen:
                 raise ValueError("Duplicate challenge")
