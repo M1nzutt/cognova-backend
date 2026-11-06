@@ -1,15 +1,21 @@
 # Validación de integración productiva
 
-## Gemini sobre Database 0008 — validación de rama pendiente
+## Gemini sobre Database 0008 — validación de rama, 2026-11-06
 
 Se añaden pruebas de snapshot persistido tras refresh, edición y decisiones sin
 sobrescritura, regenerate sucesivo/legacy, límites JSONB 32768/65536 y rollback.
-El pin de migración de pruebas es Database 0008. El checkout PostgreSQL local no
+El pin de migración de pruebas es Database 0008, SHA
+`b823ed5efd7f4a1eefacc7ba6c301d4593091d75`. El checkout PostgreSQL local no
 se pudo actualizar: la revisión automática de aprobación rechazó `git fetch`
 por límite de uso, sin evaluar seguridad. La validación PostgreSQL local de esta
-adaptación queda pendiente; se utilizará el checkout fijado por SHA en CI de la
-rama. No hay smoke productivo:
-Render Database está suspendida y sigue en 0007; no se intentó deploy.
+adaptación quedó bloqueada; [CI 42300258065](https://github.com/M1nzutt/cognova-backend/actions/runs/42300258065)
+usó el checkout fijado por SHA y aprobó **484 pruebas, 167 PostgreSQL**, cero
+omisiones. También pasaron Gitleaks, Ruff, formato, mypy (175 archivos),
+build/wheel, runtime sin tooling migrador, launcher HTTP y `pip-audit`.
+Un primer CI detectó que el ORM enviaba JSON `null` al vaciar un snapshot; el
+mapeo `JSONB(none_as_null=True)` ahora envía SQL `NULL`, como exige 0008.
+No hay smoke productivo: Render Database está suspendida y sigue en 0007; no
+se intentó deploy.
 
 ## Gemini — validación de rama, 2026-11-05
 

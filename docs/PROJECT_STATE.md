@@ -12,8 +12,12 @@ accept y reject conservan el snapshot. Regenerate conserva el anterior en
 validar recursos y límites JSONB 32768/65536 bytes. No hay deploy: producción
 Render está suspendida y permanece en 0007. El checkout local de pruebas no se
 pudo actualizar por límite de uso de la revisión automática de aprobación;
-la validación PostgreSQL local queda bloqueada. La rama/CI fijará el SHA 0008
-para validar el resto sin depender de ese checkout local.
+la validación PostgreSQL local quedó bloqueada. La rama fijó el SHA 0008 en
+[CI 42300258065](https://github.com/M1nzutt/cognova-backend/actions/runs/42300258065):
+484 pruebas aprobadas, incluidas 167 PostgreSQL, sin omisiones; Gitleaks, Ruff,
+formato, mypy, build/wheel, runtime, launcher HTTP y `pip-audit` aprobados.
+El ORM usa SQL `NULL` para planes sin snapshot, también cuando un fixture legacy
+vacía el valor; JSON `null` violaría la constraint de 0008.
 
 ## Gemini y observación académica — desarrollo 2026-11-05
 
