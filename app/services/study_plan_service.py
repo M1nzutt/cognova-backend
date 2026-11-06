@@ -1,3 +1,4 @@
+import json
 import time
 from collections.abc import Callable, Sequence
 from datetime import datetime, timezone
@@ -8,7 +9,8 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.academic_intelligence.academic_context import AcademicContext
-from app.academic_intelligence.gemini_provider import GeminiProvider
+from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
+from app.academic_intelligence.gemini_provider import MODEL, GeminiProvider
 from app.academic_intelligence.proposal_validation import validate_proposal
 from app.core.domain_error import DomainError
 from app.models.study_plans import (
@@ -101,6 +103,10 @@ class StudyPlanService:
         self._db.rollback()  # Never hold a transaction across the external call.
         proposal = self._proposal_provider.plan(evidence)
         data, challenges = validate_proposal(proposal, context)
+        snapshot = AiPlanProposalSnapshot.from_proposal(
+            proposal, model=MODEL, generated_at=self._clock()
+        ).as_storage()
+        self._validate_jsonb_size(snapshot, 32768)
 
         def insert() -> StudyPlanDetail:
             activities, sessions = self._resources.validate(user_id, data)
@@ -113,6 +119,7 @@ class StudyPlanService:
                 end_at=data.end_at,
                 status="draft",
                 source="ai",
+                ai_proposal_snapshot=snapshot,
             )
             self._db.add(plan)
             self._db.flush()
@@ -121,10 +128,11 @@ class StudyPlanService:
             return self._projection.detail(plan)
 
         detail = self._write(user_id, insert)
+        assert detail.ai_proposal_snapshot is not None
         return AiPlanGenerationResponse(
             plan=detail,
-            explanation=proposal.explanation,
-            reasoning_summary=proposal.reasoning_summary,
+            explanation=detail.ai_proposal_snapshot.explanation,
+            reasoning_summary=detail.ai_proposal_snapshot.reasoning_summary,
         )
 
     def update(
@@ -166,14 +174,21 @@ class StudyPlanService:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
-            proposed = self._snapshot(plan)
+            proposed = (
+                plan.ai_proposal_snapshot
+                if plan.ai_proposal_snapshot is not None
+                else self._snapshot(plan)
+            )
+            chosen = self._snapshot(plan)
+            self._validate_jsonb_size(proposed, 65536)
+            self._validate_jsonb_size(chosen, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="accepted",
                     proposed_value=proposed,
-                    chosen_value=proposed,
+                    chosen_value=chosen,
                 )
             )
             plan.status = "active"
@@ -188,12 +203,18 @@ class StudyPlanService:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
+            proposed = (
+                plan.ai_proposal_snapshot
+                if plan.ai_proposal_snapshot is not None
+                else self._snapshot(plan)
+            )
+            self._validate_jsonb_size(proposed, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="rejected",
-                    proposed_value=self._snapshot(plan),
+                    proposed_value=proposed,
                     chosen_value=None,
                 )
             )
@@ -211,6 +232,9 @@ class StudyPlanService:
         if current.source != "ai" or current.status != "draft":
             raise DomainError("STUDY_PLAN_STATE_CONFLICT")
         previous_updated_at = current.updated_at
+        previous_snapshot = current.ai_proposal_snapshot
+        if previous_snapshot is not None:
+            self._validate_jsonb_size(previous_snapshot, 32768)
         previous_challenges = self._db.scalars(
             select(StudyChallenge).where(
                 StudyChallenge.user_id == user_id,
@@ -229,12 +253,18 @@ class StudyPlanService:
         self._db.rollback()
         proposal = self._proposal_provider.plan(evidence)
         proposed, challenges = validate_proposal(proposal, context)
+        next_snapshot = AiPlanProposalSnapshot.from_proposal(
+            proposal, model=MODEL, generated_at=self._clock()
+        ).as_storage()
+        self._validate_jsonb_size(next_snapshot, 32768)
 
         def regenerate_proposal() -> StudyPlanDetail:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
             if plan.updated_at != previous_updated_at:
+                raise DomainError("STUDY_PLAN_WRITE_CONFLICT")
+            if plan.ai_proposal_snapshot != previous_snapshot:
                 raise DomainError("STUDY_PLAN_WRITE_CONFLICT")
             # Retain resource links required by historical, now cancelled challenges.
             linked = self._db.scalars(
@@ -282,28 +312,35 @@ class StudyPlanService:
             )
             activities, sessions = self._resources.validate(user_id, merged)
             self._resources.validate_schedule(merged.start_at, merged.end_at, sessions)
+            previous_value = (
+                previous_snapshot
+                if previous_snapshot is not None
+                else {
+                    "plan": self._snapshot(plan),
+                    "challenges": [
+                        {
+                            "id": row.id,
+                            "title": row.title,
+                            "target_type": row.target_type,
+                            "target_value": row.target_value,
+                            "generation_criteria": row.generation_criteria,
+                        }
+                        for row in linked
+                    ],
+                }
+            )
+            self._validate_jsonb_size(previous_value, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="regenerated",
-                    proposed_value={
-                        "plan": self._snapshot(plan),
-                        "challenges": [
-                            {
-                                "id": row.id,
-                                "title": row.title,
-                                "target_type": row.target_type,
-                                "target_value": row.target_value,
-                                "generation_criteria": row.generation_criteria,
-                            }
-                            for row in linked
-                        ],
-                    },
+                    proposed_value=previous_value,
                     chosen_value=None,
                 )
             )
             self._apply_write(plan, merged)
+            plan.ai_proposal_snapshot = next_snapshot
             self._resources.replace(user_id, plan.id, merged, activities, sessions)
             for row in linked:
                 if row.status == "pending":
@@ -428,6 +465,18 @@ class StudyPlanService:
 
     def _snapshot(self, plan: StudyPlan) -> dict[str, object]:
         return self._resources.snapshot(plan)
+
+    def _validate_jsonb_size(self, value: object, limit: int) -> None:
+        try:
+            encoded = json.dumps(value, ensure_ascii=False, allow_nan=False)
+            size = self._db.scalar(
+                text("SELECT octet_length(CAST(:value AS jsonb)::text)"),
+                {"value": encoded},
+            )
+        except (TypeError, ValueError, DBAPIError):
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
+        if size is None or size > limit:
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
 
     def _record_changes(
         self,
