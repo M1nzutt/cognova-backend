@@ -420,3 +420,6 @@ readiness y launcher siguen exigiendo exactamente Database 0007.
 La rama no está desplegada; el SHA productivo previo y el smoke anterior se
 mantienen como evidencia histórica. El smoke real de Gemini requiere primero
 configurar el secreto Backend.
+
+[CI de rama 42127125859](https://github.com/M1nzutt/cognova-backend/actions/runs/42127125859)
+validó 476 pruebas y todas las compuertas antes de una futura integración.

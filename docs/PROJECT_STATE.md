@@ -19,8 +19,10 @@ Gemini real queda pendiente hasta configurarla como secreto Backend.
 Validación local: 473 pruebas verdes sobre PostgreSQL 0007; se excluyó solo
 la prueba preexistente de creación de roles por falta de `CREATEROLE` en el
 administrador del servidor desechable. El launcher TCP aislado, Ruff, formato,
-mypy, wheel, `pip check` y `pip-audit` pasaron. CI de rama está en curso; su
-PostgreSQL verifica la compuerta completa y Gitleaks.
+mypy, wheel, `pip check` y `pip-audit` pasaron. [CI de la rama en
+`b668756`](https://github.com/M1nzutt/cognova-backend/actions/runs/42127125859)
+pasó con 476 pruebas y cero omisiones, PostgreSQL real, Gitleaks, Ruff,
+formato, mypy, wheel, runtime/launcher y `pip-audit`.
 
 ## Planes de Estudio + Retos — Backend cerrado en producción — 2026-11-04
 

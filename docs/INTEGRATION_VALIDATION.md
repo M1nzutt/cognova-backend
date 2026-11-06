@@ -15,7 +15,10 @@ PostgreSQL 18 y zona UTC explícita. La única exclusión es una prueba previa q
 crea roles: el administrador del servidor desechable no tiene `CREATEROLE`.
 El launcher TCP pasó por separado, al igual que Ruff, formato, mypy, wheel,
 `pip check` y `pip-audit` sin vulnerabilidades conocidas. La compuerta completa,
-incluida la prueba de roles y Gitleaks, corresponde al CI de GitHub.
+incluida la prueba de roles y Gitleaks, pasó en
+[CI 42127125859](https://github.com/M1nzutt/cognova-backend/actions/runs/42127125859):
+476 pruebas, cero omitidas, PostgreSQL real, Ruff, formato, mypy, build/wheel,
+runtime sin tooling migrador, launcher HTTP, `pip-audit` y Gitleaks.
 
 ## Planes + Retos — smoke productivo aprobado — 2026-11-04
 
