@@ -1,5 +1,5 @@
 {
-    "schema_revision":  "0007_study_plans_and_challenges",
-    "commit":  "0835447ac9b96b5e01c201deebdb9ae862e4892b",
+    "schema_revision":  "0008_ai_plan_proposal_snapshot",
+    "commit":  "b823ed5efd7f4a1eefacc7ba6c301d4593091d75",
     "repository":  "M1nzutt/cognova-database"
 }

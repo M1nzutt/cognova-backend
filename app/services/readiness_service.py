@@ -8,7 +8,7 @@ class ReadinessService:
 
     # Schema contract, not ownership of Alembic. Never accept arbitrary heads
     # from an environment variable; new heads require a tested backend release.
-    expected_revision = "0007_study_plans_and_challenges"
+    expected_revision = "0008_ai_plan_proposal_snapshot"
 
     def __init__(self, database: Database) -> None:
         self._database = database
