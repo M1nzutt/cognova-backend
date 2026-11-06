@@ -1,5 +1,13 @@
 # Despliegue existente y transición de base de datos
 
+## Gemini/Database 0008 — solo preparación de código — 2026-11-06
+
+La rama Gemini fija Database 0008 y exige esa revisión en readiness/launcher.
+Render Database está suspendida en 0007; no se intentó conexión ni deploy.
+Publicar esta rama antes del release Database 0008 dejaría readiness no apta.
+Quedan para una fase posterior backup/release Database, integración Backend a
+main, despliegue Docker final con `GEMINI_API_KEY` como secreto y smoke real.
+
 ## Planes + Retos — Live y cerrado — 2026-11-04
 
 Database está en `0007_study_plans_and_challenges`. El SHA anterior Live

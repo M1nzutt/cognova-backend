@@ -1,5 +1,16 @@
 # Validación de integración productiva
 
+## Gemini sobre Database 0008 — validación de rama pendiente
+
+Se añaden pruebas de snapshot persistido tras refresh, edición y decisiones sin
+sobrescritura, regenerate sucesivo/legacy, límites JSONB 32768/65536 y rollback.
+El pin de migración de pruebas es Database 0008. El checkout PostgreSQL local no
+se pudo actualizar: la revisión automática de aprobación rechazó `git fetch`
+por límite de uso, sin evaluar seguridad. La validación PostgreSQL local de esta
+adaptación queda pendiente; se utilizará el checkout fijado por SHA en CI de la
+rama. No hay smoke productivo:
+Render Database está suspendida y sigue en 0007; no se intentó deploy.
+
 ## Gemini — validación de rama, 2026-11-05
 
 Los tests con proveedor falso y PostgreSQL desechable 0007 cubren creación

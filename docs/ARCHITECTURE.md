@@ -1,5 +1,15 @@
 # Cognova — Arquitectura Backend
 
+## Snapshot IA en la rama 0008
+
+Backend fija Database 0008 y mapea `study_plans.ai_proposal_snapshot JSONB NULL`.
+`AiPlanProposalSnapshot` construye exclusivamente datos visibles tipados;
+`StudyPlanService` valida tamaño JSONB con PostgreSQL antes de escrituras y
+`StudyPlanProjection` deriva explicación/resumen del snapshot persistido.
+Regenerate conserva el anterior en la decisión y publica el nuevo en una sola
+transacción. No se introducen tablas, DDL ni estructuras en Database desde Backend.
+La producción suspendida sigue en 0007; esta rama no se despliega todavía.
+
 ## Calendario — decisión 2026-10-25, ampliado 2026-11-02
 
 Calendario v1 separa router, DTO discriminado y servicio de consulta read-only.

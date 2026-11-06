@@ -1,5 +1,20 @@
 # Cognova — Estado backend
 
+## Gemini sobre Database 0008 — implementación de rama, 2026-11-06
+
+`feat/gemini-behavior` se adapta a Database
+`0008_ai_plan_proposal_snapshot`, pin
+`b823ed5efd7f4a1eefacc7ba6c301d4593091d75`. Readiness y ORM esperan/mapean
+esa revisión. Generate persiste un snapshot IA tipado y versionado junto al Plan
+y los Retos; GET reconstruye explicación y propuesta tras refresh. Edit,
+accept y reject conservan el snapshot. Regenerate conserva el anterior en
+`study_plan_decisions.proposed_value` y reemplaza el vigente solo después de
+validar recursos y límites JSONB 32768/65536 bytes. No hay deploy: producción
+Render está suspendida y permanece en 0007. El checkout local de pruebas no se
+pudo actualizar por límite de uso de la revisión automática de aprobación;
+la validación PostgreSQL local queda bloqueada. La rama/CI fijará el SHA 0008
+para validar el resto sin depender de ese checkout local.
+
 ## Gemini y observación académica — desarrollo 2026-11-05
 
 La rama `feat/gemini-behavior` integra `google-genai` con

@@ -5,6 +5,17 @@ de comportamiento se definen en
 [AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md). Las nuevas rutas conservan
 auth, onboarding, ownership, errores seguros y `no-store` de esta API.
 
+## Extensión Gemini preparada para Database 0008
+
+En la rama `feat/gemini-behavior`, el detalle de Plan añade
+`ai_proposal_snapshot` nullable, `explanation` nullable y
+`reasoning_summary` nullable. Generate devuelve textos derivados del snapshot
+persistido. Regenerate archiva el snapshot anterior como `proposed_value` y
+reemplaza el vigente atómicamente; edit/accept/reject lo conservan. El snapshot
+v1 contiene únicamente propuesta visible estructurada. Límites: 32768 bytes
+para snapshot y 65536 para `proposed_value`, medidos como `jsonb::text`.
+La API 0008 no está desplegada; producción suspendida conserva 0007.
+
 ## Alcance vigente
 
 Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están cerrados

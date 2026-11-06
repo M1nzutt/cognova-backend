@@ -1,7 +1,8 @@
 # Generación de Planes y observaciones académicas — contrato Backend
 
 Modelo: `gemini-3.8-flash` mediante SDK oficial `google-genai` para Python.
-Database permanece en `0007_study_plans_and_challenges`. Solo Backend envía
+La rama Backend fija Database `0008_ai_plan_proposal_snapshot` en
+`tools/database-ref.json`; producción permanece suspendida en 0007. Solo Backend envía
 datos al proveedor. Todas las rutas exigen Bearer, onboarding completo y
 ownership; `Cache-Control: no-store`. La clave `GEMINI_API_KEY` vive únicamente
 en el entorno del proceso Backend.
@@ -30,18 +31,25 @@ construyó desde recursos propios; se rechazan claves inventadas. No se
 crean ni modifican Materias, Actividades o Sesiones. El Plan nace `ai/draft`;
 los Retos propuestos nacen `ai/pending` y solo dentro de ese Plan.
 
-La explicación y el resumen se devuelven en esta respuesta. 0007 no contiene
-campos persistentes para ellos en el Plan: al refrescar, el detalle conserva
-recursos, estado y decisiones, pero no esos dos textos. La evidencia de cada
-Reto se conserva en `generation_criteria`. Una retención permanente de la
-explicación inicial requeriría una migración del repositorio Database.
+Backend guarda en `study_plans.ai_proposal_snapshot` la propuesta visible vigente
+con `schema_version=1`, modelo, fecha de generación, explicación, resumen, Plan
+original y Retos propuestos. El detalle devuelve el snapshot y proyecta
+`explanation`/`reasoning_summary` desde esa fila después de refresh. No incluye
+chain-of-thought, prompts completos, salida cruda del proveedor ni secretos.
+El tamaño se verifica antes de escribir con `octet_length(jsonb::text) <= 32768`;
+un exceso devuelve 503 seguro sin Plan ni Retos parciales. Los Planes manuales
+y los IA históricos sin snapshot mantienen `NULL`.
 
 ## POST /api/v1/study-plans/{id}/regenerate
 
 Solo propuesta `ai/draft` propia. Mantiene el contrato `StudyPlanDetail` de
 respuesta. Solicita otra salida real; la valida íntegra antes de modificar.
-El registro `regenerated` conserva la propuesta previa en `proposed_value` y
-`chosen_value=null`, conforme a 0007. Los nuevos recursos se aplican únicamente
+El registro `regenerated` conserva el snapshot previo en `proposed_value` y
+`chosen_value=null`; el snapshot nuevo queda vigente en el Plan. Antes de escribir,
+Backend comprueba el límite de 32768 bytes del snapshot nuevo y el de 65536 bytes
+de `proposed_value` usando la serialización exacta de PostgreSQL. Si un Plan IA
+histórico tiene snapshot `NULL`, guarda como evidencia su estado/Retos 0007 sin
+atribuirle una explicación inexistente. Los nuevos recursos se aplican únicamente
 al borrador de propuesta; el usuario aún debe aceptar, editar o rechazar.
 Un fallo del proveedor o una respuesta inválida no escribe Plan, Retos ni
 decisiones. Los Retos existentes con historia que impedirían reemplazo seguro

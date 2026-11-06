@@ -1,5 +1,16 @@
 # Cognova — Decisiones Congeladas
 
+## Propuesta IA persistente — decisión 2026-11-06
+
+La propuesta IA vigente vive en `study_plans.ai_proposal_snapshot` de Database
+0008; no se crea tabla versionada. Contiene solo explicación visible, resumen y
+Plan/Retos estructurados, sin razonamiento interno, prompts o respuesta cruda.
+Editar, aceptar o rechazar no altera el original. Regenerar archiva el snapshot
+anterior en `study_plan_decisions.proposed_value` y sustituye el vigente después
+de todas las validaciones; si falla, no cambia Plan, Retos ni decisiones. Backend
+comprueba los límites JSONB 32768/65536 antes de DML. El despliegue espera el
+release de Database 0008; Render está suspendida.
+
 ## Planes de Estudio + Retos — decisión 2026-11-03
 
 Los Planes relacionan Materias, Actividades y Sesiones existentes; no duplican ni
