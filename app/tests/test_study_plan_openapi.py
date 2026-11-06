@@ -44,6 +44,12 @@ def test_study_plan_openapi_matches_nested_plan_and_challenge_contract():
     assert confirm["required"] is True
     schemas = spec["components"]["schemas"]
     assert "StudyPlanDetail" in schemas
+    detail = schemas["StudyPlanDetail"]["properties"]
+    assert {"ai_proposal_snapshot", "explanation", "reasoning_summary"} <= detail
+    assert "AiPlanProposalSnapshot" in schemas
+    assert {"schema_version", "plan", "proposed_challenges"} <= schemas[
+        "AiPlanProposalSnapshot"
+    ]["properties"]
     assert "StudyChallengeResponse" in schemas
     assert "user_id" not in str(schemas)
     assert "/api/v1/challenges" not in paths

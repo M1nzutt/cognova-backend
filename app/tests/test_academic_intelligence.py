@@ -7,6 +7,7 @@ from google.genai import errors
 
 from app.academic_intelligence.academic_event import AcademicEvent
 from app.academic_intelligence.academic_journey import AcademicJourney
+from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
 from app.academic_intelligence.decision_route import DecisionRoute
 from app.academic_intelligence.decision_trail import DecisionTrail
 from app.academic_intelligence.gemini_provider import GeminiProvider
@@ -172,6 +173,54 @@ def test_gemini_provider_uses_structured_output_and_handles_timeout():
     with pytest.raises(DomainError) as exc:
         provider.plan("{}")
     assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
+
+
+def test_versioned_snapshot_contains_only_visible_structured_proposal():
+    now = datetime(2030, 1, 1, tzinfo=timezone.utc)
+    proposal = PlanProposal(
+        name="Plan visible",
+        objective="Preparar examen.",
+        start_date=now,
+        end_date=now + timedelta(days=7),
+        explanation="Hay una actividad pendiente.",
+        reasoning_summary="Se propone una semana de práctica.",
+        subject_ids=[1],
+        activity_ids=[2],
+        session_ids=[],
+        proposed_challenges=[
+            ProposedChallenge(
+                title="Terminar actividad",
+                objective="Completar actividad propia.",
+                explanation="Tiene fecha cercana.",
+                evidence=["activity:2"],
+                target_type="activity_completion",
+                target_id=2,
+                subject_id=1,
+                activity_id=2,
+                target_value={"status": "completed"},
+                measurable_condition="La actividad queda completada.",
+            )
+        ],
+    )
+    stored = AiPlanProposalSnapshot.from_proposal(
+        proposal, model="gemini-3.8-flash", generated_at=now
+    ).as_storage()
+    assert stored["schema_version"] == 1
+    assert stored["plan"]["subject_ids"] == [1]
+    assert stored["proposed_challenges"][0]["evidence"] == ["activity:2"]
+    assert stored["explanation"] == proposal.explanation
+    assert stored["reasoning_summary"] == proposal.reasoning_summary
+    assert set(stored) == {
+        "schema_version",
+        "model",
+        "generated_at",
+        "explanation",
+        "reasoning_summary",
+        "plan",
+        "proposed_challenges",
+    }
+    for forbidden in ("prompt", "raw_response", "chain_of_thought", "api_key", "token"):
+        assert forbidden not in json.dumps(stored).lower()
 
 
 def test_proposal_validation_rejects_foreign_id_and_duplicate_id():
