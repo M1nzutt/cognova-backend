@@ -1,5 +1,17 @@
 ﻿# Handoff database → backend
 
+## Adaptación de rama a Database 0008 — 2026-11-06
+
+El pin de pruebas Backend cambia al SHA Database
+`b823ed5efd7f4a1eefacc7ba6c301d4593091d75`, revisión exacta
+`0008_ai_plan_proposal_snapshot`. El ORM añade la columna nullable JSONB y su
+CHECK físico reflejado; Backend no ejecuta DDL ni cambia grants. El snapshot
+visible ocupa como máximo 32768 bytes de `jsonb::text`; el valor archivado en
+`study_plan_decisions.proposed_value` se comprueba contra 65536 bytes antes
+de escribir. Los Planes manuales y los IA históricos pueden tener NULL. Esta
+compatibilidad es de código/rama: Database productiva permanece suspendida en
+0007 y Backend 0008 no debe desplegarse antes del release de Database.
+
 ## Estado vigente — 2026-11-04
 
 Database producción está en `0007_study_plans_and_challenges`; Backend fija

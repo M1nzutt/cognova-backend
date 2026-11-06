@@ -22,6 +22,7 @@ class SecurityMiddleware:
             await self.app(scope, receive, send)
             return
         request_id = str(uuid4())
+        scope.setdefault("state", {})["request_id"] = request_id
         started, status = perf_counter(), 500
         response_started = False
 

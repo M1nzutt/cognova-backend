@@ -1,5 +1,21 @@
 # Cognova — Contrato API v1
 
+La generación Gemini de la rama `feat/gemini-behavior` y el primer análisis
+de comportamiento se definen en
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md). Las nuevas rutas conservan
+auth, onboarding, ownership, errores seguros y `no-store` de esta API.
+
+## Extensión Gemini preparada para Database 0008
+
+En la rama `feat/gemini-behavior`, el detalle de Plan añade
+`ai_proposal_snapshot` nullable, `explanation` nullable y
+`reasoning_summary` nullable. Generate devuelve textos derivados del snapshot
+persistido. Regenerate archiva el snapshot anterior como `proposed_value` y
+reemplaza el vigente atómicamente; edit/accept/reject lo conservan. El snapshot
+v1 contiene únicamente propuesta visible estructurada. Límites: 32768 bytes
+para snapshot y 65536 para `proposed_value`, medidos como `jsonb::text`.
+La API 0008 no está desplegada; producción suspendida conserva 0007.
+
 ## Alcance vigente
 
 Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están cerrados
@@ -7,7 +23,8 @@ en Backend. Database producción está en `0007_study_plans_and_challenges`; el 
 está en tools/database-ref.json. Calendario es de solo lectura sobre Actividades y
 Sesiones, según [CALENDAR_CONTRACT](CALENDAR_CONTRACT.md). Sesiones se rige por
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md). Planes y Retos se rigen por
-[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md); Gemini real sigue pendiente y ningún
+[STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md); Gemini real sigue pendiente en
+producción mientras se valida la rama `feat/gemini-behavior`, y ningún
 endpoint declara generado por IA un Plan manual. La API de Planes/Retos está
 desplegada en Backend `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` sobre Database
 0007. CI del merge y smoke autenticado productivo pasaron. Los flujos de

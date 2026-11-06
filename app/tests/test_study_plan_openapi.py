@@ -9,6 +9,8 @@ def test_study_plan_openapi_matches_nested_plan_and_challenge_contract():
         spec = client.get("/openapi.json").json()
 
     paths = spec["paths"]
+    assert set(paths["/api/v1/study-plans/generate"]) == {"post"}
+    assert set(paths["/api/v1/analysis/behavior"]) == {"post"}
     assert set(paths["/api/v1/study-plans"]) == {"get", "post"}
     assert set(paths["/api/v1/study-plans/{plan_id}"]) == {
         "get",
@@ -42,6 +44,12 @@ def test_study_plan_openapi_matches_nested_plan_and_challenge_contract():
     assert confirm["required"] is True
     schemas = spec["components"]["schemas"]
     assert "StudyPlanDetail" in schemas
+    detail = schemas["StudyPlanDetail"]["properties"]
+    assert {"ai_proposal_snapshot", "explanation", "reasoning_summary"} <= set(detail)
+    assert "AiPlanProposalSnapshot" in schemas
+    assert {"schema_version", "plan", "proposed_challenges"} <= set(
+        schemas["AiPlanProposalSnapshot"]["properties"]
+    )
     assert "StudyChallengeResponse" in schemas
     assert "user_id" not in str(schemas)
     assert "/api/v1/challenges" not in paths

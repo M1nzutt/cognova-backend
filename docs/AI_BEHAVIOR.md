@@ -1,5 +1,24 @@
 # Cognova — Comportamiento de IA
 
+## Primera integración Backend (rama `feat/gemini-behavior`)
+
+`POST /api/v1/analysis/behavior` cuenta Sesiones `finished` con resultado
+`completed`/`partial` y duración real positiva. Con 0–4 entrega solo hechos
+deterministas y una pregunta; no llama a Gemini ni afirma patrones. Desde cinco,
+la salida estructurada de Gemini contiene observación, evidencia, pregunta,
+base de confianza e IDs relacionados. Backend valida esos IDs contra la cuenta
+autenticada y rechaza contenido diagnóstico evidente. Las hipótesis se devuelven
+al usuario, sin guardarse como hechos.
+
+`gemini-3.8-flash` se invoca mediante `google-genai` oficial con JSON Schema
+derivado de Pydantic. Hay timeout, un reintento corto para 429/500/503,
+cuota compartida por usuario, errores públicos sanitizados y logs de metadatos.
+La clave se lee solo de `GEMINI_API_KEY` del proceso Backend. El contexto enviado
+incluye muestras acotadas de registros propios; instrucciones dentro de textos
+académicos se tratan como datos. La generación de Planes solo crea borradores
+`ai` y Retos `pending` con evidencia; el usuario decide si acepta, edita o rechaza.
+Detalles de rutas y límites en [AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
+
 ## Rol
 
 Acompañante académico basado en evidencia.

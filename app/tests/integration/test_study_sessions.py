@@ -558,7 +558,7 @@ def test_upgrade_from_0005_preserves_existing_resources_and_enables_sessions(
     with database.session() as db:
         assert (
             db.scalar(text("SELECT version_num FROM alembic_version"))
-            == "0007_study_plans_and_challenges"
+            == "0008_ai_plan_proposal_snapshot"
         )
         after = {
             table: db.execute(text(f"SELECT * FROM {table} ORDER BY {columns}")).all()

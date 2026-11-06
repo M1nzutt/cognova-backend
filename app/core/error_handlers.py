@@ -50,4 +50,5 @@ async def internal_error_handler(request: Request, exc: Exception) -> JSONRespon
 
 async def domain_error_handler(request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, DomainError)
-    return error_response(exc.status_code, exc.code, exc.message)
+    headers = {"Retry-After": "30"} if exc.code == "GEMINI_RATE_LIMIT" else None
+    return error_response(exc.status_code, exc.code, exc.message, headers)

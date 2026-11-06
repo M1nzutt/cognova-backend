@@ -66,14 +66,14 @@ def test_launcher_serves_registered_routes_over_http(pg_settings, tmp_path):
         stderr=subprocess.DEVNULL,
     )
     try:
-        with httpx.Client(base_url=f"http://127.0.0.1:{port}", timeout=2) as client:
+        with httpx.Client(base_url=f"http://127.0.0.1:{port}", timeout=5) as client:
             deadline = time.monotonic() + 30
             while True:
                 assert process.poll() is None, "Launcher exited before serving"
                 try:
                     response = client.get("/openapi.json")
                     break
-                except httpx.ConnectError:
+                except (httpx.ConnectError, httpx.ConnectTimeout):
                     assert time.monotonic() < deadline, "Launcher did not listen"
                     time.sleep(0.1)
             assert response.status_code == 200

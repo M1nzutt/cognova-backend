@@ -1,5 +1,23 @@
 # Cognova — Estructuras de Datos
 
+## Segundo bloque — IA académica (rama `feat/gemini-behavior`)
+
+Las cinco estructuras nuevas viven en `app/academic_intelligence`, se construyen
+por solicitud con una muestra limitada del usuario autenticado y nunca persisten
+inferencias. `AcademicContext` las consume al preparar datos para Gemini; el árbol
+de viabilidad se consume en `validate_proposal` antes de insertar un Plan.
+
+| Nombre de dominio | Implementación propia | Uso y coste principal |
+| --- | --- | --- |
+| `PendingAnalysisFlow` | enlaces FIFO entre `PendingAnalysis` | candidatos académicos en orden de llegada; agregar/tomar O(1) |
+| `AcademicJourney` | lista simplemente enlazada de `AcademicEvent` | cronología de sesiones y deadlines; anexar O(1), recorrer O(n) |
+| `DecisionTrail` | enlaces dobles de `DecisionPassage` | decisiones del usuario en ambos sentidos; anexar O(1), recorrer O(n) |
+| `ScheduleIndex` | árbol AVL de `ScheduleEntry` | agenda por instante y recurso; insertar O(log n), consultar rango O(log n + k) |
+| `DecisionRoute` | árbol binario de `DecisionBranch` | descartar propuestas sin recursos, fechas o contexto; O(altura) |
+
+PostgreSQL sigue siendo la única fuente de verdad. Los nombres técnicos listados
+abajo describen ideas históricas, no clases de este bloque.
+
 - Stack: historial de acciones reversibles.
 - Queue: análisis pendientes.
 - SinglyLinkedList: feed cronológico.

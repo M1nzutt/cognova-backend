@@ -90,6 +90,10 @@ class DomainError(Exception):
             503,
             "La generación de Planes no está disponible en este momento.",
         ),
+        "GEMINI_RATE_LIMIT": (
+            503,
+            "La generación está ocupada. Intenta de nuevo en unos momentos.",
+        ),
         "STUDY_CHALLENGE_STATE_CONFLICT": (
             409,
             "El Reto no permite esa acción en su estado actual.",

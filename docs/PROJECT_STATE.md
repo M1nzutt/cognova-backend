@@ -1,5 +1,48 @@
 # Cognova — Estado backend
 
+## Gemini sobre Database 0008 — implementación de rama, 2026-11-06
+
+`feat/gemini-behavior` se adapta a Database
+`0008_ai_plan_proposal_snapshot`, pin
+`b823ed5efd7f4a1eefacc7ba6c301d4593091d75`. Readiness y ORM esperan/mapean
+esa revisión. Generate persiste un snapshot IA tipado y versionado junto al Plan
+y los Retos; GET reconstruye explicación y propuesta tras refresh. Edit,
+accept y reject conservan el snapshot. Regenerate conserva el anterior en
+`study_plan_decisions.proposed_value` y reemplaza el vigente solo después de
+validar recursos y límites JSONB 32768/65536 bytes. No hay deploy: producción
+Render está suspendida y permanece en 0007. El checkout local de pruebas no se
+pudo actualizar por límite de uso de la revisión automática de aprobación;
+la validación PostgreSQL local quedó bloqueada. La rama fijó el SHA 0008 en
+[CI 42300258065](https://github.com/M1nzutt/cognova-backend/actions/runs/42300258065):
+484 pruebas aprobadas, incluidas 167 PostgreSQL, sin omisiones; Gitleaks, Ruff,
+formato, mypy, build/wheel, runtime, launcher HTTP y `pip-audit` aprobados.
+El ORM usa SQL `NULL` para planes sin snapshot, también cuando un fixture legacy
+vacía el valor; JSON `null` violaría la constraint de 0008.
+
+## Gemini y observación académica — desarrollo 2026-11-05
+
+La rama `feat/gemini-behavior` integra `google-genai` con
+`gemini-3.8-flash`, salida JSON Schema/Pydantic, generación inicial de
+Planes `ai/draft`, regeneración transaccional y Retos `ai/pending` con evidencia.
+`POST /analysis/behavior` aplica el umbral de cinco Sesiones válidas: antes
+devuelve hechos y pregunta sin invocar al modelo; después valida hipótesis e IDs
+propios. Cinco estructuras manuales procesan contexto y viabilidad en memoria.
+Database permanece en 0007, sin cambios de schema. Ver
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
+
+Esta rama aún no se integró ni desplegó. El Backend productivo sigue en
+`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`; allí `regenerate` continúa
+respondiendo 503. La clave no está disponible en el entorno local; el smoke
+Gemini real queda pendiente hasta configurarla como secreto Backend.
+
+Validación local: 473 pruebas verdes sobre PostgreSQL 0007; se excluyó solo
+la prueba preexistente de creación de roles por falta de `CREATEROLE` en el
+administrador del servidor desechable. El launcher TCP aislado, Ruff, formato,
+mypy, wheel, `pip check` y `pip-audit` pasaron. [CI de la rama en
+`b668756`](https://github.com/M1nzutt/cognova-backend/actions/runs/42127125859)
+pasó con 476 pruebas y cero omisiones, PostgreSQL real, Gitleaks, Ruff,
+formato, mypy, wheel, runtime/launcher y `pip-audit`.
+
 ## Planes de Estudio + Retos — Backend cerrado en producción — 2026-11-04
 
 Database producción está en `0007_study_plans_and_challenges`, commit

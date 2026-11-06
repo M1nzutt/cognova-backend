@@ -1,4 +1,4 @@
-"""Persistence mappings for external Database revision 0007.
+"""Persistence mappings for external Database revision 0008.
 
 Database owns the schema. These mappings let the Backend read and write the
 release without taking ownership of DDL.
@@ -34,6 +34,9 @@ class StudyPlan(Base):
     end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     status: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[str] = mapped_column(Text, nullable=False)
+    ai_proposal_snapshot: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -70,6 +73,12 @@ class StudyPlan(Base):
             name="ck_study_plans_status",
         ),
         CheckConstraint("source IN ('ai','manual')", name="ck_study_plans_source"),
+        CheckConstraint(
+            "ai_proposal_snapshot IS NULL OR "
+            "(jsonb_typeof(ai_proposal_snapshot) = 'object' "
+            "AND octet_length(ai_proposal_snapshot::text) <= 32768)",
+            name="ck_study_plans_ai_proposal_snapshot",
+        ),
         CheckConstraint(
             "isfinite(created_at) AND isfinite(updated_at) "
             "AND updated_at >= created_at",

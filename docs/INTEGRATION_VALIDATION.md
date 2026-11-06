@@ -1,5 +1,42 @@
 # Validación de integración productiva
 
+## Gemini sobre Database 0008 — validación de rama, 2026-11-06
+
+Se añaden pruebas de snapshot persistido tras refresh, edición y decisiones sin
+sobrescritura, regenerate sucesivo/legacy, límites JSONB 32768/65536 y rollback.
+El pin de migración de pruebas es Database 0008, SHA
+`b823ed5efd7f4a1eefacc7ba6c301d4593091d75`. El checkout PostgreSQL local no
+se pudo actualizar: la revisión automática de aprobación rechazó `git fetch`
+por límite de uso, sin evaluar seguridad. La validación PostgreSQL local de esta
+adaptación quedó bloqueada; [CI 42300258065](https://github.com/M1nzutt/cognova-backend/actions/runs/42300258065)
+usó el checkout fijado por SHA y aprobó **484 pruebas, 167 PostgreSQL**, cero
+omisiones. También pasaron Gitleaks, Ruff, formato, mypy (175 archivos),
+build/wheel, runtime sin tooling migrador, launcher HTTP y `pip-audit`.
+Un primer CI detectó que el ORM enviaba JSON `null` al vaciar un snapshot; el
+mapeo `JSONB(none_as_null=True)` ahora envía SQL `NULL`, como exige 0008.
+No hay smoke productivo: Render Database está suspendida y sigue en 0007; no
+se intentó deploy.
+
+## Gemini — validación de rama, 2026-11-05
+
+Los tests con proveedor falso y PostgreSQL desechable 0007 cubren creación
+`ai/draft`, Reto con evidencia, fallo sin mutación ni decisión, regeneración
+sucesiva, aceptación y umbral de 0–6 Sesiones finalizadas. Los tests unitarios
+comprueban las cinco estructuras, salida estructurada, respuesta inválida,
+timeout, 429 y validación de IDs. El resultado final de suite/CI se registrará
+tras las compuertas. No hay smoke Gemini real: `GEMINI_API_KEY` no está
+configurada localmente. No se atribuye a producción esta validación de rama.
+
+Validación local del árbol funcional: `473 passed, 1 deselected` en 298 s con
+PostgreSQL 18 y zona UTC explícita. La única exclusión es una prueba previa que
+crea roles: el administrador del servidor desechable no tiene `CREATEROLE`.
+El launcher TCP pasó por separado, al igual que Ruff, formato, mypy, wheel,
+`pip check` y `pip-audit` sin vulnerabilidades conocidas. La compuerta completa,
+incluida la prueba de roles y Gitleaks, pasó en
+[CI 42127125859](https://github.com/M1nzutt/cognova-backend/actions/runs/42127125859):
+476 pruebas, cero omitidas, PostgreSQL real, Ruff, formato, mypy, build/wheel,
+runtime sin tooling migrador, launcher HTTP, `pip-audit` y Gitleaks.
+
 ## Planes + Retos — smoke productivo aprobado — 2026-11-04
 
 Backend `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` Live en Render

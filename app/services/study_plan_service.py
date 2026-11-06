@@ -1,5 +1,6 @@
+import json
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import datetime, timezone
 from typing import TypeVar
 
@@ -7,6 +8,10 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
+from app.academic_intelligence.academic_context import AcademicContext
+from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
+from app.academic_intelligence.gemini_provider import MODEL, GeminiProvider
+from app.academic_intelligence.proposal_validation import validate_proposal
 from app.core.domain_error import DomainError
 from app.models.study_plans import (
     StudyChallenge,
@@ -17,6 +22,8 @@ from app.models.study_plans import (
     StudyPlanSubject,
 )
 from app.models.user import User
+from app.schemas.ai_plan_generation_response import AiPlanGenerationResponse
+from app.schemas.study_challenge_write import StudyChallengeWrite
 from app.schemas.study_plan_detail import StudyPlanDetail
 from app.schemas.study_plan_list_response import StudyPlanListResponse
 from app.schemas.study_plan_summary import StudyPlanSummary
@@ -25,7 +32,6 @@ from app.services.study_plan_projection import StudyPlanProjection
 from app.services.study_plan_resources import StudyPlanResources
 from app.study_plans.decision_entry import DecisionEntry
 from app.study_plans.decision_history import DecisionHistory
-from app.study_plans.proposal_provider import StudyPlanProposalProvider
 
 T = TypeVar("T")
 
@@ -39,7 +45,7 @@ class StudyPlanService:
         self,
         db: Session,
         clock: Callable[[], datetime] | None = None,
-        proposal_provider: StudyPlanProposalProvider | None = None,
+        proposal_provider: GeminiProvider | None = None,
     ) -> None:
         self._db = db
         self._clock = clock or (lambda: datetime.now(timezone.utc))
@@ -89,6 +95,46 @@ class StudyPlanService:
 
         return self._write(user_id, insert)
 
+    def generate(self, user_id: int) -> AiPlanGenerationResponse:
+        if self._proposal_provider is None:
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
+        context = AcademicContext(self._db, user_id)
+        evidence = context.as_json()
+        self._db.rollback()  # Never hold a transaction across the external call.
+        proposal = self._proposal_provider.plan(evidence)
+        data, challenges = validate_proposal(proposal, context)
+        snapshot = AiPlanProposalSnapshot.from_proposal(
+            proposal, model=MODEL, generated_at=self._clock()
+        ).as_storage()
+        self._validate_jsonb_size(snapshot, 32768)
+
+        def insert() -> StudyPlanDetail:
+            activities, sessions = self._resources.validate(user_id, data)
+            self._resources.validate_schedule(data.start_at, data.end_at, sessions)
+            plan = StudyPlan(
+                user_id=user_id,
+                name=data.name,
+                objective=data.objective,
+                start_at=data.start_at,
+                end_at=data.end_at,
+                status="draft",
+                source="ai",
+                ai_proposal_snapshot=snapshot,
+            )
+            self._db.add(plan)
+            self._db.flush()
+            self._resources.replace(user_id, plan.id, data, activities, sessions)
+            self._stage_challenges(user_id, plan.id, challenges)
+            return self._projection.detail(plan)
+
+        detail = self._write(user_id, insert)
+        assert detail.ai_proposal_snapshot is not None
+        return AiPlanGenerationResponse(
+            plan=detail,
+            explanation=detail.ai_proposal_snapshot.explanation,
+            reasoning_summary=detail.ai_proposal_snapshot.reasoning_summary,
+        )
+
     def update(
         self, user_id: int, plan_id: int, data: StudyPlanWrite
     ) -> StudyPlanDetail:
@@ -128,14 +174,21 @@ class StudyPlanService:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
-            proposed = self._snapshot(plan)
+            proposed = (
+                plan.ai_proposal_snapshot
+                if plan.ai_proposal_snapshot is not None
+                else self._snapshot(plan)
+            )
+            chosen = self._snapshot(plan)
+            self._validate_jsonb_size(proposed, 65536)
+            self._validate_jsonb_size(chosen, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="accepted",
                     proposed_value=proposed,
-                    chosen_value=proposed,
+                    chosen_value=chosen,
                 )
             )
             plan.status = "active"
@@ -150,12 +203,18 @@ class StudyPlanService:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
+            proposed = (
+                plan.ai_proposal_snapshot
+                if plan.ai_proposal_snapshot is not None
+                else self._snapshot(plan)
+            )
+            self._validate_jsonb_size(proposed, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="rejected",
-                    proposed_value=self._snapshot(plan),
+                    proposed_value=proposed,
                     chosen_value=None,
                 )
             )
@@ -167,33 +226,156 @@ class StudyPlanService:
         return self._write(user_id, reject_proposal)
 
     def regenerate(self, user_id: int, plan_id: int) -> StudyPlanDetail:
+        if self._proposal_provider is None:
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
+        current = self._owned(user_id, plan_id)
+        if current.source != "ai" or current.status != "draft":
+            raise DomainError("STUDY_PLAN_STATE_CONFLICT")
+        previous_updated_at = current.updated_at
+        previous_snapshot = current.ai_proposal_snapshot
+        if previous_snapshot is not None:
+            self._validate_jsonb_size(previous_snapshot, 32768)
+        previous_challenges = self._db.scalars(
+            select(StudyChallenge).where(
+                StudyChallenge.user_id == user_id,
+                StudyChallenge.plan_id == plan_id,
+            )
+        ).all()
+        if any(
+            row.source != "ai"
+            or row.status not in {"pending", "cancelled"}
+            or (row.status == "pending" and row.updated_at > row.created_at)
+            for row in previous_challenges
+        ):
+            raise DomainError("STUDY_PLAN_HISTORY_CONFLICT")
+        context = AcademicContext(self._db, user_id)
+        evidence = context.as_json(exclude_plan_id=plan_id)
+        self._db.rollback()
+        proposal = self._proposal_provider.plan(evidence)
+        proposed, challenges = validate_proposal(proposal, context)
+        next_snapshot = AiPlanProposalSnapshot.from_proposal(
+            proposal, model=MODEL, generated_at=self._clock()
+        ).as_storage()
+        self._validate_jsonb_size(next_snapshot, 32768)
+
         def regenerate_proposal() -> StudyPlanDetail:
             plan = self._owned(user_id, plan_id, lock=True)
             if plan.source != "ai" or plan.status != "draft":
                 raise DomainError("STUDY_PLAN_STATE_CONFLICT")
-            if self._proposal_provider is None:
-                raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
-            proposed = self._proposal_provider.regenerate(plan)
-            activities, sessions = self._resources.validate(user_id, proposed)
-            self._resources.validate_schedule(
-                proposed.start_at, proposed.end_at, sessions
+            if plan.updated_at != previous_updated_at:
+                raise DomainError("STUDY_PLAN_WRITE_CONFLICT")
+            if plan.ai_proposal_snapshot != previous_snapshot:
+                raise DomainError("STUDY_PLAN_WRITE_CONFLICT")
+            # Retain resource links required by historical, now cancelled challenges.
+            linked = self._db.scalars(
+                select(StudyChallenge)
+                .where(
+                    StudyChallenge.user_id == user_id,
+                    StudyChallenge.plan_id == plan_id,
+                )
+                .with_for_update()
+            ).all()
+            if any(
+                row.source != "ai"
+                or row.status not in {"pending", "cancelled"}
+                or (row.status == "pending" and row.updated_at > row.created_at)
+                for row in linked
+            ):
+                raise DomainError("STUDY_PLAN_HISTORY_CONFLICT")
+            merged = proposed.model_copy(
+                update={
+                    "subject_ids": sorted(
+                        set(proposed.subject_ids)
+                        | {
+                            row.subject_id
+                            for row in linked
+                            if row.subject_id is not None
+                        }
+                    ),
+                    "activity_ids": sorted(
+                        set(proposed.activity_ids)
+                        | {
+                            row.activity_id
+                            for row in linked
+                            if row.activity_id is not None
+                        }
+                    ),
+                    "study_session_ids": sorted(
+                        set(proposed.study_session_ids)
+                        | {
+                            row.study_session_id
+                            for row in linked
+                            if row.study_session_id is not None
+                        }
+                    ),
+                }
             )
+            activities, sessions = self._resources.validate(user_id, merged)
+            self._resources.validate_schedule(merged.start_at, merged.end_at, sessions)
+            previous_value = (
+                previous_snapshot
+                if previous_snapshot is not None
+                else {
+                    "plan": self._snapshot(plan),
+                    "challenges": [
+                        {
+                            "id": row.id,
+                            "title": row.title,
+                            "target_type": row.target_type,
+                            "target_value": row.target_value,
+                            "generation_criteria": row.generation_criteria,
+                        }
+                        for row in linked
+                    ],
+                }
+            )
+            self._validate_jsonb_size(previous_value, 65536)
             self._db.add(
                 StudyPlanDecision(
                     user_id=user_id,
                     plan_id=plan.id,
                     action="regenerated",
-                    proposed_value=self._snapshot(plan),
+                    proposed_value=previous_value,
                     chosen_value=None,
                 )
             )
-            self._apply_write(plan, proposed)
-            self._resources.replace(user_id, plan.id, proposed, activities, sessions)
+            self._apply_write(plan, merged)
+            plan.ai_proposal_snapshot = next_snapshot
+            self._resources.replace(user_id, plan.id, merged, activities, sessions)
+            for row in linked:
+                if row.status == "pending":
+                    row.status = "cancelled"
+                    row.updated_at = self._clock()
+            self._stage_challenges(user_id, plan.id, challenges)
             plan.updated_at = self._clock()
             self._db.flush()
             return self._projection.detail(plan)
 
         return self._write(user_id, regenerate_proposal)
+
+    def _stage_challenges(
+        self, user_id: int, plan_id: int, challenges: Sequence[StudyChallengeWrite]
+    ) -> None:
+        for item in challenges:
+            self._db.add(
+                StudyChallenge(
+                    user_id=user_id,
+                    plan_id=plan_id,
+                    subject_id=item.subject_id,
+                    activity_id=item.activity_id,
+                    study_session_id=item.study_session_id,
+                    title=item.title,
+                    description=item.description,
+                    target_type=item.target_type,
+                    target_value=item.target_value,
+                    start_at=item.start_at,
+                    deadline=item.deadline,
+                    status="pending",
+                    source="ai",
+                    generation_criteria=item.generation_criteria,
+                )
+            )
+        self._db.flush()
 
     def activate(self, user_id: int, plan_id: int) -> StudyPlanDetail:
         return self._transition(
@@ -283,6 +465,18 @@ class StudyPlanService:
 
     def _snapshot(self, plan: StudyPlan) -> dict[str, object]:
         return self._resources.snapshot(plan)
+
+    def _validate_jsonb_size(self, value: object, limit: int) -> None:
+        try:
+            encoded = json.dumps(value, ensure_ascii=False, allow_nan=False)
+            size = self._db.scalar(
+                text("SELECT octet_length(CAST(:value AS jsonb)::text)"),
+                {"value": encoded},
+            )
+        except (TypeError, ValueError, DBAPIError):
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
+        if size is None or size > limit:
+            raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
 
     def _record_changes(
         self,

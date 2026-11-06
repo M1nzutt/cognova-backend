@@ -3,6 +3,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
 from app.core.domain_error import DomainError
 from app.models.activity import Activity
 from app.models.study_plans import (
@@ -39,6 +40,11 @@ class StudyPlanProjection:
         self._db = db
 
     def detail(self, plan: StudyPlan) -> StudyPlanDetail:
+        snapshot = (
+            AiPlanProposalSnapshot.model_validate(plan.ai_proposal_snapshot)
+            if plan.ai_proposal_snapshot is not None
+            else None
+        )
         subjects = self._subjects(plan)
         activities = self._activities(plan)
         sessions = self._sessions(plan)
@@ -52,6 +58,9 @@ class StudyPlanProjection:
 
         return StudyPlanDetail(
             **StudyPlanSummary.model_validate(plan).model_dump(),
+            ai_proposal_snapshot=snapshot,
+            explanation=snapshot.explanation if snapshot else None,
+            reasoning_summary=snapshot.reasoning_summary if snapshot else None,
             subjects=[
                 StudyPlanSubjectResource(id=row.id, name=row.name) for row in subjects
             ],
