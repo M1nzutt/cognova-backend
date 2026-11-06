@@ -35,7 +35,7 @@ class StudyPlan(Base):
     status: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[str] = mapped_column(Text, nullable=False)
     ai_proposal_snapshot: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB, nullable=True
+        JSONB(none_as_null=True), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
