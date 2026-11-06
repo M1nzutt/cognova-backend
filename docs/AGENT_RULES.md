@@ -1,13 +1,18 @@
 # Cognova — Reglas para Agentes
 
-## Alcance vigente — 2026-11-04
+## Alcance vigente — 2026-11-06
 
 Materias, Actividades, Sesiones de Estudio + temporizador, Calendario y Planes +
-Retos están desplegados y cerrados en Backend. Database está en
+Retos tuvieron release productivo en Backend. Gemini y análisis de comportamiento
+están integrados en `main` a nivel código/CI, sin despliegue; Frontend IA puede
+empezar. Backend exige Database `0008_ai_plan_proposal_snapshot`; su producción
+Render está suspendida en 0007. El despliegue final será Docker en servidor
+propio, con `GEMINI_API_KEY` como secreto y smoke real pendiente. Render ya no es
+dependencia de cierre. El release previo de Planes/Retos usó Database
 `0007_study_plans_and_challenges`, SHA fijado
-`0835447ac9b96b5e01c201deebdb9ae862e4892b`. El Backend Live
+`0835447ac9b96b5e01c201deebdb9ae862e4892b`. El último Backend Live
 `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0` exige esa revisión y pasó smoke
-productivo. Gemini real sigue pendiente; regenerate responde 503 sin mutaciones.
+productivo en aquel release; `regenerate` respondía 503 sin mutaciones.
 No se modificaron Frontend ni Database. Contratos:
 [STUDY_PLANS_CONTRACT](STUDY_PLANS_CONTRACT.md),
 [STUDY_SESSIONS_CONTRACT](STUDY_SESSIONS_CONTRACT.md) y

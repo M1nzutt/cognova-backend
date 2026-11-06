@@ -1,8 +1,10 @@
 # Cognova — Estado backend
 
-## Gemini sobre Database 0008 — implementación de rama, 2026-11-06
+## Gemini sobre Database 0008 — integrado en main, 2026-11-06
 
-`feat/gemini-behavior` se adapta a Database
+`feat/gemini-behavior` se integró a `main` mediante merge `--no-ff`
+`837e351e5994d101cb649555a16e8397cb94f617`, sin squash y con
+`[skip render]`. El código se adapta a Database
 `0008_ai_plan_proposal_snapshot`, pin
 `b823ed5efd7f4a1eefacc7ba6c301d4593091d75`. Readiness y ORM esperan/mapean
 esa revisión. Generate persiste un snapshot IA tipado y versionado junto al Plan
@@ -18,6 +20,12 @@ la validación PostgreSQL local quedó bloqueada. La rama fijó el SHA 0008 en
 formato, mypy, build/wheel, runtime, launcher HTTP y `pip-audit` aprobados.
 El ORM usa SQL `NULL` para planes sin snapshot, también cuando un fixture legacy
 vacía el valor; JSON `null` violaría la constraint de 0008.
+[CI del merge 42301614545](https://github.com/M1nzutt/cognova-backend/actions/runs/42301614545)
+también pasó 484 pruebas, 167 PostgreSQL, cero omisiones y todas las compuertas.
+Backend Gemini queda cerrado a nivel código/CI; Frontend IA puede empezar con
+los contratos actuales. La ejecución real espera Database 0008, despliegue Docker
+final, `GEMINI_API_KEY` como secreto del entorno y smoke. Render ya no es
+dependencia de ese cierre.
 
 ## Gemini y observación académica — desarrollo 2026-11-05
 
@@ -30,9 +38,10 @@ propios. Cinco estructuras manuales procesan contexto y viabilidad en memoria.
 Database permanece en 0007, sin cambios de schema. Ver
 [AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
 
-Esta rama aún no se integró ni desplegó. El Backend productivo sigue en
-`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`; allí `regenerate` continúa
-respondiendo 503. La clave no está disponible en el entorno local; el smoke
+En esa fase la rama aún no se había integrado ni desplegado. El último Backend
+productivo conocido seguía en
+`d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`; allí `regenerate` respondía
+503. La clave no está disponible en el entorno local; el smoke
 Gemini real queda pendiente hasta configurarla como secreto Backend.
 
 Validación local: 473 pruebas verdes sobre PostgreSQL 0007; se excluyó solo

@@ -1,6 +1,6 @@
 # Validación de integración productiva
 
-## Gemini sobre Database 0008 — validación de rama, 2026-11-06
+## Gemini sobre Database 0008 — validación de main, 2026-11-06
 
 Se añaden pruebas de snapshot persistido tras refresh, edición y decisiones sin
 sobrescritura, regenerate sucesivo/legacy, límites JSONB 32768/65536 y rollback.
@@ -14,8 +14,12 @@ omisiones. También pasaron Gitleaks, Ruff, formato, mypy (175 archivos),
 build/wheel, runtime sin tooling migrador, launcher HTTP y `pip-audit`.
 Un primer CI detectó que el ORM enviaba JSON `null` al vaciar un snapshot; el
 mapeo `JSONB(none_as_null=True)` ahora envía SQL `NULL`, como exige 0008.
-No hay smoke productivo: Render Database está suspendida y sigue en 0007; no
-se intentó deploy.
+El merge `--no-ff` `837e351e5994d101cb649555a16e8397cb94f617` conservó
+el árbol validado. [CI de main 42301614545](https://github.com/M1nzutt/cognova-backend/actions/runs/42301614545)
+pasó otras 484 pruebas, 167 PostgreSQL, cero omisiones, y las mismas compuertas
+de calidad, build, runtime y seguridad. El smoke real Gemini queda pendiente
+del despliegue Docker final con Database 0008 y `GEMINI_API_KEY` como secreto.
+Render Database está suspendida y sigue en 0007; no se intentó deploy.
 
 ## Gemini — validación de rama, 2026-11-05
 

@@ -1,12 +1,16 @@
 # Despliegue existente y transición de base de datos
 
-## Gemini/Database 0008 — solo preparación de código — 2026-11-06
+## Gemini/Database 0008 — integración de código sin deploy — 2026-11-06
 
-La rama Gemini fija Database 0008 y exige esa revisión en readiness/launcher.
-Render Database está suspendida en 0007; no se intentó conexión ni deploy.
-Publicar esta rama antes del release Database 0008 dejaría readiness no apta.
-Quedan para una fase posterior backup/release Database, integración Backend a
-main, despliegue Docker final con `GEMINI_API_KEY` como secreto y smoke real.
+`main` integra la rama Gemini mediante merge `--no-ff`
+`837e351e5994d101cb649555a16e8397cb94f617`, con `[skip render]` para
+evitar el auto deploy histórico. [CI del merge 42301614545](https://github.com/M1nzutt/cognova-backend/actions/runs/42301614545)
+pasó. Backend fija Database `0008_ai_plan_proposal_snapshot` y exige esa revisión
+en readiness/launcher. Render Database está suspendida en 0007; no hay producción
+utilizable y no se intentó conexión ni deploy. Quedan para la fase operativa
+Database 0008, despliegue Docker en servidor propio con `GEMINI_API_KEY` como
+secreto del entorno final y smoke real Gemini. Render ya no es dependencia de
+cierre.
 
 ## Planes + Retos — Live y cerrado — 2026-11-04
 
