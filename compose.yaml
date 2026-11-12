@@ -1,0 +1,122 @@
+name: cognova
+
+services:
+  postgres:
+    image: postgres:18.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cognova_admin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?copy .env.example to .env and set POSTGRES_ADMIN_PASSWORD}
+      POSTGRES_DB: cognova
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C.UTF-8
+      TZ: UTC
+      PGTZ: UTC
+      COGNOVA_RUNTIME_PASSWORD: ${COGNOVA_RUNTIME_PASSWORD:?set COGNOVA_RUNTIME_PASSWORD in .env}
+      COGNOVA_MIGRATOR_PASSWORD: ${COGNOVA_MIGRATOR_PASSWORD:?set COGNOVA_MIGRATOR_PASSWORD in .env}
+    command: ["postgres", "-c", "timezone=UTC"]
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - cognova_pgdata:/var/lib/postgresql
+      - ../cognova-database/docker/init/10-create-local-roles.sh:/docker-entrypoint-initdb.d/10-create-local-roles.sh:ro
+    networks:
+      - cognova_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  database-migrate:
+    build:
+      context: ../cognova-database
+      dockerfile: Dockerfile
+    restart: "no"
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: "postgresql+psycopg://cognova_migrator:${COGNOVA_MIGRATOR_PASSWORD:?set COGNOVA_MIGRATOR_PASSWORD in .env}@postgres:5432/cognova"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cognova_private
+
+  database-runtime-grants:
+    build:
+      context: ../cognova-database
+      dockerfile: Dockerfile
+    command: ["python", "scripts/prepare_local_runtime.py"]
+    restart: "no"
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: "postgresql+psycopg://cognova_migrator:${COGNOVA_MIGRATOR_PASSWORD:?set COGNOVA_MIGRATOR_PASSWORD in .env}@postgres:5432/cognova"
+    depends_on:
+      database-migrate:
+        condition: service_completed_successfully
+    networks:
+      - cognova_private
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: "postgresql+psycopg://cognova_runtime:${COGNOVA_RUNTIME_PASSWORD:?set COGNOVA_RUNTIME_PASSWORD in .env}@postgres:5432/cognova"
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_ALGORITHM: HS256
+      COOKIE_SECURE: "false"
+      COOKIE_SAMESITE: lax
+      CORS_ALLOWED_ORIGINS: '["http://localhost:${FRONTEND_PORT:-8080}"]'
+      ACCESS_TOKEN_EXPIRE_MINUTES: "15"
+      REFRESH_TOKEN_EXPIRE_DAYS: "30"
+      AUTH_RATE_LIMIT: "20"
+      AUTH_RATE_WINDOW_SECONDS: "60"
+      DATABASE_POOL_SIZE: "5"
+      DATABASE_MAX_OVERFLOW: "5"
+      PORT: "8000"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      TZ: UTC
+    expose:
+      - "8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      database-runtime-grants:
+        condition: service_completed_successfully
+    networks:
+      - cognova_private
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/api/v1/ready', timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  frontend:
+    build:
+      context: ../cognova-frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - cognova_private
+
+volumes:
+  cognova_pgdata:
+    name: cognova_pgdata
+
+networks:
+  cognova_private:
+    name: cognova_private
+    driver: bridge

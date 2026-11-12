@@ -1,5 +1,35 @@
 # Cognova — Estado backend
 
+## Entorno Docker integrado — stack validado localmente — 2026-11-12
+
+La rama `feat/docker-integrated-env` pasó `docker compose config --quiet` y
+`docker compose build`. PostgreSQL 18.6, Backend y Frontend Nginx quedaron healthy;
+migración y grants runtime finalizaron con código 0. La revisión es exactamente
+`0008_ai_plan_proposal_snapshot`. El helper de Database aplica ACL mínimas a
+`cognova_runtime`, incluida USAGE/SELECT de `study_session_intervals_id_seq`; PUBLIC
+no tiene grants de tabla.
+
+El smoke HTTP por `/api/*` same-origin cubrió Auth, onboarding, Materias,
+Actividades/historial de fechas, Sesiones/timer, Calendario mixto, Planes/decisiones,
+Retos, ownership y Analytics. Health/readiness devolvieron 200 y las respuestas API
+comprobaron `no-store`. El browser smoke validó 11 rutas con URL directa y refresh en
+desktop y móvil; las rutas protegidas redirigieron a login sin sesión. Se comprobó
+foco por teclado, cero overflow horizontal y cero errores JS no controlados. No se
+ingresaron credenciales en el navegador, así que la sesión autenticada UI no forma
+parte de esa evidencia.
+
+Los datos sintéticos sobrevivieron `docker compose restart` y `down`/`up` conservando
+`cognova_pgdata`. Backup custom PostgreSQL 18, `pg_restore --list` y restore aislado
+pasaron; la revisión restaurada fue 0008 y coincidieron los counts de tablas 0001–0007.
+SHA-256 local: `11820C0ECC41102E706B6312B69666B7ABC121C44B829FE86EB520BEF46EABAD`.
+No se borró el volumen; las filas locales son sintéticas y quedaron cero sesiones de
+auth activas.
+
+No hubo cambios productivos, merge ni push. `GEMINI_API_KEY` no está configurada, así
+que el smoke de Gemini real queda pendiente del entorno Docker final con el secreto.
+Este stack local aún no está listo para Internet: faltan host, HTTPS, firewall y
+política operativa de secretos/backups.
+
 ## Analytics académico — integrado en main, 2026-11-12
 
 `feat/academic-analytics` se creó desde `main` en

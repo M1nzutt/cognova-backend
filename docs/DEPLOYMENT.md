@@ -1,5 +1,21 @@
 # Despliegue existente y transición de base de datos
 
+## Entorno Docker integrado local — runtime validado, sin deploy — 2026-11-12
+
+`feat/docker-integrated-env` pasó `docker compose config --quiet`, build y arranque
+local. PostgreSQL 18.6 está healthy en `0008_ai_plan_proposal_snapshot`;
+migración/grants finalizaron; Backend y Frontend quedaron healthy. Nginx atiende
+`/healthz`, rutas SPA y proxy same-origin `/api/*`. Los smoke API/browser, persistencia
+de `cognova_pgdata` y backup/restore local están documentados en
+[DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+
+No se desplegó a Render, Netlify ni servidor. `GEMINI_API_KEY` no está configurada,
+por lo que el smoke real de Gemini queda pendiente. La UI no se autenticó desde
+navegador; sí se cubrieron flujos autenticados mediante API y rutas protegidas sin
+sesión en desktop/móvil. Esta es una validación local, no un perfil listo para
+Internet: faltan datos del servidor, HTTPS/certificados, firewall, origins finales y
+operación de backups.
+
 ## Analytics académico — todavía sin deploy — 2026-11-12
 
 Analytics está integrado en `main` mediante `11a1078719e3b0ca7722844886e3784ff05464d6`;
