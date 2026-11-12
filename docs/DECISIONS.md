@@ -11,6 +11,12 @@ requieren onboarding. No se añade un endpoint adicional de archivo: `AcademicAr
 indexa las páginas históricas del timeline. No se crean tablas ni índices SQL.
 Contrato: `ANALYTICS_CONTRACT.md`.
 
+La implementación read-only se desarrolla en `feat/academic-analytics`. Las cinco
+estructuras viven solo durante la solicitud; PostgreSQL conserva la fuente de verdad.
+El tiempo estudiado usa intervalos cerrados y el timeline expone solo hechos con
+timestamp persistido o fecha planificada rotulada como tal. No se infieren causas,
+transiciones ausentes, ni razonamiento de IA.
+
 ## Propuesta IA persistente — decisión 2026-11-06
 
 La propuesta IA vigente vive en `study_plans.ai_proposal_snapshot` de Database
@@ -269,6 +275,6 @@ Solo mediante:
 - El primer análisis no persiste inferencias. Antes de cinco Sesiones válidas
   finalizadas devuelve únicamente conteo y pregunta. Las observaciones IA con
   cinco o más son hipótesis y se validan contra ownership.
-- Database 0007 no tiene campos para conservar explicación/resumen del Plan.
-  Se entregan en la respuesta inicial; conservarlos tras refresh requiere una
-  migración futura del repositorio Database.
+- Database 0008 conserva la propuesta IA visible vigente en
+  `study_plans.ai_proposal_snapshot`; las versiones sustituidas se archivan en
+  `study_plan_decisions.proposed_value`. No se guardan prompts ni chain-of-thought.

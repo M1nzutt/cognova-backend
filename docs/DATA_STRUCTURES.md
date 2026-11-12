@@ -1,5 +1,25 @@
 # Cognova — Estructuras de Datos
 
+## Analytics académico — rama `feat/academic-analytics`
+
+Las siguientes cinco estructuras se construyen por solicitud con filas propias
+obtenidas de PostgreSQL. Son índices temporales para lecturas; no reemplazan la
+fuente persistente ni generan escrituras.
+
+| Nombre de dominio | Implementación propia | Uso y coste principal |
+| --- | --- | --- |
+| `StudyRangeInsights` | árbol segmentado con duración ponderada | Recorta intervalos cerrados y suma rangos; O(log S) por materia más conteo distinto O(S) |
+| `AcademicArchive` | B-tree | Historial de deadlines, decisiones e intervalos; insertar O(log E), página O(log E + k) |
+| `BalancedTimeline` | árbol rojo-negro | Fechas planificadas/actuales; insertar O(log E), página O(log E + k) |
+| `ResourceDirectory` | tabla hash de direccionamiento abierto | Relaciones por (tipo, id); O(1) esperado, O(R) peor caso |
+| `AcademicFinder` | Trie | Prefijo Unicode sin distinguir tildes/mayúsculas; O(L + M log M) |
+
+No se exponen como nombres de API los nombres técnicos. El B-tree agrupa múltiples
+claves por página lógica y conserva orden/rangos históricos; se adapta a consultas
+ordenadas de archivo. Sus invariantes y contrato están en
+[ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md). La validación PostgreSQL y CI de la
+rama se registrarán tras ejecutarse.
+
 ## Segundo bloque — IA académica (rama `feat/gemini-behavior`)
 
 Las cinco estructuras nuevas viven en `app/academic_intelligence`, se construyen

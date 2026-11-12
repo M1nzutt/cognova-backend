@@ -83,9 +83,10 @@ Respuesta `200`:
 }
 ```
 
-`StudyRangeInsights` es el índice segmentado de consulta; el servicio obtiene solo
-los intervalos propios que se solapan con el rango. La estructura se destruye al
-terminar la solicitud.
+`StudyRangeInsights` es un índice de segmentos ponderados por duración. El
+servicio obtiene intervalos cerrados propios que se solapan con el rango; el índice
+se destruye al terminar la solicitud. La duración usa consultas de suma O(log S)
+por materia; el conteo de IDs de sesión distintos recorre O(S) intervalos.
 
 ## Timeline y archivo
 
@@ -160,12 +161,14 @@ Analytics solo usa SELECT.
 ## Límites y complejidad
 
 Rangos de tiempo máximo 366 días; timeline hasta 100 eventos por página y búsqueda
-hasta 50 recursos por página. Se carga solo el usuario y rango/prefijo solicitado,
-sin cache global. Construir el segment tree cuesta `O(S log S)` para `S` intervalos
-y `P` materias (`O(P·S)` espacio); consulta `O(P log S)`. Construir el B-tree y
-árbol rojo-negro cuesta `O(E log E)`; recorrido de página `O(log E + k)`. Hash
-directory: `O(R)` construir, `O(1)` esperado por lookup y `O(R)` peor caso con
-colisiones. Trie: `O(L)` para ubicar prefijo de longitud `L`, más recolección y
-ordenamiento de `M` resultados (`O(M log M)`). `R`, `E`, `S` y `M` son filas o
-recursos de esa solicitud; ninguna estructura sobrevive al request. Los límites
-temporales y paginación acotan respuesta, no inventan un máximo de filas históricas.
+hasta 50 recursos por página. Se consultan solo filas del usuario autenticado y,
+para tiempo/timeline, solo las que se solapan con el rango. No hay cache global.
+Construir el segment tree cuesta `O(S log S)` y usa `O(S)` espacio; una consulta
+de duración cuesta `O(P log S)` y el conteo de sesiones distintas agrega `O(S)`.
+Construir el B-tree y el árbol rojo-negro cuesta `O(E log E)`; tras construirlos,
+el recorrido de página cuesta `O(log E + k)`. El directorio hash cuesta `O(R)`
+al construir, `O(1)` esperado por acceso y `O(R)` peor caso con colisiones. Trie:
+`O(L)` para ubicar prefijo de longitud `L`, más recolección y ordenamiento de `M`
+coincidencias (`O(M log M)`). `R`, `E`, `S` y `M` son filas/recursos propios de
+esa solicitud; ninguna estructura sobrevive al request. Los límites temporales y
+paginación limitan la respuesta; no imponen un máximo artificial a la historia.
