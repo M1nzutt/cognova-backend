@@ -1,5 +1,16 @@
 # Cognova — Decisiones Congeladas
 
+## Analytics académico — contrato previo a implementación, 2026-11-12
+
+Analytics expone overview all-time, tiempo por rango, timeline y búsqueda por
+prefijo. Rangos usan timestamps con offset y buckets con zona IANA explícita. La
+API presenta hechos persistidos; no inventa transiciones ni causas. Los eventos de
+status se limitan a los timestamps conservados; no se reconstruye historial de
+estado de Actividades, Planes o Retos. Ownership sale del Bearer y las rutas
+requieren onboarding. No se añade un endpoint adicional de archivo: `AcademicArchive`
+indexa las páginas históricas del timeline. No se crean tablas ni índices SQL.
+Contrato: `ANALYTICS_CONTRACT.md`.
+
 ## Propuesta IA persistente — decisión 2026-11-06
 
 La propuesta IA vigente vive en `study_plans.ai_proposal_snapshot` de Database

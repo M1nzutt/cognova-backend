@@ -149,10 +149,14 @@ transiciones y DTOs están definidos en el contrato específico.
 
 ## Analytics
 
-- GET `/analytics/summary`
-- GET `/analytics/by-time-of-day`
-- GET `/analytics/by-duration`
-- GET `/analytics/by-subject`
+- GET `/analytics/overview`
+- GET `/analytics/study-time`
+- GET `/analytics/timeline`
+- GET `/analytics/search`
+
+The previous Analytics routes were conceptual only and had no implementation.
+The current request, response, filters, ranges, cursors, errors and ordering are
+defined in [ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md).
 
 Con menos de 5 sesiones válidas:
 - puede devolver datos descriptivos;
