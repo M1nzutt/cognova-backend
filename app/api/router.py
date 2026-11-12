@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.activities import router as activities_router
+from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.behavior_analysis import router as behavior_analysis_router
 from app.api.calendar import router as calendar_router
@@ -25,3 +26,4 @@ api_router.include_router(calendar_router)
 api_router.include_router(study_sessions_router)
 api_router.include_router(study_plans_router)
 api_router.include_router(behavior_analysis_router)
+api_router.include_router(analytics_router)
