@@ -11,7 +11,7 @@ from app.tests.integration.test_study_sessions import create_plan as create_sess
 from app.tests.integration.test_subjects import onboard
 
 BASE = "/api/v1/analytics"
-RANGE = {"from": "2020-01-01T00:00:00Z", "to": "2040-01-01T00:00:00Z"}
+RANGE = {"from": "2030-01-01T00:00:00Z", "to": "2031-01-01T00:00:00Z"}
 
 
 def get(client, headers, path, **params):
@@ -139,6 +139,11 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
 ):
     from app.services import study_session_service
 
+    event_time = datetime.now(timezone.utc) + timedelta(hours=1)
+    timeline_range = {
+        "from": (event_time - timedelta(days=1)).isoformat(),
+        "to": (event_time + timedelta(days=2)).isoformat(),
+    }
     _, headers, activity_body, activity = setup_activity(client, registration)
     plan = create_study_plan(client, headers, subject_ids=[activity_body["subject_id"]])
     edited = client.put(
@@ -164,19 +169,22 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
     deadline = client.patch(
         f"/api/v1/activities/{activity['id']}/deadline",
         headers=headers,
-        json={"deadline": "2030-02-01T12:00:00Z", "expected_revision": 0},
+        json={
+            "deadline": (event_time + timedelta(days=1)).isoformat(),
+            "expected_revision": 0,
+        },
     )
     assert deadline.status_code == 200
 
     from app.tests.integration.test_study_sessions import create_plan as create_session
 
-    now = {"value": datetime(2030, 1, 2, 10, tzinfo=timezone.utc)}
+    now = {"value": event_time}
     monkeypatch.setattr(study_session_service, "utc_now", lambda: now["value"])
     session = create_session(
         client,
         headers,
         activity_body["subject_id"],
-        planned_start_at="2030-01-02T10:00:00Z",
+        planned_start_at=event_time.isoformat(),
     )
     session_path = f"/api/v1/sessions/{session['id']}"
     assert client.post(session_path + "/start", headers=headers).status_code == 200
@@ -196,7 +204,7 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
                 "study_challenges",
             )
         }
-    first = get(client, headers, "timeline", **RANGE, limit=2)
+    first = get(client, headers, "timeline", **timeline_range, limit=2)
     assert first.status_code == 200, first.text
     pages = first.json()["items"][:]
     while first.json()["next_cursor"]:
@@ -204,7 +212,7 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
             client,
             headers,
             "timeline",
-            **RANGE,
+            **timeline_range,
             limit=2,
             cursor=first.json()["next_cursor"],
         )
@@ -220,7 +228,9 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
     assert any(item["event_type"] == "deadline_changed" for item in pages)
     assert any(item["event_type"] == "started" for item in pages)
     assert any(item["event_type"] == "ended" for item in pages)
-    activity_only = get(client, headers, "timeline", **RANGE, category="activity")
+    activity_only = get(
+        client, headers, "timeline", **timeline_range, category="activity"
+    )
     assert activity_only.status_code == 200
     assert all(item["category"] == "activity" for item in activity_only.json()["items"])
     assert all("user_id" not in item for item in pages)
@@ -249,12 +259,14 @@ def test_timeline_mixes_owned_events_paginates_and_never_writes(
         and "chosen_value" not in item["details"]
         for item in pages
     )
-    cursor = get(client, headers, "timeline", **RANGE, limit=1).json()["next_cursor"]
+    cursor = get(client, headers, "timeline", **timeline_range, limit=1).json()[
+        "next_cursor"
+    ]
     invalid = get(
         client,
         headers,
         "timeline",
-        **RANGE,
+        **timeline_range,
         limit=1,
         category="activity",
         cursor=cursor,

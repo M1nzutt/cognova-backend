@@ -55,6 +55,13 @@ def test_timeline_filters_enforce_range_and_page_limits():
                 "limit": 101,
             }
         )
+    with pytest.raises(ValidationError):
+        AnalyticsTimelineFilters.model_validate(
+            {
+                "from": "2020-01-01T00:00:00Z",
+                "to": "2040-01-01T00:00:00Z",
+            }
+        )
 
 
 def test_cursors_roundtrip_and_bind_to_filter_values():
