@@ -106,6 +106,10 @@ class DomainError(Exception):
             409,
             "El Reto cambió durante la operación; consulta e intenta de nuevo.",
         ),
+        "ANALYTICS_CURSOR_INVALID": (
+            422,
+            "El cursor no corresponde a los filtros de esta consulta.",
+        ),
     }
 
     def __init__(self, code: str) -> None:
