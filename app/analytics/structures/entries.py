@@ -37,4 +37,6 @@ class TimelineEvent:
             self.occurrence_id,
             self.event_type,
         )
+
+
 __all__ = ["TimelineEvent"]
