@@ -40,7 +40,20 @@ def test_balanced_timeline_orders_ranges_and_preserves_tree_invariants():
 
 def test_balanced_timeline_rejects_duplicate_keys():
     index = BalancedTimeline()
+    assert len(index) == 0
+    assert list(index.iter_range()) == []
     item = event(0)
     index.add(item)
     with pytest.raises(ValueError):
         index.add(item)
+
+
+def test_balanced_timeline_handles_ascending_and_descending_insertions():
+    for values in (range(120), range(119, -1, -1)):
+        index = BalancedTimeline()
+        for value in values:
+            index.add(event(value))
+        assert index.validate_invariants()
+        assert list(index.iter_range()) == sorted(
+            (event(value) for value in range(120)), key=lambda item: item.key
+        )

@@ -56,8 +56,12 @@ def test_archive_orders_range_queries_and_pages_after_cursor():
 
 def test_archive_rejects_duplicate_keys_and_invalid_ranges():
     archive = AcademicArchive()
+    assert len(archive) == 0
+    assert list(archive.iter_range()) == []
     item = event(4)
     archive.add(item)
+    assert list(archive.iter_range()) == [item]
+    assert archive.validate_invariants()
     with pytest.raises(ValueError):
         archive.add(item)
     with pytest.raises(ValueError):

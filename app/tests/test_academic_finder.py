@@ -9,6 +9,7 @@ from app.analytics.structures.analytics_resource import AnalyticsResource
 
 def test_academic_finder_normalizes_case_and_accents_and_deduplicates():
     finder = AcademicFinder()
+    assert finder.search("academia") == []
     first = AnalyticsResource("subject", 1, "Física avanzada")
     finder.add(first)
     finder.add(first)
@@ -25,6 +26,15 @@ def test_academic_finder_normalizes_case_and_accents_and_deduplicates():
     assert len(finder) == 3
     assert normalize_search_text("Mecánica cuántica") == "mecanica cuantica"
     assert finder.search("quim") == []
+
+
+def test_academic_finder_replaces_a_resource_title_without_stale_results():
+    finder = AcademicFinder()
+    finder.add(AnalyticsResource("subject", 7, "Física"))
+    finder.add(AnalyticsResource("subject", 7, "Química"))
+    assert finder.search("fis") == []
+    assert [item.title for item in finder.search("qui")] == ["Química"]
+    assert len(finder) == 1
 
 
 def test_academic_finder_prefix_pagination_and_invalid_query():
