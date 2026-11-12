@@ -1,5 +1,15 @@
 # Cognova — Estado backend
 
+## Entorno Docker integrado — preparado, ejecución bloqueada por herramienta — 2026-11-12
+
+La rama `feat/docker-integrated-env` prepara `Dockerfile`, `compose.yaml`,
+`.env.example` y [guía local](DOCKER_DEPLOYMENT.md). El stack coordina PostgreSQL
+18, migración Alembic hasta 0008, ACL runtime, Backend y Frontend en red Docker,
+con proxy same-origin y volumen persistente. No hubo deploy ni cambios a datos
+externos. En el equipo de trabajo no existe Docker CLI/runtime, por lo que Compose
+config/build/up, smoke HTTP/browser, restart y persistencia no se ejecutaron. El
+stack no queda cerrado ni listo para servidor final hasta pasar esa validación real.
+
 ## Analytics académico — integrado en main, 2026-11-12
 
 `feat/academic-analytics` se creó desde `main` en

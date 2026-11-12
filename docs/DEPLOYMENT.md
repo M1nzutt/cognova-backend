@@ -1,5 +1,18 @@
 # Despliegue existente y transición de base de datos
 
+## Entorno Docker integrado local — pendiente de ejecución real — 2026-11-12
+
+La rama `feat/docker-integrated-env` añade imagen Backend no root y Compose local
+que consume el Dockerfile Frontend/Database de sus repos hermanos. Migración a
+0008 y grants locales preceden el arranque Backend; Nginx publica Frontend y proxya
+`/api/*` same-origin. La guía es [DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+
+No se ejecutó Docker: no hay Docker CLI/runtime disponible en el equipo. No se hizo
+deploy a Render, Netlify ni servidor. Health, readiness, auth/cookies, smoke completo,
+backup/restore y supervivencia del volumen quedan pendientes de ejecución con
+Docker habilitado. Esta configuración local no es todavía un perfil de producción;
+faltan datos del servidor, HTTPS, certificados, origins, TLS DB y política de backups.
+
 ## Analytics académico — todavía sin deploy — 2026-11-12
 
 Analytics está integrado en `main` mediante `11a1078719e3b0ca7722844886e3784ff05464d6`;

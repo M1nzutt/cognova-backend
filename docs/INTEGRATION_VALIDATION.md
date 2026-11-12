@@ -543,3 +543,23 @@ frontend/database. E2E de navegador y proxy Netlify siguen a cargo del frontend;
 este smoke HTTP no los sustituye. No volver a aplicar 0003 ni desplegar el backend
 antiguo que exige 0002. HealthCheckPath de Render permanece vacío; no se cambió
 configuración ajena al rol runtime. Inicio 54 commits; cierre 57, faltan 444 a 501.
+# Docker local integrado — implementación en progreso, sin runtime — 2026-11-12
+
+Se prepararon imágenes y Compose para Frontend, Backend, PostgreSQL 18, migraciones
+0001→0008 y ACL runtime local. Nginx conserva el origen browser y proxya `/api/*`;
+Backend no publica puerto de host y Postgres solo se enlaza a loopback. El detalle
+del flujo de smoke está en [DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+
+La máquina no tiene Docker CLI ni runtime; no fue posible ejecutar `docker compose
+config/build/up/ps`, healthchecks, smoke de API/navegador, restart ni prueba de
+persistencia. No hay resultados de runtime que declarar. Tampoco se desplegó a
+servicios externos. El estado solo puede cerrarse tras repetir la matriz en un
+equipo Docker habilitado. Gemini real requiere además que el operador configure la
+clave como secreto exclusivamente en Backend.
+
+Validación no-Docker: Backend 338 passed/173 skipped (sin PostgreSQL), Ruff,
+formato y mypy aprobados; Frontend 385/385 tests, lint, TypeScript, build y audit
+de producción aprobados (0 vulnerabilidades); Database 86 passed/332 skipped
+(sin PostgreSQL), Ruff y formato aprobados. PyYAML aceptó la estructura de Compose
+y se verificaron los cinco servicios y rutas de build. Esto no sustituye
+`docker compose config` ni build/runtime real.
