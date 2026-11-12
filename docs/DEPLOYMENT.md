@@ -1,5 +1,12 @@
 # Despliegue existente y transición de base de datos
 
+## Analytics académico — todavía sin deploy — 2026-11-12
+
+`feat/academic-analytics` añade solo consultas sobre tablas existentes; no requiere
+migración ni cambios de Database. No se hizo deploy ni smoke productivo. Render
+continúa suspendida. Integrar Analytics a `main` no despliega el producto; el entorno
+final será Docker y deberá usar Database 0008 según el handoff vigente.
+
 ## Gemini/Database 0008 — integración de código sin deploy — 2026-11-06
 
 `main` integra la rama Gemini mediante merge `--no-ff`

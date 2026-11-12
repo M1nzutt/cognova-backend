@@ -1,5 +1,20 @@
 # Validación de integración productiva
 
+## Analytics académico — validación local de rama, 2026-11-12
+
+`feat/academic-analytics` implementa las cuatro rutas definidas en
+[ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md). Las pruebas añadidas cubren cursores,
+filtros, ownership, onboarding, no-store, rangos semiabiertos, intervalos cerrados,
+conteos por materia, DST, timeline mixto/paginado y ausencia de escrituras.
+La suite local reportó **338 passed, 173 skipped**. Los skips corresponden a pruebas
+de integración PostgreSQL: el entorno no define `TEST_DATABASE_URL` ni permite
+iniciar PostgreSQL local. Mypy pasó en 205 archivos; Ruff y formato pasaron en 276.
+Build sdist/wheel, `pip check` y `pip-audit -r requirements.lock` pasaron.
+
+Gitleaks no está instalado en esta máquina. PostgreSQL, verificación del wheel en
+runtime y Gitleaks quedan para CI remoto con la referencia de Database 0008. No hubo
+deploy ni consultas a producción; esta rama no está integrada y no es un smoke.
+
 ## Gemini sobre Database 0008 — validación de main, 2026-11-06
 
 Se añaden pruebas de snapshot persistido tras refresh, edición y decisiones sin

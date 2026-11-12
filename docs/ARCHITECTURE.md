@@ -26,8 +26,22 @@ onboarding y ownership. `StudyPlanService` coordina transacciones y decisiones,
 un Plan y sus relaciones/contexto se validan antes de escribir. Los servicios usan
 `LearningPlanMap`, `PriorityPlanner`, `DependencyNetwork`, `DecisionHistory`,
 `WeeklyRhythm` y `StudySlots` en lógica de dominio. La interfaz del proveedor IA queda
-preparada; Gemini no está conectado. El Backend que exige 0007 está Live en Render
-desde el merge `d9fff7c36e6a1c1c98079e9be225c1d273e0e9d0`.
+conectada en `main` y fija Database 0008. Render está suspendida; el despliegue final
+y smoke Gemini esperan el entorno Docker.
+
+## Analytics académico — implementación read-only 2026-11-12
+
+`/api/v1/analytics` consulta únicamente filas del usuario autenticado en las
+tablas existentes. `AnalyticsOverviewService`, `AnalyticsStudyTimeService`,
+`AnalyticsTimelineService` y `AnalyticsSearchService` entregan resumen, tiempo
+por intervalos cerrados, cronología y prefijo. El router aplica Bearer y onboarding;
+el middleware pone `no-store`. No hay persistencia, DDL ni llamadas a Gemini.
+
+`StudyRangeInsights`, `AcademicArchive`, `BalancedTimeline`, `ResourceDirectory` y
+`AcademicFinder` se crean dentro del request. Los dos índices cronológicos se
+fusionan con una clave total estable; los cursores son opacos y quedan ligados a
+rango/filtros. Búsqueda y eventos resuelven proyecciones desde recursos propios.
+Ver [ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md).
 
 ```text
 Usuario
@@ -36,7 +50,7 @@ Frontend (React + TypeScript + Vite)
   ↓ HTTPS / JSON
 Backend (Python + FastAPI)
   ├── PostgreSQL
-  └── Gemini (integración futura)
+  └── Gemini (API key desde secreto del entorno)
 
 cognova-database (operación, no API de producto)
   └── Alembic / schema lifecycle / backups → PostgreSQL
@@ -154,8 +168,9 @@ La implementación de la rama `feat/gemini-behavior` separa
 `GeminiProvider` (SDK/JSON Schema), `validate_proposal` (IDs/fechas/contexto),
 `StudyPlanService` (transacción única de propuesta y Retos) y
 `BehaviorAnalysisService` (umbral y observaciones de solo lectura). La clave
-no entra en DTO ni Frontend. Database permanece en 0007; los textos de explicación
-inicial del Plan son efímeros porque 0007 no tiene columnas para guardarlos.
+no entra en DTO ni Frontend. Backend fija Database 0008 y persiste la propuesta
+visible en `ai_proposal_snapshot`; Render está suspendida y el smoke real Gemini
+queda pendiente del despliegue Docker final.
 
 Flujo:
 

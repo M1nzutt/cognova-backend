@@ -1,5 +1,24 @@
 # Cognova — Estado backend
 
+## Analytics académico — rama de implementación, 2026-11-12
+
+Se creó `feat/academic-analytics` desde `main` en
+`110978bc1931fd0fc5882c7a0316acd57e0e9183` (156 commits). HEAD local actual:
+`326569c`; hay 15 commits reales nuevos y 171 commits en la rama. El contrato
+se definió antes del código en [ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md).
+
+La rama implementa `GET /api/v1/analytics/overview`, `/study-time`, `/timeline`
+y `/search`, con auth, onboarding, ownership por Bearer, `no-store`, cursores y
+sin escrituras. Las cinco estructuras manuales se consumen en servicios. No hay
+cambios de Database ni migraciones. No se desplegó.
+
+Validación local: **338 passed, 173 skipped**; los skips son pruebas de integración
+PostgreSQL porque este entorno no tiene `TEST_DATABASE_URL`. Mypy pasó en 205
+archivos; Ruff/formato en 276; build/wheel, `pip check` y `pip-audit` pasaron.
+Gitleaks no está instalado localmente. CI remoto con PostgreSQL, runtime de wheel
+y Gitleaks sigue pendiente. No se declara cerrada la implementación hasta que CI
+complete.
+
 ## Gemini sobre Database 0008 — integrado en main, 2026-11-06
 
 `feat/gemini-behavior` se integró a `main` mediante merge `--no-ff`
