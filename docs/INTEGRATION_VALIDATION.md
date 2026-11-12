@@ -543,23 +543,35 @@ frontend/database. E2E de navegador y proxy Netlify siguen a cargo del frontend;
 este smoke HTTP no los sustituye. No volver a aplicar 0003 ni desplegar el backend
 antiguo que exige 0002. HealthCheckPath de Render permanece vacío; no se cambió
 configuración ajena al rol runtime. Inicio 54 commits; cierre 57, faltan 444 a 501.
-# Docker local integrado — implementación en progreso, sin runtime — 2026-11-12
+# Docker local integrado — validación real completada — 2026-11-12
 
-Se prepararon imágenes y Compose para Frontend, Backend, PostgreSQL 18, migraciones
-0001→0008 y ACL runtime local. Nginx conserva el origen browser y proxya `/api/*`;
-Backend no publica puerto de host y Postgres solo se enlaza a loopback. El detalle
-del flujo de smoke está en [DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+`docker compose config --quiet` y `docker compose build` pasaron en Docker Desktop.
+PostgreSQL 18.6, Backend y Frontend Nginx quedaron healthy; `database-migrate` y
+`database-runtime-grants` terminaron con exit 0. Revisión exacta:
+`0008_ai_plan_proposal_snapshot`. El permiso de secuencia de intervalos fue añadido
+a `cognova_runtime`; PUBLIC quedó sin grants de tabla. Health/readiness devolvieron
+200, OpenAPI devolvió 200 con 51 rutas y `/api/*` pasó por el proxy same-origin.
+Logs revisados: arranque normal, sin secretos expuestos.
 
-La máquina no tiene Docker CLI ni runtime; no fue posible ejecutar `docker compose
-config/build/up/ps`, healthchecks, smoke de API/navegador, restart ni prueba de
-persistencia. No hay resultados de runtime que declarar. Tampoco se desplegó a
-servicios externos. El estado solo puede cerrarse tras repetir la matriz en un
-equipo Docker habilitado. Gemini real requiere además que el operador configure la
-clave como secreto exclusivamente en Backend.
+El smoke API usó usuarios sintéticos y cubrió Auth (refresh/CSRF/logout), onboarding,
+Materias, Actividades e historial de deadlines, Sesiones/timer, Calendario mixto,
+Planes y evidencia de decisiones, Retos/transiciones, ownership y Analytics. Se
+comprobó `no-store`; SQL confirmó cero sesiones de auth sintéticas activas. Las filas
+locales que permanecen son datos sintéticos protegidos por historial/FKs.
 
-Validación no-Docker: Backend 338 passed/173 skipped (sin PostgreSQL), Ruff,
-formato y mypy aprobados; Frontend 385/385 tests, lint, TypeScript, build y audit
-de producción aprobados (0 vulnerabilidades); Database 86 passed/332 skipped
-(sin PostgreSQL), Ruff y formato aprobados. PyYAML aceptó la estructura de Compose
-y se verificaron los cinco servicios y rutas de build. Esto no sustituye
-`docker compose config` ni build/runtime real.
+Frontend: 11 rutas con URL directa y refresh en desktop 1440×900 y móvil 390×844,
+redirección de rutas protegidas sin auth, foco de teclado, cero overflow horizontal
+y cero errores JS/console no controlados. No se ingresaron credenciales al browser;
+no se declara smoke visual autenticado.
+
+Subject y Plan sobrevivieron `docker compose restart`; después de `docker compose
+down`/`up -d` siguieron disponibles y `cognova_pgdata` permaneció intacto. No se usó
+`down -v`. Backup PostgreSQL 18 custom, TOC y restore aislado pasaron; revisión 0008
+y counts 0001–0007 coincidieron. SHA-256 del dump:
+`11820C0ECC41102E706B6312B69666B7ABC121C44B829FE86EB520BEF46EABAD`. El restore
+inicial sin `--username` falló porque no existe el rol implícito `root`; el restore
+repetido con `--username=cognova_admin` pasó y la guía se corrigió.
+
+No hubo deploy, push, merge ni cambios productivos. `GEMINI_API_KEY` está ausente;
+queda pendiente el smoke real de Gemini con el secreto del entorno final. Este stack
+HTTP local requiere definir operación del servidor antes de exponerse a Internet.

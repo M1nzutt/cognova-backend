@@ -1,17 +1,20 @@
 # Despliegue existente y transición de base de datos
 
-## Entorno Docker integrado local — pendiente de ejecución real — 2026-11-12
+## Entorno Docker integrado local — runtime validado, sin deploy — 2026-11-12
 
-La rama `feat/docker-integrated-env` añade imagen Backend no root y Compose local
-que consume el Dockerfile Frontend/Database de sus repos hermanos. Migración a
-0008 y grants locales preceden el arranque Backend; Nginx publica Frontend y proxya
-`/api/*` same-origin. La guía es [DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+`feat/docker-integrated-env` pasó `docker compose config --quiet`, build y arranque
+local. PostgreSQL 18.6 está healthy en `0008_ai_plan_proposal_snapshot`;
+migración/grants finalizaron; Backend y Frontend quedaron healthy. Nginx atiende
+`/healthz`, rutas SPA y proxy same-origin `/api/*`. Los smoke API/browser, persistencia
+de `cognova_pgdata` y backup/restore local están documentados en
+[DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
 
-No se ejecutó Docker: no hay Docker CLI/runtime disponible en el equipo. No se hizo
-deploy a Render, Netlify ni servidor. Health, readiness, auth/cookies, smoke completo,
-backup/restore y supervivencia del volumen quedan pendientes de ejecución con
-Docker habilitado. Esta configuración local no es todavía un perfil de producción;
-faltan datos del servidor, HTTPS, certificados, origins, TLS DB y política de backups.
+No se desplegó a Render, Netlify ni servidor. `GEMINI_API_KEY` no está configurada,
+por lo que el smoke real de Gemini queda pendiente. La UI no se autenticó desde
+navegador; sí se cubrieron flujos autenticados mediante API y rutas protegidas sin
+sesión en desktop/móvil. Esta es una validación local, no un perfil listo para
+Internet: faltan datos del servidor, HTTPS/certificados, firewall, origins finales y
+operación de backups.
 
 ## Analytics académico — todavía sin deploy — 2026-11-12
 

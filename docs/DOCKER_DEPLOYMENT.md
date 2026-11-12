@@ -3,10 +3,13 @@
 ## Estado y alcance
 
 Esta guía integra Frontend, Backend y Database localmente. No despliega ni llama a
-Render/Netlify y no define servidor, dominio, IP o reverse proxy. Docker CLI y runtime
-no están instalados en el equipo de trabajo actual; por eso config/build/up,
-healthchecks, smoke, restart y persistencia siguen sin ejecución real. El stack no se
-considera cerrado hasta correrlo en un equipo con Docker.
+Render/Netlify y no define servidor, dominio, IP o reverse proxy. La validación se
+completó en Docker Desktop / Compose V2 el 2026-11-12. `docker compose config --quiet`
+y `docker compose build` pasaron; PostgreSQL 18.6, Backend y Frontend Nginx quedaron
+healthy, y migración/grants finalizaron con código 0 en
+`0008_ai_plan_proposal_snapshot`. Smoke API/browser, persistencia y backup/restore
+local se documentan abajo. Esta configuración no es un perfil de producción para
+Internet.
 
 Requiere Docker Engine y Docker Compose V2 2.20+. Las carpetas deben estar juntas:
 
@@ -98,13 +101,28 @@ sintéticas nuevas:
    real. Con key protegida en Backend, verifica propuesta/snapshot tras refresh,
    decisiones y regenerate; no guardar prompts ni chain-of-thought.
 
-Para cerrar el stack hay que ejecutar este smoke y registrar el resultado real,
-healthchecks, errores de consola y persistencia. En este equipo aún no fue ejecutable.
+Resultado 2026-11-12: el smoke API se ejecutó con usuarios sintéticos e incluyó Auth,
+onboarding, Materias, Actividades, Sesiones/timer, Calendario mixto, Planes, Retos,
+ownership y Analytics por el proxy Nginx same-origin. Health/readiness fueron 200 con
+`no-store`; las sesiones sintéticas quedaron revocadas. En browser se validaron 11
+rutas directas/refresco en desktop y móvil, foco de teclado, sin overflow horizontal
+ni errores JS no controlados. Las rutas protegidas redirigieron a login; no se ingresó
+auth desde la UI. `GEMINI_API_KEY` no está configurada, así que no se afirma un smoke
+Gemini real.
 
 ## Backup, restore y persistencia
 
-Guarda el dump fuera de Git y trátalo como información académica sensible. En Windows
-PowerShell 5, cmd preserva la salida binaria de pg_dump:
+Se verificó localmente un dump PostgreSQL 18.6 custom con `pg_restore --list` y restore
+aislado. Restauró `0008_ai_plan_proposal_snapshot` y coincidieron los counts
+sanitizados de las tablas 0001–0007. Dump local:
+`%USERPROFILE%\cognova-backups\cognova-local-20261112-204131.dump`; SHA-256
+`11820C0ECC41102E706B6312B69666B7ABC121C44B829FE86EB520BEF46EABAD`. Un primer
+restore sin usuario explícito intentó usar el rol `root` y falló; la repetición con
+`--username=cognova_admin` pasó. También se comprobó persistencia tras `restart` y
+`down`/`up`; `cognova_pgdata` sigue presente y no se ejecutó `down -v`.
+
+Para repetir la copia, guárdala fuera de Git y trátala como información académica
+sensible. En Windows PowerShell 5, cmd preserva la salida binaria de pg_dump:
 
 ~~~powershell
 $backupDirectory = Join-Path $env:USERPROFILE 'cognova-backups'
@@ -113,7 +131,7 @@ $backupFile = Join-Path $backupDirectory 'cognova-local.dump'
 cmd /c ('docker compose exec -T postgres pg_dump -U cognova_admin -d cognova --format=custom > "' + $backupFile + '"')
 cmd /c ('docker compose exec -T postgres pg_restore --list < "' + $backupFile + '"')
 docker compose exec -T postgres createdb -U cognova_admin cognova_restore
-cmd /c ('docker compose exec -T postgres pg_restore --exit-on-error --single-transaction --dbname=cognova_restore < "' + $backupFile + '"')
+cmd /c ('docker compose exec -T postgres pg_restore --username=cognova_admin --exit-on-error --single-transaction --dbname=cognova_restore < "' + $backupFile + '"')
 docker compose exec -T postgres psql -U cognova_admin -d cognova_restore -Atc "SELECT version_num FROM public.alembic_version"
 ~~~
 
