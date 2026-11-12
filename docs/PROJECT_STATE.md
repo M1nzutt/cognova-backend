@@ -1,23 +1,31 @@
 # Cognova — Estado backend
 
-## Analytics académico — rama de implementación, 2026-11-12
+## Analytics académico — integrado en main, 2026-11-12
 
-Se creó `feat/academic-analytics` desde `main` en
-`110978bc1931fd0fc5882c7a0316acd57e0e9183` (156 commits). HEAD local actual:
-`326569c`; hay 15 commits reales nuevos y 171 commits en la rama. El contrato
-se definió antes del código en [ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md).
+`feat/academic-analytics` se creó desde `main` en
+`110978bc1931fd0fc5882c7a0316acd57e0e9183` (156 commits) y se integró con
+`--no-ff` en `11a1078719e3b0ca7722844886e3784ff05464d6`. La rama añadió 17
+commits reales; `main` quedó en 174 commits tras el merge y antes del cierre
+documental. El contrato se definió antes del código en
+[ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md).
 
-La rama implementa `GET /api/v1/analytics/overview`, `/study-time`, `/timeline`
+El bloque implementa `GET /api/v1/analytics/overview`, `/study-time`, `/timeline`
 y `/search`, con auth, onboarding, ownership por Bearer, `no-store`, cursores y
 sin escrituras. Las cinco estructuras manuales se consumen en servicios. No hay
 cambios de Database ni migraciones. No se desplegó.
 
-Validación local: **338 passed, 173 skipped**; los skips son pruebas de integración
-PostgreSQL porque este entorno no tiene `TEST_DATABASE_URL`. Mypy pasó en 205
+CI de rama [43166789233](https://github.com/M1nzutt/cognova-backend/actions/runs/43166789233)
+y CI de `main` [43167536226](https://github.com/M1nzutt/cognova-backend/actions/runs/43167536226)
+pasaron; cada uno ejecutó **511/511** pruebas con PostgreSQL 17, Gitleaks, Ruff y
+formato, JUnit, mypy, build/wheel, runtime/launcher y `pip-audit`. El primer run
+de rama falló dos pruebas porque un fixture excedía el rango contractual de
+366 días; commit `50b4868` corrigió las fechas del fixture y añadió cobertura del
+límite. No era un fallo de la implementación del endpoint.
+
+Local: **338 passed, 173 skipped** por falta de `TEST_DATABASE_URL`; mypy en 205
 archivos; Ruff/formato en 276; build/wheel, `pip check` y `pip-audit` pasaron.
-Gitleaks no está instalado localmente. CI remoto con PostgreSQL, runtime de wheel
-y Gitleaks sigue pendiente. No se declara cerrada la implementación hasta que CI
-complete.
+No hubo deploy, cambios de Database ni consultas a producción. El despliegue final
+será Docker; la implementación ya está integrada y validada a nivel código/CI.
 
 ## Gemini sobre Database 0008 — integrado en main, 2026-11-06
 

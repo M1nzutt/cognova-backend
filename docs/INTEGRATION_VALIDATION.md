@@ -1,19 +1,26 @@
 # Validación de integración productiva
 
-## Analytics académico — validación local de rama, 2026-11-12
+## Analytics académico — CI de rama y main, 2026-11-12
 
 `feat/academic-analytics` implementa las cuatro rutas definidas en
 [ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md). Las pruebas añadidas cubren cursores,
 filtros, ownership, onboarding, no-store, rangos semiabiertos, intervalos cerrados,
 conteos por materia, DST, timeline mixto/paginado y ausencia de escrituras.
-La suite local reportó **338 passed, 173 skipped**. Los skips corresponden a pruebas
-de integración PostgreSQL: el entorno no define `TEST_DATABASE_URL` ni permite
-iniciar PostgreSQL local. Mypy pasó en 205 archivos; Ruff y formato pasaron en 276.
-Build sdist/wheel, `pip check` y `pip-audit -r requirements.lock` pasaron.
+El primer run de rama [43165994807](https://github.com/M1nzutt/cognova-backend/actions/runs/43165994807)
+encontró dos fallos de test: ambos reutilizaban un rango de 20 años pese al máximo
+contractual de 366 días. Se ajustó el fixture a fechas próximas al reloj sintético
+y se agregó una aserción de rango máximo.
 
-Gitleaks no está instalado en esta máquina. PostgreSQL, verificación del wheel en
-runtime y Gitleaks quedan para CI remoto con la referencia de Database 0008. No hubo
-deploy ni consultas a producción; esta rama no está integrada y no es un smoke.
+CI de rama [43166789233](https://github.com/M1nzutt/cognova-backend/actions/runs/43166789233)
+y CI del merge `--no-ff` [43167536226](https://github.com/M1nzutt/cognova-backend/actions/runs/43167536226)
+pasaron cada uno **511 pruebas, 0 skips** con PostgreSQL 17. También pasaron
+Gitleaks, Ruff, formato, control JUnit, mypy, build/wheel, runtime/launcher real y
+`pip-audit` (sin vulnerabilidades conocidas).
+
+La suite local reportó **338 passed, 173 skipped** porque el entorno no define
+`TEST_DATABASE_URL`; mypy pasó en 205 archivos, Ruff/formato en 276, build/wheel,
+`pip check` y `pip-audit` pasaron. No hubo deploy ni consultas a producción. El
+merge es cierre de código/CI, no un smoke ni despliegue; el entorno final será Docker.
 
 ## Gemini sobre Database 0008 — validación de main, 2026-11-06
 

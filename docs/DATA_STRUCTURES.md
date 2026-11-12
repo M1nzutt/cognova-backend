@@ -1,6 +1,6 @@
 # Cognova — Estructuras de Datos
 
-## Analytics académico — rama `feat/academic-analytics`
+## Analytics académico — integrado en `main`
 
 Las siguientes cinco estructuras se construyen por solicitud con filas propias
 obtenidas de PostgreSQL. Son índices temporales para lecturas; no reemplazan la
@@ -17,8 +17,8 @@ fuente persistente ni generan escrituras.
 No se exponen como nombres de API los nombres técnicos. El B-tree agrupa múltiples
 claves por página lógica y conserva orden/rangos históricos; se adapta a consultas
 ordenadas de archivo. Sus invariantes y contrato están en
-[ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md). La validación PostgreSQL y CI de la
-rama se registrarán tras ejecutarse.
+[ANALYTICS_CONTRACT](ANALYTICS_CONTRACT.md). CI de rama y merge ejecutó 511 pruebas
+PostgreSQL y aprobó invariantes/servicios; no se desplegó.
 
 ## Segundo bloque — IA académica (rama `feat/gemini-behavior`)
 

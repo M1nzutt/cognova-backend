@@ -21,9 +21,9 @@ y el despliegue final queda pendiente del entorno Docker.
 Materias, Actividades, Sesiones, Calendario y Planes/Retos tienen contratos
 implementados en Backend. La rama `main` integra Gemini y fija Database
 `0008_ai_plan_proposal_snapshot`; no hay producción utilizable tras suspender
-Render. El release final será Docker en servidor propio. La implementación de
-Analytics se desarrolla en `feat/academic-analytics`; no se considera desplegada
-hasta que se integre y valide en el entorno final.
+Render. El release final será Docker en servidor propio. Analytics se integró a
+`main` mediante merge `11a1078719e3b0ca7722844886e3784ff05464d6` y pasó CI con
+PostgreSQL; no se ha desplegado y espera al entorno final.
 
 
 Auth, onboarding y cuestionario siguen operativos. Las secciones de otros módulos

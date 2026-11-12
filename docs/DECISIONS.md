@@ -11,11 +11,12 @@ requieren onboarding. No se añade un endpoint adicional de archivo: `AcademicAr
 indexa las páginas históricas del timeline. No se crean tablas ni índices SQL.
 Contrato: `ANALYTICS_CONTRACT.md`.
 
-La implementación read-only se desarrolla en `feat/academic-analytics`. Las cinco
-estructuras viven solo durante la solicitud; PostgreSQL conserva la fuente de verdad.
-El tiempo estudiado usa intervalos cerrados y el timeline expone solo hechos con
-timestamp persistido o fecha planificada rotulada como tal. No se infieren causas,
-transiciones ausentes, ni razonamiento de IA.
+La implementación read-only se integró a `main` con merge `11a1078719e3b0ca7722844886e3784ff05464d6`.
+Las cinco estructuras viven solo durante la solicitud; PostgreSQL conserva la fuente
+de verdad. El tiempo estudiado usa intervalos cerrados y el timeline expone solo
+hechos con timestamp persistido o fecha planificada rotulada como tal. No se infieren
+causas, transiciones ausentes ni razonamiento de IA. CI PostgreSQL pasó en rama y
+merge; no hubo despliegue ni cambio de Database.
 
 ## Propuesta IA persistente — decisión 2026-11-06
 
