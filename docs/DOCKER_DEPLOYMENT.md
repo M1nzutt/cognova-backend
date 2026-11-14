@@ -82,8 +82,9 @@ down -v con información que deba preservarse.
 
 ## Smoke funcional integrado
 
-Desde http://localhost:8080 y por los endpoints same-origin /api/*, usando cuentas
-sintéticas nuevas:
+Desde http://localhost:8080 o http://127.0.0.1:8080 y por los endpoints same-origin
+/api/*, usando cuentas sintéticas nuevas. Ambos hosts loopback están permitidos
+explícitamente solo en esta configuración local; otros orígenes siguen rechazados:
 
 1. Auth: registro, login, ruta protegida directa, refresh con CSRF, rotación de cookie,
    logout y 401 posterior. Verifica no-store y cookies host-only/SameSite=Lax.
@@ -149,8 +150,9 @@ de /docker-entrypoint-initdb.d solo se ejecutan al crear el volumen inicial; cam
 
 Si falla migración, grants o Backend, mira logs sanitizados y comprueba revisión 0008,
 roles y health/readiness. Si /api falla, confirma backend:8000 dentro de la red. Para
-cookies usa exactamente http://localhost:8080; la IP no está permitida por el origin
-local. La clave Gemini faltante no impide iniciar el stack.
+cookies y autenticación usa uno de los dos orígenes locales explícitos:
+http://localhost:8080 o http://127.0.0.1:8080. Otros hosts y puertos no están
+permitidos. La clave Gemini faltante no impide iniciar el stack.
 
 Esta configuración es HTTP local, no es producción lista para Internet. Aún faltan
 SO, dominio, IP, reverse proxy y certificados del servidor. Antes del despliegue se
