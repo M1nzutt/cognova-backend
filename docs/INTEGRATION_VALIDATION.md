@@ -1,5 +1,29 @@
 # Validación de integración productiva
 
+## Auditoría local autenticada y suite — actualización — 2026-11-15
+
+El recorrido autenticado local previo con la cuenta sintética existente cubrió
+los nueve módulos: Dashboard, Materias, Actividades, Sesiones/temporizador,
+Calendario, Planes, Retos y Analytics. Se comprobó el flujo manual de planes y
+retos sin llamar a Gemini, además de analytics, calendario, deadline/historial
+y persistencia de intervalos. Los datos sintéticos existentes permanecen
+retenidos; esta continuación no hizo escrituras, borrados ni limpieza.
+
+En la revisión de cambios locales: Backend **341 passed, 1 skipped**; Ruff
+check y formato de los archivos afectados pasaron. El frontend correspondiente
+pasó `npm run verify`: **386 pruebas en 49 archivos**, lint, TypeScript y build.
+Los contenedores Backend, Frontend y PostgreSQL estaban healthy, y readiness
+por proxy respondió 200. Los commits locales `03be785` y `cdfd41a` registran
+los cambios de retry budget del SDK y timeout de solicitud frontend que estaban
+pendientes al iniciar este bloque.
+
+No se repitió el smoke autenticado porque los scripts disponibles borran sus
+fixtures y no se contaba con credenciales de smoke, en cumplimiento de la
+instrucción de no eliminar datos. La evidencia autenticada citada es la corrida
+previa; no se generó evidencia nueva de navegador. Gemini sigue en pausa: no
+hubo llamada, push, merge, despliegue ni modificación de volúmenes en esta
+continuación.
+
 ## Analytics académico — CI de rama y main, 2026-11-12
 
 `feat/academic-analytics` implementa las cuatro rutas definidas en

@@ -1,5 +1,27 @@
 # Cognova — Estado backend
 
+## Auditoría funcional local — actualización — 2026-11-15
+
+El smoke autenticado previo contra Docker con el usuario sintético existente
+cubrió Dashboard, Materias, Actividades, Sesiones/temporizador, Calendario,
+Planes/Retos y Analytics. Las operaciones manuales de Planes y Retos funcionaron
+sin Gemini; Analytics (overview, study-time, timeline y search) y el calendario
+respondieron correctamente. La cuenta y los datos sintéticos se conservaron;
+no se borraron recursos ni volúmenes.
+
+En esta continuación se revisaron, verificaron y registraron en un commit local
+los cambios pendientes de reintentos/timeout, sin volver a llamar a Gemini.
+Commit
+`03be785 fix(ai): bound Interactions retries`. La suite Backend pasó
+**341 pruebas, 1 omitida**; `ruff check` y `ruff format --check` pasaron en los
+archivos modificados. También se comprobó readiness local HTTP 200 y los tres
+servicios Docker healthy. El código Gemini sigue bloqueado para generación real:
+la última llamada previa agotó 30.158 s sin código HTTP ni motivo del proveedor.
+
+No se hicieron escrituras o borrados académicos en esta continuación, ni se
+alteraron volúmenes. No hubo push, merge ni despliegue. La validación real del
+proveedor permanece en pausa a petición del usuario.
+
 ## Entorno Docker integrado — stack validado localmente — 2026-11-12
 
 La rama `feat/docker-integrated-env` pasó `docker compose config --quiet` y
