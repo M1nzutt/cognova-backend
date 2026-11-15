@@ -7,6 +7,7 @@ from typing import TypeVar
 
 from google import genai
 from google.genai import errors, types
+from google.genai._interactions import APIError as InteractionsAPIError
 from httpx import TimeoutException, TransportError
 from pydantic import BaseModel, ValidationError
 
@@ -28,7 +29,18 @@ class GeminiProvider:
         request_id: str | None = None,
     ) -> None:
         self._client = client or (
-            genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=15000))
+            genai.Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(
+                    timeout=15000,
+                    retry_options=types.HttpRetryOptions(
+                        # Interactions maps attempts to retries; this caps one
+                        # operation at the initial request plus one retry.
+                        attempts=1,
+                        http_status_codes=[408, 500, 502, 503, 504],
+                    ),
+                ),
+            )
             if api_key
             else None
         )
@@ -67,34 +79,33 @@ class GeminiProvider:
         started = self._clock()
         result = "failed"
         try:
-            for attempt in range(2):
-                try:
-                    response = self._client.interactions.create(  # type: ignore[attr-defined]
-                        model=MODEL,
-                        system_instruction=instruction,
-                        input=context,
-                        response_format={
-                            "type": "text",
-                            "mime_type": "application/json",
-                            "schema": schema.model_json_schema(),
-                        },
-                    )
-                    payload = response.output_text
-                    if not payload:
-                        raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
-                    parsed = schema.model_validate_json(payload)
-                    result = "ok"
-                    return parsed
-                except errors.APIError as exc:
-                    if exc.code in {429, 500, 503} and attempt == 0:
-                        time.sleep(0.25)
-                        continue
-                    if exc.code == 429:
-                        raise DomainError("GEMINI_RATE_LIMIT") from None
-                    raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
-                except (ValidationError, ValueError, TypeError):
-                    raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
-            raise AssertionError("unreachable")
+            try:
+                response = self._client.interactions.create(  # type: ignore[attr-defined]
+                    model=MODEL,
+                    system_instruction=instruction,
+                    input=context,
+                    response_format={
+                        "type": "text",
+                        "mime_type": "application/json",
+                        "schema": schema.model_json_schema(),
+                    },
+                    automatic_continuation=False,
+                )
+                payload = response.output_text
+                if not payload:
+                    raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
+                parsed = schema.model_validate_json(payload)
+                result = "ok"
+                return parsed
+            except (errors.APIError, InteractionsAPIError) as exc:
+                status_code = getattr(exc, "code", None) or getattr(
+                    exc, "status_code", None
+                )
+                if status_code == 429:
+                    raise DomainError("GEMINI_RATE_LIMIT") from None
+                raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
+            except (ValidationError, ValueError, TypeError):
+                raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
         except (TimeoutError, ConnectionError, TimeoutException, TransportError):
             raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
         finally:

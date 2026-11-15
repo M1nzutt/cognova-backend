@@ -3,7 +3,8 @@ from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
-from google.genai import errors
+from google.genai import _interactions, errors
+from httpx import Request, Response
 
 from app.academic_intelligence.academic_event import AcademicEvent
 from app.academic_intelligence.academic_journey import AcademicJourney
@@ -119,7 +120,7 @@ def test_gemini_provider_rejects_empty_invalid_and_transient_results(monkeypatch
     with pytest.raises(DomainError) as exc:
         GeminiProvider(None, client=fake).behavior("{}")
     assert exc.value.code == "GEMINI_RATE_LIMIT"
-    assert len(calls) == 2
+    assert len(calls) == 1
 
     for code in (500, 503):
         attempts = []
@@ -132,7 +133,7 @@ def test_gemini_provider_rejects_empty_invalid_and_transient_results(monkeypatch
         with pytest.raises(DomainError) as exc:
             GeminiProvider(None, client=fake).behavior("{}")
         assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
-        assert len(attempts) == 2
+        assert len(attempts) == 1
 
 
 def test_gemini_provider_uses_structured_output_and_handles_timeout():
@@ -163,6 +164,7 @@ def test_gemini_provider_uses_structured_output_and_handles_timeout():
     assert "untrusted" in calls[0]["system_instruction"]
     assert calls[0]["response_format"]["mime_type"] == "application/json"
     assert "schema" in calls[0]["response_format"]
+    assert calls[0]["automatic_continuation"] is False
 
     def timeout(**kwargs):
         raise TimeoutError()
@@ -173,6 +175,63 @@ def test_gemini_provider_uses_structured_output_and_handles_timeout():
     with pytest.raises(DomainError) as exc:
         provider.plan("{}")
     assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
+
+    request = Request("POST", "https://example.test/interactions")
+    for status_code, expected_code in (
+        (429, "GEMINI_RATE_LIMIT"),
+        (503, "STUDY_PLAN_GENERATION_UNAVAILABLE"),
+    ):
+        upstream_error = _interactions.APIError.generate(
+            status_code,
+            {"error": {"message": "upstream unavailable"}},
+            "upstream unavailable",
+            Response(status_code, request=request),
+        )
+        calls = []
+
+        def unavailable(**kwargs):
+            calls.append(kwargs)
+            raise upstream_error
+
+        provider = GeminiProvider(
+            None,
+            client=SimpleNamespace(interactions=SimpleNamespace(create=unavailable)),
+        )
+        with pytest.raises(DomainError) as exc:
+            provider.plan("{}")
+        assert exc.value.code == expected_code
+        assert len(calls) == 1
+
+    def interaction_timeout(**kwargs):
+        raise _interactions.APITimeoutError(request=request)
+
+    provider = GeminiProvider(
+        None,
+        client=SimpleNamespace(
+            interactions=SimpleNamespace(create=interaction_timeout)
+        ),
+    )
+    with pytest.raises(DomainError) as exc:
+        provider.plan("{}")
+    assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
+
+
+def test_gemini_client_uses_explicit_retry_budget(monkeypatch):
+    captured = {}
+    fake = SimpleNamespace(interactions=SimpleNamespace(create=lambda **_: None))
+
+    def create_client(**kwargs):
+        captured.update(kwargs)
+        return fake
+
+    monkeypatch.setattr(
+        "app.academic_intelligence.gemini_provider.genai.Client", create_client
+    )
+    GeminiProvider("synthetic-key")
+    options = captured["http_options"]
+    assert options.timeout == 15_000
+    assert options.retry_options.attempts == 1
+    assert options.retry_options.http_status_codes == [408, 500, 502, 503, 504]
 
 
 def test_versioned_snapshot_contains_only_visible_structured_proposal():
