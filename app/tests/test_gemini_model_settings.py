@@ -19,6 +19,15 @@ def test_model_is_loaded_from_backend_environment(monkeypatch):
     assert Settings(_env_file=None).gemini_model == "gemini-3.5-flash-lite"
 
 
+def test_generation_timeout_is_configurable_and_bounded(monkeypatch):
+    monkeypatch.setenv("GEMINI_TIMEOUT_MS", "60000")
+    assert Settings(_env_file=None).gemini_timeout_ms == 60000
+    for invalid in ("0", "999999", "not-a-number"):
+        monkeypatch.setenv("GEMINI_TIMEOUT_MS", invalid)
+        with pytest.raises(ValidationError):
+            Settings(_env_file=None)
+
+
 @pytest.mark.parametrize("value", ["", "gpt-5", "gemini-x\nsecret", "../gemini-x"])
 def test_invalid_model_is_rejected(monkeypatch, value):
     monkeypatch.setenv("GEMINI_MODEL", value)

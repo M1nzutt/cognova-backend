@@ -32,13 +32,14 @@ class GeminiProvider:
         clock: Callable[[], float] = time.monotonic,
         request_id: str | None = None,
         model: str = MODEL,
+        timeout_ms: int = 15000,
     ) -> None:
         self._model = model
         self._client = client or (
             genai.Client(
                 api_key=api_key,
                 http_options=types.HttpOptions(
-                    timeout=15000,
+                    timeout=timeout_ms,
                     retry_options=types.HttpRetryOptions(
                         # One application operation sends one generation only.
                         attempts=0,
@@ -83,9 +84,9 @@ class GeminiProvider:
             '{\"minutes\":N} with integer N from 1 to 1440; subject_mastery '
             'requires {\"criterion\":\"nonempty text\",\"threshold\":N} with '
             "integer N from 1 to 100 and criterion at most 200 characters. "
-            "If target_id is supplied, use activity_id for activity_completion, "
-            "session_id for session_completion, subject_id for subject_mastery; "
-            "otherwise it must match one of the challenge's linked IDs. "
+            "Set the optional generic target_id to null. Represent the actual "
+            "target with the typed subject_id, activity_id or session_id fields "
+            "above; do not duplicate those IDs into a generic target_id. "
             "Challenge start_at and deadline, when supplied, must lie within the "
             "plan dates; deadline must not precede start_at. "
             "Never repeat a challenge with the same target_type and linked IDs. "
@@ -151,12 +152,22 @@ class GeminiProvider:
                 status_code = getattr(exc, "code", None) or getattr(
                     exc, "status_code", None
                 )
+                safe_status = (
+                    status_code if type(status_code) is int
+                    and 400 <= status_code <= 599 else None
+                )
+                _logger.warning(
+                    "ai_provider_failed reason=provider_error http_status=%s",
+                    safe_status,
+                )
                 if status_code == 429:
                     raise DomainError("GEMINI_RATE_LIMIT") from None
                 raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
             except (ValidationError, ValueError, TypeError):
+                _logger.warning("ai_provider_failed reason=invalid_structured_output")
                 raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
         except (TimeoutError, ConnectionError, TimeoutException, TransportError):
+            _logger.warning("ai_provider_failed reason=timeout_or_transport")
             raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE") from None
         finally:
             _logger.info(

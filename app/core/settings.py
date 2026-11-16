@@ -34,6 +34,7 @@ class Settings(BaseSettings):
         default="gemini-3.8-flash",
         pattern=r"^gemini-[a-z0-9][a-z0-9.-]{0,99}$",
     )
+    gemini_timeout_ms: int = Field(default=15000, ge=1000, le=120000)
 
     @field_validator("cors_allowed_origins")
     @classmethod

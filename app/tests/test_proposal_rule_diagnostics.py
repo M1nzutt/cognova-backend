@@ -234,6 +234,7 @@ def test_instruction_explains_ai_target_contract(payload):
         '{"minutes":N}',
         '{"criterion":"nonempty text","threshold":N}',
         "Every challenge needs subject_id",
+        "Set the optional generic target_id to null",
         "deadline must not precede start_at",
         "must lie within the plan dates",
     ):
