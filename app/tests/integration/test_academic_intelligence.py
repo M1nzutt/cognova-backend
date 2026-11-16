@@ -53,7 +53,11 @@ def proposal(subject_id, activity_id, *, name="Propuesta contextual"):
 
 
 @pytest.mark.parametrize(
-    "failure", ["missing", "type", "relationship", "truncated", "incomplete"]
+    "failure",
+    [
+        "missing", "type", "relationship", "truncated", "incomplete",
+        "custom", "target_shape", "challenge_timezone", "evidence",
+    ],
 )
 def test_wire_validation_failure_has_no_partial_postgres_writes(
     client, registration, database, monkeypatch, failure
@@ -83,6 +87,14 @@ def test_wire_validation_failure_has_no_partial_postgres_writes(
         invalid["subject_ids"] = [str(activity_data["subject_id"])]
     elif failure == "relationship":
         invalid["proposed_challenges"][0]["activity_id"] = 99999999
+    elif failure == "custom":
+        invalid["proposed_challenges"][0]["target_type"] = "custom"
+    elif failure == "target_shape":
+        invalid["proposed_challenges"][0]["target_value"] = {"status": "completada"}
+    elif failure == "challenge_timezone":
+        invalid["proposed_challenges"][0]["deadline"] = "2030-01-05T12:00:00"
+    elif failure == "evidence":
+        invalid["proposed_challenges"][0]["evidence"] = ["activity:99999999"]
     text = json.dumps(invalid)
     if failure == "truncated":
         text = text[:-8]

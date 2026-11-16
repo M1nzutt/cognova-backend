@@ -79,3 +79,9 @@ Referencias oficiales:
 
 - https://ai.google.dev/gemini-api/docs/structured-output
 - https://ai.google.dev/gemini-api/docs/interactions
+
+## Seguimiento
+
+La prueba anterior se conserva como resultado histórico. El diagnóstico
+posterior, las reglas seguras y una nueva prueba autorizada que sí pasó la
+validación de negocio se documentan en [GEMINI_BUSINESS_VALIDATION.md](GEMINI_BUSINESS_VALIDATION.md).
