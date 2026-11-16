@@ -1,6 +1,8 @@
 # Generación de Planes y observaciones académicas — contrato Backend
 
-Modelo: `gemini-3.8-flash` mediante SDK oficial `google-genai` para Python.
+Modelo configurable mediante `GEMINI_MODEL`, usando SDK oficial `google-genai`
+para Python. Sin variable se conserva `gemini-3.8-flash`; la opción validada
+para las pruebas locales de Planes es `gemini-3.5-flash-lite`.
 La rama Backend fija Database `0008_ai_plan_proposal_snapshot` en
 `tools/database-ref.json`; producción permanece suspendida en 0007. Solo Backend envía
 datos al proveedor. Todas las rutas exigen Bearer, onboarding completo y
@@ -91,11 +93,15 @@ psicológicas.
   `Retry-After` corto, sin filtrar detalles internos.
 - 503 `STUDY_PLAN_GENERATION_UNAVAILABLE`: falta de clave, timeout, 500/503,
   respuesta vacía, JSON o esquema inválido, o salida insegura del modelo.
-- El proveedor usa timeout y, como máximo, un reintento conservador para
-  errores transitorios inequívocos antes de cualquier escritura.
+- El proveedor usa timeout sin reintentos automáticos ni continuación:
+  una operación solicita una sola generación. No hay fallback.
 - Las operaciones registran request id, nombre, duración, modelo y resultado
   general. Nunca prompts completos, datos académicos crudos, tokens ni clave.
 
 La salida estructurada restringe el formato; validación Pydantic y reglas de
 dominio Backend deciden si se acepta. Ningún texto del usuario puede autorizar
 acceso a datos de otra cuenta ni saltarse estas reglas.
+
+El snapshot y los logs seguros usan el modelo seleccionado en esa instancia
+del proveedor, no una constante histórica. Cambiar `GEMINI_MODEL` afecta futuras
+operaciones; no reescribe propuestas ni decisiones existentes.
