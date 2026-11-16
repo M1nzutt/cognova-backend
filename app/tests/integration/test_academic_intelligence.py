@@ -1,4 +1,7 @@
+import json
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 from sqlalchemy import func, select
@@ -12,7 +15,7 @@ from app.academic_intelligence.gemini_schemas import (
     ProposedChallenge,
 )
 from app.core.domain_error import DomainError
-from app.models.study_plans import StudyPlan, StudyPlanDecision
+from app.models.study_plans import StudyChallenge, StudyPlan, StudyPlanDecision
 from app.models.user import User
 from app.services.study_plan_service import StudyPlanService
 from app.tests.integration.test_activities import setup_activity
@@ -47,6 +50,62 @@ def proposal(subject_id, activity_id, *, name="Propuesta contextual"):
         ],
         reasoning_summary="Se relacionó la fecha límite con la actividad existente.",
     )
+
+
+@pytest.mark.parametrize(
+    "failure", ["missing", "type", "relationship", "truncated", "incomplete"]
+)
+def test_wire_validation_failure_has_no_partial_postgres_writes(
+    client, registration, database, monkeypatch, failure
+):
+    _, headers, activity_data, activity = setup_activity(client, registration)
+    valid = proposal(activity_data["subject_id"], activity["id"]).model_dump(
+        mode="json"
+    )
+    create = Mock(return_value=SimpleNamespace(
+        output_text=json.dumps(valid), status="completed"
+    ))
+    provider = GeminiProvider(
+        None, client=SimpleNamespace(interactions=SimpleNamespace(create=create))
+    )
+    plan_method = GeminiProvider.plan
+    monkeypatch.setattr(
+        GeminiProvider, "plan", lambda self, context: plan_method(provider, context)
+    )
+    generated = client.post(BASE + "/generate", headers=headers)
+    assert generated.status_code == 201, generated.text
+    original = generated.json()["plan"]
+
+    invalid = json.loads(json.dumps(valid))
+    if failure == "missing":
+        del invalid["objective"]
+    elif failure == "type":
+        invalid["subject_ids"] = [str(activity_data["subject_id"])]
+    elif failure == "relationship":
+        invalid["proposed_challenges"][0]["activity_id"] = 99999999
+    text = json.dumps(invalid)
+    if failure == "truncated":
+        text = text[:-8]
+    create.return_value = SimpleNamespace(
+        output_text=text,
+        status="incomplete" if failure == "incomplete" else "completed",
+    )
+
+    def counts():
+        with database.session() as db:
+            return tuple(
+                db.scalar(select(func.count()).select_from(model))
+                for model in (StudyPlan, StudyChallenge, StudyPlanDecision)
+            )
+
+    before = counts()
+    for path in (BASE + "/generate", f"{BASE}/{original['id']}/regenerate"):
+        assert client.post(path, headers=headers).status_code == 503
+        assert counts() == before
+        detail = client.get(f"{BASE}/{original['id']}", headers=headers).json()
+        assert detail["ai_proposal_snapshot"] == original["ai_proposal_snapshot"]
+        assert detail["decisions"] == []
+    assert create.call_count == 3  # One valid and two invalid local responses.
 
 
 def test_generate_and_regenerate_are_atomic(
