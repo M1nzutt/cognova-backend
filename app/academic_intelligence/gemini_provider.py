@@ -3,7 +3,7 @@
 import logging
 import time
 from collections.abc import Callable
-from typing import TypeVar
+from typing import TypeVar, cast
 
 from google import genai
 from google.genai import errors, types
@@ -11,6 +11,10 @@ from google.genai._interactions import APIError as InteractionsAPIError
 from httpx import TimeoutException, TransportError
 from pydantic import BaseModel, ValidationError
 
+from app.academic_intelligence.gemini_plan_codec import (
+    decode_plan_proposal,
+    plan_generation_schema,
+)
 from app.academic_intelligence.gemini_schemas import BehaviorProposal, PlanProposal
 from app.core.domain_error import DomainError
 
@@ -56,7 +60,10 @@ class GeminiProvider:
             "concrete evidence. Do not diagnose, "
             "label, activate a plan, or create resources. Return Spanish text. "
             "Dates must be timezone-aware ISO 8601. In each evidence list use only "
-            "exact keys from evidence_catalog; never invent evidence."
+            "exact keys from evidence_catalog; never invent evidence. "
+            "Use at most 100 subject IDs, 200 activity IDs, 200 session IDs, "
+            "30 challenges, and 1 to 5 evidence keys per challenge. "
+            "Names and challenge titles must be at most 100 characters."
         )
         return self._ask(instruction, context, PlanProposal, "plan")
 
@@ -87,16 +94,27 @@ class GeminiProvider:
                     response_format={
                         "type": "text",
                         "mime_type": "application/json",
-                        "schema": schema.model_json_schema(),
+                        "schema": (
+                            plan_generation_schema()
+                            if schema is PlanProposal
+                            else schema.model_json_schema()
+                        ),
                     },
                     automatic_continuation=False,
+                    store=False,
                 )
+                if getattr(response, "status", "completed") != "completed":
+                    raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
                 payload = response.output_text
                 if not payload:
                     raise DomainError("STUDY_PLAN_GENERATION_UNAVAILABLE")
-                parsed = schema.model_validate_json(payload)
+                parsed = (
+                    decode_plan_proposal(payload)
+                    if schema is PlanProposal
+                    else schema.model_validate_json(payload)
+                )
                 result = "ok"
-                return parsed
+                return cast(T, parsed)
             except (errors.APIError, InteractionsAPIError) as exc:
                 status_code = getattr(exc, "code", None) or getattr(
                     exc, "status_code", None
