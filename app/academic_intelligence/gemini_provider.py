@@ -31,17 +31,17 @@ class GeminiProvider:
         client: object | None = None,
         clock: Callable[[], float] = time.monotonic,
         request_id: str | None = None,
+        model: str = MODEL,
     ) -> None:
+        self._model = model
         self._client = client or (
             genai.Client(
                 api_key=api_key,
                 http_options=types.HttpOptions(
                     timeout=15000,
                     retry_options=types.HttpRetryOptions(
-                        # Interactions maps attempts to retries; this caps one
-                        # operation at the initial request plus one retry.
-                        attempts=1,
-                        http_status_codes=[408, 500, 502, 503, 504],
+                        # One application operation sends one generation only.
+                        attempts=0,
                     ),
                 ),
             )
@@ -50,6 +50,10 @@ class GeminiProvider:
         )
         self._clock = clock
         self._request_id = request_id
+
+    @property
+    def model(self) -> str:
+        return self._model
 
     def plan(self, context: str) -> PlanProposal:
         instruction = (
@@ -116,7 +120,7 @@ class GeminiProvider:
         try:
             try:
                 response = self._client.interactions.create(  # type: ignore[attr-defined]
-                    model=MODEL,
+                    model=self.model,
                     system_instruction=instruction,
                     input=context,
                     response_format={
@@ -159,7 +163,7 @@ class GeminiProvider:
                 "ai request_id=%s operation=%s model=%s result=%s duration_ms=%d",
                 self._request_id or "unavailable",
                 operation,
-                MODEL,
+                self.model,
                 result,
                 int((self._clock() - started) * 1000),
             )

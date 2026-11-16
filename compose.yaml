@@ -78,6 +78,7 @@ services:
       DATABASE_MAX_OVERFLOW: "5"
       PORT: "8000"
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
       TZ: UTC
     expose:
       - "8000"

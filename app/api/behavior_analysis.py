@@ -29,5 +29,6 @@ def analyze_behavior(
     provider = GeminiProvider(
         os.environ.get("GEMINI_API_KEY"),
         request_id=getattr(request.state, "request_id", None),
+        model=request.app.state.settings.gemini_model,
     )
     return BehaviorAnalysisService(db, provider).analyze(user.id)

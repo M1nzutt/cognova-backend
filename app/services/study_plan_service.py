@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.academic_intelligence.academic_context import AcademicContext
 from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
-from app.academic_intelligence.gemini_provider import MODEL, GeminiProvider
+from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.academic_intelligence.proposal_validation import validate_proposal
 from app.core.domain_error import DomainError
 from app.models.study_plans import (
@@ -104,7 +104,7 @@ class StudyPlanService:
         proposal = self._proposal_provider.plan(evidence)
         data, challenges = validate_proposal(proposal, context)
         snapshot = AiPlanProposalSnapshot.from_proposal(
-            proposal, model=MODEL, generated_at=self._clock()
+            proposal, model=self._proposal_provider.model, generated_at=self._clock()
         ).as_storage()
         self._validate_jsonb_size(snapshot, 32768)
 
@@ -254,7 +254,7 @@ class StudyPlanService:
         proposal = self._proposal_provider.plan(evidence)
         proposed, challenges = validate_proposal(proposal, context)
         next_snapshot = AiPlanProposalSnapshot.from_proposal(
-            proposal, model=MODEL, generated_at=self._clock()
+            proposal, model=self._proposal_provider.model, generated_at=self._clock()
         ).as_storage()
         self._validate_jsonb_size(next_snapshot, 32768)
 

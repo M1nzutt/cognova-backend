@@ -38,6 +38,7 @@ def get_plan_service(
     provider = GeminiProvider(
         os.environ.get("GEMINI_API_KEY"),
         request_id=getattr(request.state, "request_id", None),
+        model=request.app.state.settings.gemini_model,
     )
     return StudyPlanService(db, proposal_provider=provider)
 

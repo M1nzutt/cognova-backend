@@ -52,6 +52,38 @@ def proposal(subject_id, activity_id, *, name="Propuesta contextual"):
     )
 
 
+def test_configured_model_is_used_and_persisted_for_generate_and_regenerate(
+    client, registration, monkeypatch
+):
+    _, headers, activity_data, activity = setup_activity(client, registration)
+    output = proposal(activity_data["subject_id"], activity["id"])
+    create = Mock(return_value=SimpleNamespace(
+        output_text=output.model_dump_json(), status="completed"
+    ))
+    monkeypatch.setenv("GEMINI_API_KEY", "synthetic-key")
+    monkeypatch.setattr(
+        "app.academic_intelligence.gemini_provider.genai.Client",
+        lambda **_: SimpleNamespace(interactions=SimpleNamespace(create=create)),
+    )
+    client.app.state.settings.gemini_model = "gemini-3.5-flash-lite"
+    generated = client.post(BASE + "/generate", headers=headers)
+    assert generated.status_code == 201, generated.text
+    plan = generated.json()["plan"]
+    assert plan["ai_proposal_snapshot"]["model"] == "gemini-3.5-flash-lite"
+    assert create.call_args.kwargs["model"] == "gemini-3.5-flash-lite"
+    refreshed = client.get(f"{BASE}/{plan['id']}", headers=headers).json()
+    assert refreshed["ai_proposal_snapshot"] == plan["ai_proposal_snapshot"]
+
+    client.app.state.settings.gemini_model = "gemini-3.6-flash"
+    regenerated = client.post(f"{BASE}/{plan['id']}/regenerate", headers=headers)
+    assert regenerated.status_code == 200, regenerated.text
+    next_plan = regenerated.json()
+    assert next_plan["ai_proposal_snapshot"]["model"] == "gemini-3.6-flash"
+    assert create.call_args.kwargs["model"] == "gemini-3.6-flash"
+    assert next_plan["decisions"][-1]["proposed_value"] == plan["ai_proposal_snapshot"]
+    assert create.call_count == 2
+
+
 @pytest.mark.parametrize(
     "failure",
     [

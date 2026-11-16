@@ -230,8 +230,7 @@ def test_gemini_client_uses_explicit_retry_budget(monkeypatch):
     GeminiProvider("synthetic-key")
     options = captured["http_options"]
     assert options.timeout == 15_000
-    assert options.retry_options.attempts == 1
-    assert options.retry_options.http_status_codes == [408, 500, 502, 503, 504]
+    assert options.retry_options.attempts == 0
 
 
 def test_versioned_snapshot_contains_only_visible_structured_proposal():

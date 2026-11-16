@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     auth_rate_window_seconds: int = Field(default=60, ge=1, le=3600)
     database_pool_size: int = Field(default=5, ge=1, le=20)
     database_max_overflow: int = Field(default=5, ge=0, le=20)
+    gemini_model: str = Field(
+        default="gemini-3.8-flash",
+        pattern=r"^gemini-[a-z0-9][a-z0-9.-]{0,99}$",
+    )
 
     @field_validator("cors_allowed_origins")
     @classmethod

@@ -7,6 +7,7 @@ import pytest
 def isolated_environment(monkeypatch):
     # Unit tests never use the developer's database or .env credentials.
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_MODEL", raising=False)
     monkeypatch.setenv(
         "DATABASE_URL", "postgresql+psycopg://test:test@localhost:5432/cognova_test"
     )
