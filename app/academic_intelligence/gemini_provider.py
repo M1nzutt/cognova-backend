@@ -63,7 +63,35 @@ class GeminiProvider:
             "exact keys from evidence_catalog; never invent evidence. "
             "Use at most 100 subject IDs, 200 activity IDs, 200 session IDs, "
             "30 challenges, and 1 to 5 evidence keys per challenge. "
-            "Names and challenge titles must be at most 100 characters."
+            "Names and challenge titles must be at most 100 characters. "
+            "Use at least one existing subject and unique IDs in each plan list; "
+            "all IDs must be positive 32-bit integers. "
+            "Plan end_date must be strictly later than start_date. "
+            "Every challenge needs subject_id in the plan, even when optional in "
+            "the JSON schema. Include its linked activity/session in the plan; "
+            "their subject IDs must agree, and a session linked to an activity "
+            "must belong to that activity. Never use target_type custom: it is "
+            "not permitted for AI proposals. "
+            "Use these exact target_value shapes (JSON keys and values are not "
+            "translated): activity_completion requires activity_id and "
+            '{\"status\":\"completed\"}; session_completion requires session_id '
+            'and {\"lifecycle\":\"finished\"}; study_minutes requires '
+            '{\"minutes\":N} with integer N from 1 to 1440; subject_mastery '
+            'requires {\"criterion\":\"nonempty text\",\"threshold\":N} with '
+            "integer N from 1 to 100 and criterion at most 200 characters. "
+            "If target_id is supplied, use activity_id for activity_completion, "
+            "session_id for session_completion, subject_id for subject_mastery; "
+            "otherwise it must match one of the challenge's linked IDs. "
+            "Challenge start_at and deadline, when supplied, must lie within the "
+            "plan dates; deadline must not precede start_at. "
+            "Never repeat a challenge with the same target_type and linked IDs. "
+            "Each evidence list must include a catalog key for its linked "
+            "subject, activity or session; all keys must exist in the catalog. "
+            "Omit challenges for subjects without recorded activities or sessions. "
+            "Keep objective, explanation and reasoning_summary at most 2000 "
+            "characters, challenge explanation at most 1000, measurable_condition "
+            "at most 300; all required text must be nonempty after trimming. "
+            "Do not include control characters or non-JSON values."
         )
         return self._ask(instruction, context, PlanProposal, "plan")
 
