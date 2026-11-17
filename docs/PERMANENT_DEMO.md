@@ -117,6 +117,11 @@ C:\Users\sarav\.local\state\cognova\demo\
 - `report.json`: métricas, límites y estado real; no contiene respuestas Gemini.
 - `prepare.lock`: bloqueo transitorio de proceso; no es un registro académico.
 
+`report.json` es una lectura generada por la última fase `verify`; tras cambios
+de reglas de Analytics, regenerarlo con las API disponibles antes de usar sus
+totales. El reporte anterior puede reflejar la regla histórica que contaba
+temporizadores cancelados dentro del estudio.
+
 En Linux se usa `credentials.json` con modo `0600`, dentro de directorio `0700`.
 No se almacena una API Key en estas herramientas: Gemini solo la lee el Backend.
 La contraseña cumple el contrato de 8–12 caracteres y no está en Git.
