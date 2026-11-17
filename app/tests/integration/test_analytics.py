@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
+import pytest
 from sqlalchemy import text
 
 from app.tests.integration.test_activities import setup_activity
@@ -180,9 +181,8 @@ def test_cancelled_timer_is_separate_from_studied_time_and_ai_evidence(
         evidence = json.loads(context.as_json())
     evidence_by_id = {row["id"]: row for row in evidence["sessions"]}
     assert evidence_by_id[cancelled["id"]]["actual_minutes"] == 0
-    assert evidence_by_id[cancelled["id"]]["cancelled_elapsed_minutes"] == (
-        45662.422572 / 60
-    )
+    cancelled_minutes = evidence_by_id[cancelled["id"]]["cancelled_elapsed_minutes"]
+    assert cancelled_minutes == pytest.approx(45662.422572 / 60)
     assert evidence_by_id[partial["id"]]["actual_minutes"] == 840.73537 / 60
 
 

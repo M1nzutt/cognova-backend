@@ -120,7 +120,7 @@ def test_wire_validation_failure_has_no_partial_postgres_writes(
     elif failure == "relationship":
         invalid["proposed_challenges"][0]["activity_id"] = 99999999
     elif failure == "target_relation":
-        invalid["proposed_challenges"][0]["target_id"] = activity_data["subject_id"]
+        invalid["proposed_challenges"][0]["target_id"] = activity["id"] + 1000
     elif failure == "custom":
         invalid["proposed_challenges"][0]["target_type"] = "custom"
     elif failure == "target_shape":
