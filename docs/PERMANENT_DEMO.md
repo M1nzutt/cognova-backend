@@ -72,7 +72,7 @@ La sustentación debe señalar esta diferencia. La sesión cancelada conserva el
 motivo en su detalle y el informe privado separa
 `valid_rehearsal_seconds` de `recovery_incidents`.
 
-## Gemini: registro y bloqueo actual
+## Gemini: estado y límite de llamadas
 
 Modelo: `gemini-3.5-flash-lite`, sin fallback ni reintentos automáticos.
 
@@ -81,17 +81,15 @@ Modelo: `gemini-3.5-flash-lite`, sin fallback ni reintentos automáticos.
 | 1 | API 503; operación fallida, sin propuesta persistida. Causa interna exacta no retenida |
 | 2 | Gemini/Pydantic válidos; rechazo de negocio `challenge_target_relation`; ninguna escritura parcial |
 | 3 | HTTP 503 del proveedor, confirmado por diagnóstico seguro; ninguna propuesta persistida |
+| 4 | Tras aprobar Analytics/Gemini/PostgreSQL en pruebas locales, propuesta válida persistida como Plan `26`, editada y aceptada por los endpoints oficiales |
 
-Se hicieron **tres solicitudes reales** para esta cuenta. Se agotó el presupuesto
-explícito de esta preparación. El verificador de navegador no consume Gemini.
-No se copiaron propuestas de otra cuenta ni se inventaron respuestas, explicaciones
-o snapshots.
-
-En la revisión posterior se autorizó condicionalmente un cuarto intento, solo
-después de aprobar también PostgreSQL. No se consumió ni se aumentó el presupuesto:
-el Docker Engine local no estuvo disponible, por lo que no fue posible ejecutar
-esas pruebas. No hacer otra llamada hasta repetir las regresiones PostgreSQL y
-obtener autorización vigente.
+Se hicieron **cuatro solicitudes reales en total**. El cuarto intento fue el
+único autorizado para esa ejecución y quedó registrado antes de enviar la
+solicitud; presupuesto persistente `4/4`. No hubo reintentos. La propuesta
+conserva el snapshot del modelo y su explicación; el detalle autenticado confirma
+decisiones `edited` y `accepted`, estado `active` y un reto con relaciones tipadas.
+La verificación posterior a refresh comprobó snapshot e historial estables.
+No se copiaron propuestas de otra cuenta ni se inventaron resultados.
 
 Se añadieron dos mejoras conservadoras: espera configurable
 `GEMINI_TIMEOUT_MS` (15000 por defecto; local 60000, rango 1000–120000) y
@@ -99,10 +97,11 @@ diagnósticos de fallo sin prompts/respuestas/credenciales. El identificador
 genérico opcional `target_id` se pide como `null`; los objetivos conservan
 sus enlaces tipados y todas las comprobaciones de negocio.
 
-**Pendiente:** una propuesta auténtica editada/aceptada y una segunda propuesta
-contextual con decisión de rechazo. Requiere disponibilidad del proveedor y
-autorización para ampliar el presupuesto. No se vuelve a crear el semestre ni
-a ejecutar los ensayos para retomarlo.
+**Pendiente real:** la propuesta contextual adicional y su decisión de rechazo
+no se generaron; el verificador conserva `ai-contextual` como pendiente. No
+realizar más llamadas con el presupuesto actual. Cualquier propuesta futura
+requiere nuevo presupuesto y autorización. No se vuelve a crear el semestre ni
+a ejecutar los ensayos para retomarla.
 
 ## Credenciales y estado privado
 
@@ -117,10 +116,9 @@ C:\Users\sarav\.local\state\cognova\demo\
 - `report.json`: métricas, límites y estado real; no contiene respuestas Gemini.
 - `prepare.lock`: bloqueo transitorio de proceso; no es un registro académico.
 
-`report.json` es una lectura generada por la última fase `verify`; tras cambios
-de reglas de Analytics, regenerarlo con las API disponibles antes de usar sus
-totales. El reporte anterior puede reflejar la regla histórica que contaba
-temporizadores cancelados dentro del estudio.
+`report.json` es una lectura generada por la última fase `verify`; fue actualizado
+tras aplicar la regla vigente de Analytics. Un reporte anterior puede reflejar la
+regla histórica que contaba temporizadores cancelados dentro del estudio.
 
 En Linux se usa `credentials.json` con modo `0600`, dentro de directorio `0700`.
 No se almacena una API Key en estas herramientas: Gemini solo la lee el Backend.
@@ -197,10 +195,12 @@ ambiguos, presupuesto, no repetición de temporizadores y recuperación.
 No se ejecutaron migraciones ni pruebas que necesiten crear esquemas en esta
 preparación. La corrección posterior de Analytics suma regresiones PostgreSQL
 que requieren ejecutar un servidor desechable. En la última revisión se
-aprobaron 462 pruebas unitarias Backend y 391 Frontend; las pruebas PostgreSQL
-no se ejecutaron porque el Docker Engine estaba desconectado. Tampoco se pudo
-volver a ejecutar la verificación autenticada del navegador mientras los
-servicios locales permanecieron apagados.
+aprobaron 462 pruebas unitarias Backend y 391 Frontend. Tras recuperar Docker se
+aprobaron **26 pruebas PostgreSQL** de Analytics/Gemini en un contenedor desechable.
+La base persistente de la demo no se usó como base de pruebas. La verificación
+autenticada posterior confirmó Analytics, sesión/temporizador, planes/retos,
+propuesta IA, refresh y logout/login; 0 errores de API/JavaScript y 0 llamadas
+Gemini desde el navegador. Solo `ai-contextual` queda pendiente.
 
 ## Verificación de navegador
 
@@ -222,10 +222,12 @@ cognova-frontend/.local/permanent-demo/*.png
 cognova-frontend/.local/permanent-demo/browser-report.json
 ```
 
-La ejecución pasó los módulos disponibles con cero errores de API/JavaScript.
-El informe marca `complete=false` y `pending_modules` para los dos planes IA,
-sin declarar una verificación que no ocurrió. Código de salida `2` significa
-preparación incompleta, no un fallo de login o pérdida de datos.
+La ejecución autenticada pasó Analytics general y por rango, conservación del
+intervalo cancelado, Plan IA, refresh y logout/login, con cero errores de
+API/JavaScript. El informe marca `complete=false` y `pending_modules` contiene
+solo `ai-contextual`; la propuesta inicial sí está persistida y aceptada. Código
+de salida `2` significa que falta esa fase contextual, no un fallo de login ni
+pérdida de datos.
 
 ## Guion breve recomendado (con las limitaciones explícitas)
 
@@ -237,10 +239,9 @@ preparación incompleta, no un fallo de login o pérdida de datos.
    aplazada y la futura preparada para el temporizador.
 5. Plan Fundamentos completado -> Ruta revisada activa; mostrar edición,
    dependencia y retos completados/fallidos/en progreso/pendientes.
-6. Analytics: mostrar los cinco ensayos, aclarar que las semanas previas no
-   contienen estudio retroactivo y señalar el intervalo técnico cancelado.
-7. Cuando Gemini vuelva a funcionar y se autoricen las llamadas pendientes:
-   revisar explicación/snapshot, editar y aceptar, luego comparar con una
-   nueva propuesta contextual y la decisión de rechazo. **Este paso no está
-   disponible todavía y no debe simularse.**
+6. Analytics: mostrar **14 min** estudiados y **12 h 41 min** cancelados/excluidos;
+   aclarar que las semanas previas no contienen estudio retroactivo.
+7. Propuesta IA auténtica: revisar explicación y snapshot de `gemini-3.5-flash-lite`,
+   edición y aceptación persistidas. La propuesta contextual y su rechazo siguen
+   pendientes; no deben simularse ni solicitarse sin nueva autorización.
 8. Recargar, cerrar sesión y volver a entrar para demostrar persistencia.
