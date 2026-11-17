@@ -87,7 +87,7 @@ def test_configured_model_is_used_and_persisted_for_generate_and_regenerate(
 @pytest.mark.parametrize(
     "failure",
     [
-        "missing", "type", "relationship", "truncated", "incomplete",
+        "missing", "type", "relationship", "target_relation", "truncated", "incomplete",
         "custom", "target_shape", "challenge_timezone", "evidence",
     ],
 )
@@ -119,6 +119,8 @@ def test_wire_validation_failure_has_no_partial_postgres_writes(
         invalid["subject_ids"] = [str(activity_data["subject_id"])]
     elif failure == "relationship":
         invalid["proposed_challenges"][0]["activity_id"] = 99999999
+    elif failure == "target_relation":
+        invalid["proposed_challenges"][0]["target_id"] = activity_data["subject_id"]
     elif failure == "custom":
         invalid["proposed_challenges"][0]["target_type"] = "custom"
     elif failure == "target_shape":

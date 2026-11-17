@@ -4,6 +4,8 @@ from pydantic import BaseModel
 class AnalyticsOverview(BaseModel):
     total_studied_seconds: str
     total_studied_minutes: str
+    cancelled_session_seconds: str
+    cancelled_session_minutes: str
     finished_sessions: int
     completed_sessions: int
     partial_sessions: int

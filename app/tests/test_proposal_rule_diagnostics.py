@@ -71,6 +71,8 @@ def reject_case(payload, context, case):
         challenge["target_id"] = 999
     elif case == "target_type":
         challenge["target_id"] = 101
+    elif case == "typed_target_contradiction":
+        challenge.update(target_id=101, activity_id=201)
     elif case == "duplicate_challenge":
         payload["proposed_challenges"] *= 2
     elif case == "unknown_subject":
@@ -147,6 +149,7 @@ CASES = [
     ("session_activity", "challenge_session_relation"),
     ("target_unrelated", "challenge_target_relation"),
     ("target_type", "challenge_target_type_id"),
+    ("typed_target_contradiction", "challenge_target_type_id"),
     ("duplicate_challenge", "unique_challenge"),
     ("unknown_subject", "known_subject"),
     ("invented_evidence", "catalog_evidence"),
@@ -192,6 +195,7 @@ def test_valid_proposal_logs_no_rejection(payload, context, caplog):
     ("target_type", "value", "target_id"),
     [
         ("activity_completion", {"status": "completed"}, 201),
+        ("activity_completion", {"status": "completed"}, None),
         ("study_minutes", {"minutes": 15}, 101),
         ("subject_mastery", {"criterion": "Practicar", "threshold": 80}, 101),
         ("session_completion", {"lifecycle": "finished"}, 301),

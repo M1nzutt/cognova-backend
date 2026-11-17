@@ -16,6 +16,9 @@ class AnalyticsStudyTimeResponse(BaseModel):
     granularity: Literal["day", "week", "month"]
     total_seconds: str
     total_minutes: str
+    cancelled_seconds: str
+    cancelled_minutes: str
+    cancelled_sessions_count: int
     sessions_count: int
     by_subject: list[AnalyticsStudyTimeSubject]
     buckets: list[AnalyticsStudyTimeBucket]

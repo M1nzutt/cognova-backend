@@ -30,6 +30,9 @@ parámetros de query son estrictos: campos desconocidos dan 422.
 actuales propios y devuelve:
 
 - `total_studied_seconds` y `total_studied_minutes`, decimales con seis posiciones;
+- `cancelled_session_seconds` y `cancelled_session_minutes`: duración de
+  temporizador asociada a sesiones canceladas, informada aparte y no sumada al
+  tiempo estudiado;
 - `finished_sessions`: lifecycle `finished`, incluidos los cuatro resultados;
 - `completed_sessions`, `partial_sessions`, `postponed_sessions` y
   `cancelled_sessions`, por resultado;
@@ -40,8 +43,11 @@ actuales propios y devuelve:
 
 `pending_activities` significa status exactamente `pending`. Las métricas de
 estado son snapshots actuales; no afirman cuándo cambió un estado. `total_studied`
-se obtiene de `study_sessions.actual_duration`; los intervalos abiertos no se
-suman hasta que Backend los cierre.
+se obtiene de `study_sessions.actual_duration` de sesiones cuyo resultado no es
+`cancelled`; el tiempo de sesiones canceladas se devuelve en sus campos separados.
+Los intervalos abiertos no se suman hasta que Backend los cierre. Sesiones activas
+sin resultado y sesiones `completed`, `partial` o `postponed` conservan el tiempo
+registrado; cancelar no borra ni modifica la duración histórica.
 
 ## Tiempo estudiado
 
@@ -59,9 +65,12 @@ Cada bucket devuelve límites ISO 8601 en la zona indicada, recortados al rango
 solicitado. Los segundos son tiempo transcurrido real entre instantes; días de
 cambio horario pueden durar 23 o 25 horas. Se consideran únicamente porciones
 cerradas de `study_session_intervals` que se superponen con `[from,to)`. Un
-intervalo que cruza el límite se recorta con precisión de microsegundos. Las
-sesiones se cuentan distintas por ID dentro del rango y por materia; una Sesión con
-varios intervalos cuenta una vez. Los buckets vacíos se devuelven con cero.
+intervalo que cruza el límite se recorta con precisión de microsegundos. Se excluyen
+de tiempo estudiado los intervalos de sesiones `cancelled`; su duración recortada
+se informa como `cancelled_seconds`, `cancelled_minutes` y
+`cancelled_sessions_count` del rango. `sessions_count`, distribución por materia y
+buckets usan solo tiempo estudiado elegible. Una sesión con varios intervalos
+cuenta una vez. Los buckets vacíos se devuelven con cero.
 
 Respuesta `200`:
 
@@ -73,6 +82,9 @@ Respuesta `200`:
   "granularity": "day",
   "total_seconds": "10800.000000",
   "total_minutes": "180.000000",
+  "cancelled_seconds": "0.000000",
+  "cancelled_minutes": "0.000000",
+  "cancelled_sessions_count": 0,
   "sessions_count": 3,
   "by_subject": [
     {"subject_id": 4, "name": "Física", "seconds": "7200.000000", "minutes": "120.000000", "sessions_count": 2}

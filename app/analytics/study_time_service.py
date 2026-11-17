@@ -9,6 +9,7 @@ from app.analytics.structures.study_range_insights import (
     StudyInterval,
     StudyRangeInsights,
 )
+from app.analytics.study_time_policy import is_cancelled_session
 from app.models.study_session import StudySession
 from app.models.study_session_interval import StudySessionInterval
 from app.models.subject import Subject
@@ -33,6 +34,7 @@ class AnalyticsStudyTimeService:
             select(
                 StudySessionInterval.session_id,
                 StudySession.subject_id,
+                StudySession.status,
                 StudySessionInterval.started_at,
                 StudySessionInterval.ended_at,
             )
@@ -44,6 +46,7 @@ class AnalyticsStudyTimeService:
                 StudySessionInterval.ended_at > start_utc,
             )
         ).all()
+        cancelled_rows = [row for row in rows if is_cancelled_session(row.status)]
         intervals = [
             StudyInterval(
                 session_id=row.session_id,
@@ -52,10 +55,26 @@ class AnalyticsStudyTimeService:
                 ended_at=row.ended_at,
             )
             for row in rows
+            if row.ended_at is not None and not is_cancelled_session(row.status)
+        ]
+        cancelled_intervals = [
+            StudyInterval(
+                session_id=row.session_id,
+                subject_id=row.subject_id,
+                started_at=row.started_at,
+                ended_at=row.ended_at,
+            )
+            for row in cancelled_rows
             if row.ended_at is not None
         ]
         insights = StudyRangeInsights(intervals)
         totals = insights.between(start_utc, end_utc)
+        cancelled_totals = StudyRangeInsights(cancelled_intervals).between(
+            start_utc, end_utc
+        )
+        cancelled_duration = sum(
+            item.duration_microseconds for item in cancelled_totals.values()
+        )
         subject_ids = [
             subject_id for subject_id, total in totals.items() if total.session_count
         ]
@@ -110,6 +129,11 @@ class AnalyticsStudyTimeService:
             granularity=filters.granularity,
             total_seconds=self._seconds(total_duration),
             total_minutes=self._minutes(total_duration),
+            cancelled_seconds=self._seconds(cancelled_duration),
+            cancelled_minutes=self._minutes(cancelled_duration),
+            cancelled_sessions_count=sum(
+                item.session_count for item in cancelled_totals.values()
+            ),
             sessions_count=sum(item.session_count for item in totals.values()),
             by_subject=by_subject,
             buckets=bucket_responses,

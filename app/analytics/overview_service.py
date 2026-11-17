@@ -4,6 +4,7 @@ from typing import cast
 from sqlalchemy import case, func, select, union
 from sqlalchemy.orm import Session
 
+from app.analytics.study_time_policy import included_in_study_time
 from app.models.activity import Activity
 from app.models.study_plans import StudyChallenge, StudyPlan
 from app.models.study_session import StudySession
@@ -19,7 +20,14 @@ class AnalyticsOverviewService:
     def get(self, user_id: int) -> AnalyticsOverview:
         total_duration = self._db.scalar(
             select(func.coalesce(func.sum(StudySession.actual_duration), 0)).where(
-                StudySession.user_id == user_id
+                StudySession.user_id == user_id,
+                included_in_study_time(),
+            )
+        )
+        cancelled_duration = self._db.scalar(
+            select(func.coalesce(func.sum(StudySession.actual_duration), 0)).where(
+                StudySession.user_id == user_id,
+                StudySession.status == "cancelled",
             )
         )
         session_counts = self._db.execute(
@@ -63,9 +71,14 @@ class AnalyticsOverviewService:
             select(func.count()).select_from(subjects)
         )
         seconds = Decimal(str(total_duration or 0)).quantize(Decimal("0.000001"))
+        cancelled_seconds = Decimal(str(cancelled_duration or 0)).quantize(
+            Decimal("0.000001")
+        )
         return AnalyticsOverview(
             total_studied_seconds=f"{seconds:.6f}",
             total_studied_minutes=f"{seconds / Decimal(60):.6f}",
+            cancelled_session_seconds=f"{cancelled_seconds:.6f}",
+            cancelled_session_minutes=f"{cancelled_seconds / Decimal(60):.6f}",
             finished_sessions=self._count(session_counts[0]),
             completed_sessions=self._count(session_counts[1]),
             partial_sessions=self._count(session_counts[2]),

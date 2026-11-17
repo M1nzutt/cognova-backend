@@ -63,13 +63,13 @@ de intervalo; no se recortaron ni eliminaron. Se creó el reemplazo mediante
 POST oficial, sin editar el plan activo, operación que sus reglas no permiten.
 
 Los cinco ensayos válidos suman **840,735370 segundos**, unos **14 minutos**.
-La implementación actual de Analytics también suma intervalos cerrados de
-sesiones canceladas: el total mostrado de **775,052632 minutos** incluye la
-interrupción técnica y **no representa estudio efectivo**. No se cambió el
-algoritmo de producción ni se ocultó el incidente para mejorar estadísticas.
+Analytics excluye las sesiones canceladas del tiempo estudiado y expone su
+duración por separado. Para esta cuenta debe mostrar aproximadamente **14 minutos
+de estudio** y **761 minutos de temporizador cancelado excluidos**. Todos los
+intervalos originales permanecen intactos; no se borraron ni acortaron datos.
 
-La guía de sustentación debe señalar esta diferencia. La sesión cancelada
-conserva el motivo en su detalle y el informe privado separa
+La sustentación debe señalar esta diferencia. La sesión cancelada conserva el
+motivo en su detalle y el informe privado separa
 `valid_rehearsal_seconds` de `recovery_incidents`.
 
 ## Gemini: registro y bloqueo actual
@@ -86,6 +86,12 @@ Se hicieron **tres solicitudes reales** para esta cuenta. Se agotó el presupues
 explícito de esta preparación. El verificador de navegador no consume Gemini.
 No se copiaron propuestas de otra cuenta ni se inventaron respuestas, explicaciones
 o snapshots.
+
+En la revisión posterior se autorizó condicionalmente un cuarto intento, solo
+después de aprobar también PostgreSQL. No se consumió ni se aumentó el presupuesto:
+el Docker Engine local no estuvo disponible, por lo que no fue posible ejecutar
+esas pruebas. No hacer otra llamada hasta repetir las regresiones PostgreSQL y
+obtener autorización vigente.
 
 Se añadieron dos mejoras conservadoras: espera configurable
 `GEMINI_TIMEOUT_MS` (15000 por defecto; local 60000, rango 1000–120000) y
@@ -179,12 +185,17 @@ credenciales de cada instalación son independientes.
 Se comprobó una repetición real: **cero escrituras académicas**, mismas huellas
 de recursos y mismo número de intentos Gemini.
 
-Las pruebas locales aprobaron **458 casos Backend (1 omitido)** y **390
+Las pruebas locales aprobaron **462 casos Backend (1 omitido)** y **391
 Frontend**, además de lint, tipos y build. Las pruebas nuevas cubren los
 contratos, fechas relativas, protección de credenciales, paginación, estados
 ambiguos, presupuesto, no repetición de temporizadores y recuperación.
 No se ejecutaron migraciones ni pruebas que necesiten crear esquemas en esta
-preparación.
+preparación. La corrección posterior de Analytics suma regresiones PostgreSQL
+que requieren ejecutar un servidor desechable. En la última revisión se
+aprobaron 462 pruebas unitarias Backend y 391 Frontend; las pruebas PostgreSQL
+no se ejecutaron porque el Docker Engine estaba desconectado. Tampoco se pudo
+volver a ejecutar la verificación autenticada del navegador mientras los
+servicios locales permanecieron apagados.
 
 ## Verificación de navegador
 

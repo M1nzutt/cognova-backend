@@ -33,6 +33,11 @@ construyó desde recursos propios; se rechazan claves inventadas. No se
 crean ni modifican Materias, Actividades o Sesiones. El Plan nace `ai/draft`;
 los Retos propuestos nacen `ai/pending` y solo dentro de ese Plan.
 
+`target_id` es nullable y genérico; si está presente debe corresponder al destino
+tipado (`subject_id`, `activity_id` o `session_id`) y al `target_type`. La
+instrucción al proveedor pide `target_id=null` para evitar duplicar enlaces; las
+relaciones tipadas siguen siendo obligatorias y se validan antes de persistir.
+
 Backend guarda en `study_plans.ai_proposal_snapshot` la propuesta visible vigente
 con `schema_version=1`, modelo, fecha de generación, explicación, resumen, Plan
 original y Retos propuestos. El detalle devuelve el snapshot y proyecta
@@ -84,6 +89,12 @@ Con al menos cinco, Gemini puede proponer hipótesis en forma de pregunta,
 validadas contra IDs propios y evidencia proporcionada. No se persisten
 inferencias como hechos. La salida no diagnostica ni atribuye causas
 psicológicas.
+
+En el contexto de Planes, `actual_minutes` expresa minutos: `actual_duration`
+persistido en Sesiones está en segundos y se divide por 60. Una Sesión cancelada
+aporta cero minutos de estudio; el tiempo de su temporizador se conserva en
+`cancelled_elapsed_minutes`, identificado como excluido, para no transformarlo
+en evidencia de estudio.
 
 ## Errores y límites
 

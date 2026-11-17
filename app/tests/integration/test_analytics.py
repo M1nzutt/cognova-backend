@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
@@ -113,6 +114,76 @@ def test_study_time_clips_intervals_buckets_and_counts_sessions(
     assert overview["finished_sessions"] == 0
     assert overview["pending_activities"] == 1
     assert overview["subjects_with_activity"] == 1
+
+
+def test_cancelled_timer_is_separate_from_studied_time_and_ai_evidence(
+    client, registration, monkeypatch, database
+):
+    from app.academic_intelligence.academic_context import AcademicContext
+    from app.services import study_session_service
+
+    user, headers, activity_data, _ = setup_activity(client, registration)
+    clock = {"now": datetime(2030, 1, 1, tzinfo=timezone.utc)}
+    monkeypatch.setattr(study_session_service, "utc_now", lambda: clock["now"])
+
+    cancelled = create_session(client, headers, activity_data["subject_id"])
+    cancelled_path = f"/api/v1/sessions/{cancelled['id']}"
+    assert client.post(cancelled_path + "/start", headers=headers).status_code == 200
+    clock["now"] += timedelta(seconds=45662, microseconds=422572)
+    result = client.post(
+        cancelled_path + "/finish",
+        headers=headers,
+        json={"status": "cancelled", "context": "interrupted"},
+    )
+    assert result.status_code == 200
+    assert result.json()["actual_duration"] == "45662.422572"
+
+    clock["now"] += timedelta(seconds=1)
+    partial = create_session(client, headers, activity_data["subject_id"])
+    partial_path = f"/api/v1/sessions/{partial['id']}"
+    assert client.post(partial_path + "/start", headers=headers).status_code == 200
+    clock["now"] += timedelta(seconds=840, microseconds=735370)
+    result = client.post(
+        partial_path + "/finish",
+        headers=headers,
+        json={"status": "partial", "context": "tired"},
+    )
+    assert result.status_code == 200
+    assert result.json()["actual_duration"] == "840.735370"
+
+    overview = get(client, headers, "overview").json()
+    assert overview["total_studied_seconds"] == "840.735370"
+    assert overview["cancelled_session_seconds"] == "45662.422572"
+    assert overview["cancelled_session_minutes"] == "761.040376"
+
+    ranged = get(
+        client,
+        headers,
+        "study-time",
+        **{
+            "from": "2030-01-01T00:00:00Z",
+            "to": "2030-01-03T00:00:00Z",
+            "timezone": "UTC",
+            "granularity": "day",
+        },
+    ).json()
+    assert ranged["total_seconds"] == "840.735370"
+    assert ranged["cancelled_seconds"] == "45662.422572"
+    assert ranged["cancelled_minutes"] == "761.040376"
+    assert ranged["cancelled_sessions_count"] == 1
+    assert ranged["sessions_count"] == 1
+    assert sum(float(bucket["seconds"]) for bucket in ranged["buckets"]) == 840.73537
+    assert ranged["by_subject"][0]["seconds"] == "840.735370"
+
+    with database.session() as db:
+        context = AcademicContext(db, user["user"]["id"])
+        evidence = json.loads(context.as_json())
+    evidence_by_id = {row["id"]: row for row in evidence["sessions"]}
+    assert evidence_by_id[cancelled["id"]]["actual_minutes"] == 0
+    assert evidence_by_id[cancelled["id"]]["cancelled_elapsed_minutes"] == (
+        45662.422572 / 60
+    )
+    assert evidence_by_id[partial["id"]]["actual_minutes"] == 840.73537 / 60
 
 
 def test_study_time_local_day_bucket_respects_dst_transition():

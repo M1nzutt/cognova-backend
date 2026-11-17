@@ -11,6 +11,13 @@ requieren onboarding. No se añade un endpoint adicional de archivo: `AcademicAr
 indexa las páginas históricas del timeline. No se crean tablas ni índices SQL.
 Contrato: `ANALYTICS_CONTRACT.md`.
 
+Tiempo de estudio excluye el resultado `cancelled`: el reloj registra tiempo
+transcurrido, pero una sesión cancelada no acredita estudio. Para preservar
+auditoría, el tiempo cancelado se expone aparte en overview y estudio por rango;
+no se borran ni recortan intervalos. Sesiones activas y otros resultados conservan
+su duración registrada. La elegibilidad de conteos de patrones IA sigue siendo
+más estricta (finalizada `completed`/`partial` positiva).
+
 La implementación read-only se integró a `main` con merge `11a1078719e3b0ca7722844886e3784ff05464d6`.
 Las cinco estructuras viven solo durante la solicitud; PostgreSQL conserva la fuente
 de verdad. El tiempo estudiado usa intervalos cerrados y el timeline expone solo

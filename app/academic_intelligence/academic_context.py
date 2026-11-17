@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import func, select
@@ -111,7 +112,15 @@ class AcademicContext:
             **{
                 f"session:{row.id}": (
                     f"Sesión {row.id}: {row.planned_duration} minutos planificados, "
-                    f"{float(row.actual_duration)} reales, resultado {row.status}, "
+                    f"{self._session_minutes(row)} minutos contabilizados "
+                    f"como estudio"
+                    + (
+                        f", {self._cancelled_minutes(row)} minutos de temporizador "
+                        "cancelado excluidos"
+                        if row.status == "cancelled"
+                        else ""
+                    )
+                    + f"; resultado {row.status}, "
                     f"{self.pause_counts.get(row.id, 0)} pausas."
                 )
                 for row in self.sessions
@@ -194,7 +203,8 @@ class AcademicContext:
                     "activity_id": row.activity_id,
                     "planned_start_at": row.planned_start_at.isoformat(),
                     "planned_minutes": row.planned_duration,
-                    "actual_minutes": float(row.actual_duration),
+                    "actual_minutes": self._session_minutes(row),
+                    "cancelled_elapsed_minutes": self._cancelled_minutes(row),
                     "lifecycle": row.execution_state,
                     "result": row.status,
                     "pause_count": self.pause_counts.get(row.id, 0),
@@ -242,3 +252,15 @@ class AcademicContext:
             "analysis_candidates": pending,
         }
         return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+    @staticmethod
+    def _session_minutes(row: StudySession) -> float:
+        if row.status == "cancelled":
+            return 0.0
+        return float(Decimal(row.actual_duration) / Decimal(60))
+
+    @staticmethod
+    def _cancelled_minutes(row: StudySession) -> float | None:
+        if row.status != "cancelled":
+            return None
+        return float(Decimal(row.actual_duration) / Decimal(60))
