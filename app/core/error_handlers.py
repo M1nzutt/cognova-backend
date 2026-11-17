@@ -50,5 +50,12 @@ async def internal_error_handler(request: Request, exc: Exception) -> JSONRespon
 
 async def domain_error_handler(request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, DomainError)
-    headers = {"Retry-After": "30"} if exc.code == "GEMINI_RATE_LIMIT" else None
+    if exc.code == "ACADEMIC_CHAT_LIMIT":
+        headers = {
+            "Retry-After": str(request.app.state.settings.auth_rate_window_seconds)
+        }
+    elif exc.code == "GEMINI_RATE_LIMIT":
+        headers = {"Retry-After": "30"}
+    else:
+        headers = None
     return error_response(exc.status_code, exc.code, exc.message, headers)

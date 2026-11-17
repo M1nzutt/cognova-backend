@@ -94,6 +94,24 @@ class DomainError(Exception):
             503,
             "La generación está ocupada. Intenta de nuevo en unos momentos.",
         ),
+        "ACADEMIC_CONVERSATION_NOT_FOUND": (404, "Conversación no encontrada."),
+        "ACADEMIC_CONVERSATION_LIMIT": (
+            409,
+            "Has alcanzado el límite de conversaciones. Retoma una existente.",
+        ),
+        "ACADEMIC_CONVERSATION_FULL": (
+            409,
+            "Esta conversación alcanzó su límite. Puedes iniciar otra.",
+        ),
+        "ACADEMIC_CHAT_UNAVAILABLE": (
+            503,
+            "El acompañante académico no está disponible ahora. Inténtalo más tarde.",
+        ),
+        "ACADEMIC_CHAT_LIMIT": (
+            429,
+            "Has enviado varios mensajes seguidos. "
+            "Espera un momento e inténtalo otra vez.",
+        ),
         "STUDY_CHALLENGE_STATE_CONFLICT": (
             409,
             "El Reto no permite esa acción en su estado actual.",

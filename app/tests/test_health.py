@@ -46,6 +46,8 @@ def test_readiness_requires_current_migration():
     session.scalars.return_value.all.return_value = ["0007_study_plans_and_challenges"]
     assert not ReadinessService(database).check()
     session.scalars.return_value.all.return_value = ["0008_ai_plan_proposal_snapshot"]
+    assert not ReadinessService(database).check()
+    session.scalars.return_value.all.return_value = ["0009_academic_companion_chat"]
     assert ReadinessService(database).check()
 
 

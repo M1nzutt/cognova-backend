@@ -16,6 +16,8 @@ def test_openapi_does_not_advertise_unimplemented_endpoints():
     assert set(response.json()["paths"]) == {
         "/api/v1/calendar",
         "/api/v1/analysis/behavior",
+        "/api/v1/academic-chat/conversations",
+        "/api/v1/academic-chat/conversations/{conversation_id}/messages",
         "/api/v1/analytics/overview",
         "/api/v1/analytics/study-time",
         "/api/v1/analytics/timeline",

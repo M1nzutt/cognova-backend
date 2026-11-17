@@ -174,20 +174,22 @@ Respuesta conceptual:
 - current_streak
 - best_streak
 
-## AI
+## Academic chat
 
-- POST `/ai/analyze`
-- GET `/ai/conversations`
-- POST `/ai/conversations`
-- GET `/ai/conversations/{id}/messages`
-- POST `/ai/conversations/{id}/messages`
+El chat escrito y su contexto, límites, persistencia y seguridad están definidos en
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md).
 
-Reglas:
-- IA real;
-- contexto académico;
-- evidencia desde backend;
-- rate limiting/cost controls;
-- manejo de proveedor no disponible.
+- GET `/academic-chat/conversations` — historial privado (máximo 50).
+- POST `/academic-chat/conversations` — crear una conversación vacía (201).
+- GET `/academic-chat/conversations/{id}/messages?before_id=&limit=` — historial
+  paginado (50 por defecto, máximo 100).
+- POST `/academic-chat/conversations/{id}/messages` — enviar `{ "content": "..." }`
+  y recibir el mensaje del estudiante, respuesta y conversación (201).
+
+Bearer, onboarding completo, ownership, no-store, límite de 4000 caracteres,
+rate limit persistente y errores seguros son obligatorios. La conversación ajena
+devuelve 404. El chat es solo lectura de contexto: no crea ni modifica materias,
+actividades, sesiones, planes o retos.
 
 ## Observations
 

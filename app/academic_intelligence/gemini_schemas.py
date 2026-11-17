@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ProposedChallenge(BaseModel):
@@ -59,3 +59,20 @@ class BehaviorProposal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     observations: list[BehaviorObservation] = Field(max_length=5)
+
+
+class AcademicChatReply(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    answer: str = Field(min_length=1, max_length=3000)
+    evidence_keys: list[str] = Field(max_length=8)
+
+    @field_validator("answer")
+    @classmethod
+    def clean_answer(cls, value: str) -> str:
+        answer = value.strip()
+        if not answer or any(
+            ord(character) < 32 and character not in "\t\n\r" for character in answer
+        ):
+            raise ValueError("Answer cannot be blank")
+        return answer

@@ -1,9 +1,9 @@
-# Generación de Planes y observaciones académicas — contrato Backend
+# Generación de Planes, observaciones y acompañamiento académico — contrato Backend
 
 Modelo configurable mediante `GEMINI_MODEL`, usando SDK oficial `google-genai`
 para Python. Sin variable se conserva `gemini-3.8-flash`; la opción validada
 para las pruebas locales de Planes es `gemini-3.5-flash-lite`.
-La rama Backend fija Database `0008_ai_plan_proposal_snapshot` en
+La rama Backend fija Database `0009_academic_companion_chat` en
 `tools/database-ref.json`; producción permanece suspendida en 0007. Solo Backend envía
 datos al proveedor. Todas las rutas exigen Bearer, onboarding completo y
 ownership; `Cache-Control: no-store`. La clave `GEMINI_API_KEY` vive únicamente
@@ -116,3 +116,35 @@ acceso a datos de otra cuenta ni saltarse estas reglas.
 El snapshot y los logs seguros usan el modelo seleccionado en esa instancia
 del proveedor, no una constante histórica. Cambiar `GEMINI_MODEL` afecta futuras
 operaciones; no reescribe propuestas ni decisiones existentes.
+
+## Acompañante académico escrito
+
+Rutas autenticadas bajo `GET/POST /api/v1/academic-chat/conversations`,
+`GET /api/v1/academic-chat/conversations/{id}/messages` y
+`POST /api/v1/academic-chat/conversations/{id}/messages`. Exigen onboarding
+completo; no reciben `user_id`. Una conversación pertenece a su creador y cada
+mensaje se vincula con una FK compuesta `(user_id, conversation_id)`. Un recurso
+ajeno se responde como 404. Lista hasta 50 conversaciones y páginas mensajes en
+orden cronológico (50 por defecto, máximo 100).
+
+El estudiante envía texto de 1–4000 caracteres; una cuenta puede tener 50
+conversaciones y una conversación, 200 mensajes. El límite compartido PostgreSQL
+protege las generaciones. Contexto acotado: últimas 12 intervenciones y 8000
+caracteres de historial, datos estructurados del `AcademicContext` existente y
+máximo 24000 bytes de entrada combinada. Gemini recibe como máximo 900 tokens de
+salida. La clave solo existe en Backend.
+
+El prompt trata como **datos no confiables** tanto los registros académicos como
+el mensaje e historial; contenido recuperado no puede alterar las instrucciones
+ni permitir acceso a otras cuentas. Solo admite las claves de `evidence_catalog`
+que Backend construyó para ese estudiante. Las referencias se resuelven y validan
+en Backend antes de guardar la respuesta; una clave inventada no se muestra.
+Hechos, hipótesis y sugerencias se distinguen cuando aplican; se prohíben
+diagnósticos, afirmaciones sin evidencia y modificaciones de recursos. Gemini no
+tiene herramientas ni estado remoto (`store=false`, sin continuación ni reintento).
+
+Los mensajes de estudiante y asistente se persisten. Un fallo del proveedor
+conserva el mensaje del estudiante para que el historial no lo pierda, pero no
+guarda una respuesta parcial o inválida. No hay endpoints de mutación académica
+en el chat. Los logs contienen solo request id, operación, modelo, duración y
+resultado general; nunca prompts, respuestas, historial ni claves.
