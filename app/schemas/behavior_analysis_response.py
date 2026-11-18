@@ -1,9 +1,40 @@
-from pydantic import BaseModel
+from typing import Literal
 
-from app.academic_intelligence.gemini_schemas import BehaviorObservation
+from pydantic import BaseModel, ConfigDict
+
+
+class BehaviorEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    session_id: int
+    planned_minutes: int
+    actual_seconds: str
+    result: Literal["completed", "partial"]
+    summary: str
+
+
+class RelatedResource(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["subject", "activity", "session"]
+    id: int
+    label: str
+    href: str
+
+
+class BehaviorObservation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    observation: str
+    interpretation: str
+    evidence: list[BehaviorEvidence]
+    question: str
+    confidence_basis: str
+    related_resources: list[RelatedResource]
 
 
 class BehaviorAnalysisResponse(BaseModel):
-    finished_session_count: int
-    pattern_eligible: bool
+    completed_session_count: int
+    reviewed_session_count: int
+    state: Literal["factual_summary", "insufficient_data"]
     observations: list[BehaviorObservation]

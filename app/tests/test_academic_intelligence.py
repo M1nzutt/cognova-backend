@@ -13,8 +13,6 @@ from app.academic_intelligence.decision_route import DecisionRoute
 from app.academic_intelligence.decision_trail import DecisionTrail
 from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.academic_intelligence.gemini_schemas import (
-    BehaviorObservation,
-    BehaviorProposal,
     PlanProposal,
     ProposedChallenge,
 )
@@ -24,7 +22,6 @@ from app.academic_intelligence.proposal_validation import validate_proposal
 from app.academic_intelligence.schedule_entry import ScheduleEntry
 from app.academic_intelligence.schedule_index import ScheduleIndex
 from app.core.domain_error import DomainError
-from app.services.behavior_analysis_service import BehaviorAnalysisService
 from app.study_plans.decision_entry import DecisionEntry
 
 
@@ -118,7 +115,7 @@ def test_gemini_provider_rejects_empty_invalid_and_transient_results(monkeypatch
 
     fake = SimpleNamespace(interactions=SimpleNamespace(create=throttled))
     with pytest.raises(DomainError) as exc:
-        GeminiProvider(None, client=fake).behavior("{}")
+        GeminiProvider(None, client=fake).plan("{}")
     assert exc.value.code == "GEMINI_RATE_LIMIT"
     assert len(calls) == 1
 
@@ -131,7 +128,7 @@ def test_gemini_provider_rejects_empty_invalid_and_transient_results(monkeypatch
 
         fake = SimpleNamespace(interactions=SimpleNamespace(create=unavailable))
         with pytest.raises(DomainError) as exc:
-            GeminiProvider(None, client=fake).behavior("{}")
+            GeminiProvider(None, client=fake).plan("{}")
         assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
         assert len(attempts) == 1
 
@@ -307,47 +304,6 @@ def test_proposal_validation_rejects_foreign_id_and_duplicate_id():
         validate_proposal(proposal, context)
     with pytest.raises(DomainError):
         validate_proposal(proposal.model_copy(update={"subject_ids": [1, 1]}), context)
-
-
-def test_behavior_rejects_diagnosis_and_unowned_evidence(monkeypatch):
-    context = SimpleNamespace(
-        finished_count=5,
-        subject_ids={1},
-        activity_ids=set(),
-        session_ids=set(),
-        evidence_catalog={"subject:1": "Materia propia registrada."},
-        as_json=lambda: "{}",
-    )
-    monkeypatch.setattr(
-        "app.services.behavior_analysis_service.AcademicContext",
-        lambda db, user_id: context,
-    )
-    db = SimpleNamespace(rollback=lambda: None)
-
-    def analyze(observation, evidence):
-        provider = SimpleNamespace(
-            behavior=lambda _: BehaviorProposal(
-                observations=[
-                    BehaviorObservation(
-                        observation=observation,
-                        evidence=evidence,
-                        question="¿Cómo interpretas esto?",
-                        confidence_basis="Cinco sesiones; muestra limitada.",
-                        related_subject_ids=[1],
-                        related_activity_ids=[],
-                        related_session_ids=[],
-                    )
-                ]
-            )
-        )
-        return BehaviorAnalysisService(db, provider).analyze(1)
-
-    with pytest.raises(DomainError):
-        analyze("Tienes un trastorno.", ["subject:1"])
-    with pytest.raises(DomainError):
-        analyze("Podría haber una diferencia.", ["subject:999"])
-    good = analyze("Podría haber una diferencia.", ["subject:1"])
-    assert good.observations[0].evidence == ["Materia propia registrada."]
 
 
 def test_contextual_challenge_requires_matching_target_and_owned_evidence():

@@ -9,8 +9,6 @@ from sqlalchemy import func, select
 from app.academic_intelligence.ai_plan_snapshot import AiPlanProposalSnapshot
 from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.academic_intelligence.gemini_schemas import (
-    BehaviorObservation,
-    BehaviorProposal,
     PlanProposal,
     ProposedChallenge,
 )
@@ -264,7 +262,7 @@ def test_generate_and_regenerate_are_atomic(
     assert client.get(BASE, headers=other_headers).json()["items"] == []
     isolated = client.post("/api/v1/analysis/behavior", headers=other_headers)
     assert isolated.status_code == 200
-    assert isolated.json()["finished_session_count"] == 0
+    assert isolated.json()["completed_session_count"] == 0
 
 
 def test_manual_edit_reject_and_legacy_ai_snapshot_are_safe(
@@ -472,53 +470,89 @@ def test_legacy_ai_plan_without_snapshot_regenerates_safely(
     )
 
 
-def test_behavior_threshold_zero_through_six(client, registration, monkeypatch):
-    _, headers, activity_data, _ = setup_activity(client, registration)
+def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
+    client, registration, monkeypatch
+):
+    _, headers, activity_data, activity = setup_activity(client, registration)
     zero = client.post("/api/v1/analysis/behavior", headers=headers)
-    assert zero.status_code == 200 and zero.json()["observations"] == []
-    assert zero.json()["pattern_eligible"] is False
+    assert zero.status_code == 200 and zero.json()["observations"] == [], zero.text
+    assert zero.json()["state"] == "insufficient_data"
     clock = {"now": datetime(2030, 1, 2, 12, tzinfo=timezone.utc)}
     monkeypatch.setattr(
         "app.services.study_session_service.utc_now", lambda: clock["now"]
     )
-    monkeypatch.setattr(
-        GeminiProvider,
-        "behavior",
-        lambda self, context: BehaviorProposal(
-            observations=[
-                BehaviorObservation(
-                    observation="Podría haber una diferencia entre plan y duración.",
-                    evidence=[f"subject:{activity_data['subject_id']}"],
-                    question="¿Cómo interpretas esa diferencia?",
-                    confidence_basis="Solo cinco sesiones; la muestra es limitada.",
-                    related_subject_ids=[activity_data["subject_id"]],
-                    related_activity_ids=[],
-                    related_session_ids=[],
-                )
-            ]
-        ),
-    )
-    for count in range(1, 7):
-        clock["now"] = datetime(2030, 1, count + 1, 12, tzinfo=timezone.utc)
+    session_ids = []
+    for count in range(5):
+        clock["now"] = datetime(2030, 1, count + 3, 12, tzinfo=timezone.utc)
         session = create_session(
             client,
             headers,
             activity_data["subject_id"],
+            activity_id=activity["id"],
             planned_start_at=clock["now"].isoformat(),
+            planned_duration=10,
         )
+        session_ids.append(session["id"])
         path = f"/api/v1/sessions/{session['id']}"
         assert client.post(path + "/start", headers=headers).status_code == 200
-        clock["now"] += timedelta(minutes=30)
+        clock["now"] += timedelta(seconds=60, milliseconds=140 if count == 0 else 0)
         finished = client.post(
-            path + "/finish", headers=headers, json={"status": "completed"}
+            path + "/finish",
+            headers=headers,
+            json={
+                "status": "completed" if count == 0 else "partial",
+                **({"context": "interrupted"} if count else {}),
+            },
         )
         assert finished.status_code == 200, finished.text
-        response = client.post("/api/v1/analysis/behavior", headers=headers)
-        assert response.status_code == 200, response.text
-        assert response.json()["finished_session_count"] == count
-        if count < 5:
-            assert response.json()["pattern_eligible"] is False
-            assert "patrón" not in response.json()["observations"][0]["observation"]
-        else:
-            assert response.json()["pattern_eligible"] is True
-            assert response.json()["observations"][0]["question"].endswith("?")
+    excluded = create_session(
+        client,
+        headers,
+        activity_data["subject_id"],
+        planned_start_at=clock["now"].isoformat(),
+        planned_duration=10,
+    )
+    assert (
+        client.post(
+            f"/api/v1/sessions/{excluded['id']}/finish",
+            headers=headers,
+            json={"status": "cancelled"},
+        ).status_code
+        == 200
+    )
+    pending = create_session(
+        client,
+        headers,
+        activity_data["subject_id"],
+        planned_start_at=clock["now"].isoformat(),
+        planned_duration=10,
+    )
+    response = client.post("/api/v1/analysis/behavior", headers=headers)
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["completed_session_count"] == 1
+    assert result["reviewed_session_count"] == 5
+    assert pending["execution_state"] == "planned"
+    assert result["state"] == "factual_summary"
+    observation = result["observations"][0]
+    assert observation["observation"] == (
+        "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+    )
+    assert "no explican la diferencia" in observation["interpretation"]
+    assert "no permiten concluir que sea un hábito" in observation["interpretation"]
+    assert observation["question"].endswith("?")
+    assert len(observation["evidence"]) == 5
+    assert {row["result"] for row in observation["evidence"]} == {
+        "completed",
+        "partial",
+    }
+    precision = next(
+        row for row in observation["evidence"] if row["session_id"] == session_ids[0]
+    )
+    assert precision["actual_seconds"] == "60.140000"
+    assert precision["planned_minutes"] == 10
+    resources = observation["related_resources"]
+    assert len([row for row in resources if row["kind"] == "subject"]) == 1
+    assert len([row for row in resources if row["kind"] == "activity"]) == 1
+    assert len([row for row in resources if row["kind"] == "session"]) == 5
+    assert all(row["label"] and row["href"].startswith("/app/") for row in resources)

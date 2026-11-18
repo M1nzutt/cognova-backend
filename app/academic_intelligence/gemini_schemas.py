@@ -43,24 +43,6 @@ class PlanProposal(BaseModel):
     reasoning_summary: str = Field(min_length=1, max_length=2000)
 
 
-class BehaviorObservation(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    observation: str = Field(min_length=1, max_length=1000)
-    evidence: list[str] = Field(min_length=1, max_length=5)
-    question: str = Field(min_length=1, max_length=500)
-    confidence_basis: str = Field(min_length=1, max_length=500)
-    related_subject_ids: list[int] = Field(max_length=20)
-    related_activity_ids: list[int] = Field(max_length=20)
-    related_session_ids: list[int] = Field(max_length=20)
-
-
-class BehaviorProposal(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    observations: list[BehaviorObservation] = Field(max_length=5)
-
-
 class AcademicChatReply(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
