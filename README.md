@@ -113,6 +113,11 @@ El adaptador exige SHA exacto y checkout limpio; `COGNOVA_DATABASE_PATH` permite
 seleccionar otra copia de tooling, siempre del mismo SHA. El CLI recibe el destino
 por entorno sin JWT y con search_path del esquema aislado. Las dependencias dev
 incluyen Alembic para tooling y comparación ORM; runtime y lock no lo incluyen.
+Si una prueba informa que el checkout no coincide, compara `git rev-parse HEAD` en
+la ruta predeterminada `.local/database-handoff` con el SHA de `tools/database-ref.json`.
+Una copia hermana correcta no se selecciona automáticamente: apunta a ella con
+`COGNOVA_DATABASE_PATH` y confirma que esté limpia y en ese mismo SHA. No cambies el
+pin ni adaptes el esquema para resolver una discrepancia de checkout.
 
 IA, seed y demás módulos de producto están fuera de la fase actual. El despliegue
 existente fue confirmado por el usuario; no se recrea durante la separación DB.

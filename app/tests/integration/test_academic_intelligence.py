@@ -539,7 +539,7 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
         "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
     )
     assert "no explican la diferencia" in observation["interpretation"]
-    assert "no permiten concluir que sea un hábito" in observation["interpretation"]
+    assert "ni permiten concluir que sea un hábito" in observation["interpretation"]
     assert observation["question"].endswith("?")
     assert len(observation["evidence"]) == 5
     assert {row["result"] for row in observation["evidence"]} == {
@@ -556,3 +556,12 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
     assert len([row for row in resources if row["kind"] == "activity"]) == 1
     assert len([row for row in resources if row["kind"] == "session"]) == 5
     assert all(row["label"] and row["href"].startswith("/app/") for row in resources)
+
+    other_registration = {**registration, "email": "other-behavior@example.com"}
+    _, other_headers, _, _ = setup_activity(client, other_registration)
+    isolated = client.post("/api/v1/analysis/behavior", headers=other_headers)
+    assert isolated.status_code == 200, isolated.text
+    assert isolated.json()["completed_session_count"] == 0
+    assert isolated.json()["reviewed_session_count"] == 0
+    assert isolated.json()["state"] == "insufficient_data"
+    assert isolated.json()["observations"] == []
