@@ -1,14 +1,21 @@
 # Cognova — Comportamiento de IA
 
-## Primera integración Backend (rama `feat/gemini-behavior`)
+## Observaciones de sesiones
 
-`POST /api/v1/analysis/behavior` cuenta Sesiones `finished` con resultado
-`completed`/`partial` y duración real positiva. Con 0–4 entrega solo hechos
-deterministas y una pregunta; no llama a Gemini ni afirma patrones. Desde cinco,
-la salida estructurada de Gemini contiene observación, evidencia, pregunta,
-base de confianza e IDs relacionados. Backend valida esos IDs contra la cuenta
-autenticada y rechaza contenido diagnóstico evidente. Las hipótesis se devuelven
-al usuario, sin guardarse como hechos.
+`POST /api/v1/analysis/behavior` aplica las mismas reglas a todos los usuarios.
+Compara sesiones `finished` con resultado `completed` o `partial` y duración real
+positiva; contabiliza por separado las completadas, parciales y canceladas. Las
+canceladas no se usan para comparar duración. La conclusión informa cuántas
+sesiones registraron menos tiempo que el planificado, sin inferir causas.
+
+La interpretación identifica su procedencia: `gemini` cuando Gemini devuelve
+contenido que supera las validaciones; `deterministic` cuando se aplican reglas
+locales sin solicitar Gemini; `fallback` cuando Gemini falla o su respuesta es
+rechazada. Las sugerencias proponen probar sesiones más breves y evaluar los
+resultados, sin especular sobre el origen de los registros ni sobre motivos.
+
+Backend valida la evidencia y los IDs relacionados contra la cuenta autenticada.
+Las interpretaciones no se guardan como hechos.
 
 El modelo de `GEMINI_MODEL` se invoca mediante `google-genai` oficial con JSON
 Schema y validación Pydantic. Sin variable se mantiene `gemini-3.8-flash`;
@@ -59,8 +66,7 @@ No debe inventar registros faltantes.
 
 ## Evidencia
 
-- mínimo 5 sesiones válidas antes de hablar de patrones;
-- indicar muestra cuando sea pequeña;
+- indicar la muestra y los límites de los datos;
 - usar cantidades/proporciones cuando sea posible;
 - distinguir dato descriptivo de interpretación;
 - no convertir correlación en causalidad;

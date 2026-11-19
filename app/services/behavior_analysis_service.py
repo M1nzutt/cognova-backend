@@ -27,7 +27,12 @@ class BehaviorAnalysisService:
     _CACHE_TTL_SECONDS = 1800
     _MAX_CACHE_ENTRIES = 256
     _CACHE: dict[
-        str, tuple[float, BehaviorInsight, Literal["gemini", "factual_fallback"]]
+        str,
+        tuple[
+            float,
+            BehaviorInsight,
+            Literal["gemini", "deterministic", "fallback"],
+        ],
     ] = {}
     _CACHE_LOCK = threading.Lock()
     _CACHE_CONDITION = threading.Condition(_CACHE_LOCK)
@@ -78,6 +83,31 @@ class BehaviorAnalysisService:
             )
             or 0
         )
+        partial_count = (
+            self._db.scalar(
+                select(func.count())
+                .select_from(StudySession)
+                .where(
+                    StudySession.user_id == user_id,
+                    StudySession.execution_state == "finished",
+                    StudySession.status == "partial",
+                    StudySession.actual_duration > 0,
+                )
+            )
+            or 0
+        )
+        cancelled_count = (
+            self._db.scalar(
+                select(func.count())
+                .select_from(StudySession)
+                .where(
+                    StudySession.user_id == user_id,
+                    StudySession.execution_state == "finished",
+                    StudySession.status == "cancelled",
+                )
+            )
+            or 0
+        )
         observed_rows = [
             row
             for row in context.sessions
@@ -89,6 +119,11 @@ class BehaviorAnalysisService:
         evidence = [self._evidence_item(row, context) for row in evidence_rows]
         observations = []
         if evidence:
+            shorter_count = sum(
+                Decimal(item.actual_seconds)
+                < Decimal(item.planned_minutes) * Decimal(60)
+                for item in evidence
+            )
             differences = sum(
                 abs(
                     Decimal(item.actual_seconds)
@@ -110,17 +145,21 @@ class BehaviorAnalysisService:
                 == common_actual
                 for item in evidence
             )
-            if differences and (common_count > 1 or len(evidence) == 1):
+            if shorter_count:
                 observation = (
-                    f"En {common_count} de {len(evidence)} registros se "
-                    f"registró cerca de {self._duration_label(common_actual)} "
-                    f"frente a {self._duration_label(common_planned)} "
-                    "planificados."
+                    f"En {shorter_count} de {len(evidence)} sesiones, el tiempo "
+                    "registrado fue menor que el planificado."
+                )
+            elif differences and (common_count > 1 or len(evidence) == 1):
+                observation = (
+                    f"En {common_count} de {len(evidence)} sesiones se registró "
+                    f"cerca de {self._duration_label(common_actual)} frente a "
+                    f"{self._duration_label(common_planned)} planificados."
                 )
             elif differences:
                 observation = (
-                    f"El tiempo real difiere del planificado en {differences} "
-                    f"de {len(evidence)} registros mostrados."
+                    f"El tiempo registrado difiere del planificado en {differences} "
+                    f"de {len(evidence)} sesiones mostradas."
                 )
             else:
                 observation = (
@@ -141,7 +180,7 @@ class BehaviorAnalysisService:
                         "qué ocurrió ni bastan para concluir que sea un patrón estable."
                     ),
                     suggestion="",
-                    interpretation_source="factual_fallback",
+                    interpretation_source="deterministic",
                     evidence=evidence,
                     question=(
                         "¿Qué contexto ayudaría a entender la diferencia entre "
@@ -170,6 +209,8 @@ class BehaviorAnalysisService:
             item.interpretation_source = source
         return BehaviorAnalysisResponse(
             completed_session_count=completed_count,
+            partial_session_count=partial_count,
+            cancelled_session_count=cancelled_count,
             reviewed_session_count=reviewed_count,
             state="factual_summary" if observations else "insufficient_data",
             insufficient_data_guidance=(
@@ -187,20 +228,19 @@ class BehaviorAnalysisService:
         differences: int,
         reviewed_count: int,
         on_gemini_request: Callable[[], None] | None,
-    ) -> tuple[BehaviorInsight, Literal["gemini", "factual_fallback"]]:
+    ) -> tuple[BehaviorInsight, Literal["gemini", "deterministic", "fallback"]]:
         fallback = BehaviorInsight(
             interpretation=(
                 "La diferencia puede ser relevante para valorar si la duración "
                 "planificada representa bien el tiempo disponible para estudiar."
             ),
             suggestion=(
-                "Si fueron sesiones de estudio reales, podrías probar un bloque "
-                "inicial más breve y comparar después el tiempo previsto con el "
-                "que te resulta viable."
+                "Podrías probar sesiones más breves y comparar los próximos "
+                "registros para evaluar qué duración te resulta viable."
             ),
         )
         if not self._insight_generator or len(evidence) < 3 or not differences:
-            return fallback, "factual_fallback"
+            return fallback, "deterministic"
         fingerprint = hashlib.sha256(
             json.dumps(
                 [
@@ -234,7 +274,7 @@ class BehaviorAnalysisService:
             self._CACHE.pop(fingerprint, None)
             self._CACHE_INFLIGHT.add(fingerprint)
         result: BehaviorInsight
-        source: Literal["gemini", "factual_fallback"]
+        source: Literal["gemini", "deterministic", "fallback"]
         try:
             if on_gemini_request:
                 on_gemini_request()
@@ -259,15 +299,18 @@ class BehaviorAnalysisService:
             if (
                 self._UNSAFE_TERMS.search(generated.interpretation)
                 or self._UNSAFE_TERMS.search(generated.suggestion)
-                or not generated.suggestion.casefold().startswith(
-                    "si fueron sesiones de estudio reales,"
+                or re.search(
+                    r"\b(si fueron|si estabas probando|datos artificiales|"
+                    r"sesiones de prueba|temporizador de prueba)\b",
+                    generated.interpretation + " " + generated.suggestion,
+                    re.IGNORECASE,
                 )
                 or re.search(r"\d", generated.interpretation + generated.suggestion)
             ):
                 raise ValueError("Generated behavior insight failed safety checks")
             result, source = generated, "gemini"
         except Exception:
-            result, source = fallback, "factual_fallback"
+            result, source = fallback, "fallback"
         with self._CACHE_CONDITION:
             try:
                 expired = [key for key, value in self._CACHE.items() if value[0] <= now]

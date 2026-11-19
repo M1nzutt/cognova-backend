@@ -140,8 +140,9 @@ class GeminiProvider:
             "ejecución podría ser útil para ajustar el tamaño de bloques de estudio; "
             "no afirmes hechos adicionales, causas, motivos, emociones, diagnósticos, "
             "disciplina, motivación, constancia ni hábitos. La sugerencia debe "
-            "comenzar exactamente con «Si fueron sesiones de estudio reales,» y "
-            "proponer una acción pequeña y opcional; no des por hecho que lo fueron. "
+            "proponer una acción pequeña y opcional para ajustar futuras sesiones "
+            "y evaluar los resultados; trata todos los registros de forma uniforme "
+            "y no especules sobre si son pruebas o datos artificiales. "
             "No incluyas números, afirmaciones sobre la persona ni información no "
             "contenida en los registros."
         )

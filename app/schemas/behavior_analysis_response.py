@@ -30,7 +30,7 @@ class BehaviorObservation(BaseModel):
     interpretation: str
     uncertainty: str
     suggestion: str
-    interpretation_source: Literal["gemini", "factual_fallback"]
+    interpretation_source: Literal["gemini", "deterministic", "fallback"]
     evidence: list[BehaviorEvidence]
     question: str
     confidence_basis: str
@@ -39,6 +39,8 @@ class BehaviorObservation(BaseModel):
 
 class BehaviorAnalysisResponse(BaseModel):
     completed_session_count: int
+    partial_session_count: int
+    cancelled_session_count: int
     reviewed_session_count: int
     state: Literal["factual_summary", "insufficient_data"]
     insufficient_data_guidance: str

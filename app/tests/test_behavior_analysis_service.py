@@ -33,14 +33,33 @@ def analyze(monkeypatch, rows, *, completed=1, reviewed=5):
         "app.services.behavior_analysis_service.AcademicContext",
         lambda _db, _user_id: context(rows),
     )
-    db = SimpleNamespace(scalar=Mock(side_effect=[completed, reviewed]))
+    partial = sum(
+        row.execution_state == "finished"
+        and row.status == "partial"
+        and row.actual_duration > 0
+        for row in rows
+    )
+    cancelled = sum(
+        row.execution_state == "finished" and row.status == "cancelled"
+        for row in rows
+    )
+    db = SimpleNamespace(
+        scalar=Mock(side_effect=[completed, reviewed, partial, cancelled])
+    )
     return BehaviorAnalysisService(db).analyze(99)
 
 
 def test_five_short_session_records_are_described_without_claiming_a_habit(monkeypatch):
     rows = [
         session(1, "completed"),
-        *(session(identifier, "partial") for identifier in range(2, 6)),
+        *(
+            session(
+                identifier,
+                "partial",
+                actual="600" if identifier == 5 else "60.140789",
+            )
+            for identifier in range(2, 6)
+        ),
     ]
 
     response = analyze(monkeypatch, rows)
@@ -50,13 +69,13 @@ def test_five_short_session_records_are_described_without_claiming_a_habit(monke
     assert response.state == "factual_summary"
     observation = response.observations[0]
     assert observation.observation == (
-        "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+        "En 4 de 5 sesiones, el tiempo registrado fue menor que el planificado."
     )
     assert observation.conclusion == observation.observation
     assert "puede ser relevante" in observation.interpretation
     assert "no indican por qué ocurrió" in observation.uncertainty
-    assert observation.suggestion.startswith("Si fueron sesiones de estudio reales,")
-    assert observation.interpretation_source == "factual_fallback"
+    assert "sesiones más breves" in observation.suggestion
+    assert observation.interpretation_source == "deterministic"
     assert "¿" == observation.question[0]
     assert observation.evidence[0].planned_minutes == 10
     assert observation.evidence[0].actual_seconds == "60.140789"
@@ -83,6 +102,8 @@ def test_partial_cancelled_and_incomplete_sessions_are_not_counted_as_completed(
     response = analyze(monkeypatch, rows, completed=0, reviewed=1)
 
     assert response.completed_session_count == 0
+    assert response.partial_session_count == 1
+    assert response.cancelled_session_count == 1
     assert response.reviewed_session_count == 1
     assert response.observations[0].evidence[0].result == "partial"
 
@@ -98,7 +119,7 @@ def test_subsecond_timer_variation_does_not_mark_a_planned_ten_minutes_as_differ
     response = analyze(monkeypatch, rows)
 
     assert response.observations[0].observation == (
-        "En 4 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+        "En 4 de 5 sesiones, el tiempo registrado fue menor que el planificado."
     )
     assert response.observations[0].evidence[-1].actual_seconds == "600.232317"
 
@@ -133,8 +154,8 @@ def test_grounded_gemini_insight_and_cached_result(monkeypatch):
                 "bloques previstos."
             ),
             suggestion=(
-                "Si fueron sesiones de estudio reales, podrías probar un bloque "
-                "más breve y revisar si se ajusta mejor."
+                "Podrías probar sesiones más breves y revisar los próximos "
+                "registros para evaluar qué duración resulta viable."
             ),
         )
     )
@@ -142,16 +163,14 @@ def test_grounded_gemini_insight_and_cached_result(monkeypatch):
         "app.services.behavior_analysis_service.AcademicContext",
         lambda _db, _user_id: context(rows),
     )
-    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5, 1, 5]))
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5, 4, 0, 1, 5, 4, 0]))
     service = BehaviorAnalysisService(db, generator)
 
     first = service.analyze(93001)
     second = service.analyze(93001)
 
     assert first.observations[0].interpretation_source == "gemini"
-    assert first.observations[0].suggestion.startswith(
-        "Si fueron sesiones de estudio reales,"
-    )
+    assert "sesiones más breves" in first.observations[0].suggestion
     assert second.observations[0].interpretation == first.observations[0].interpretation
     generator.assert_called_once()
 
@@ -166,17 +185,17 @@ def test_gemini_failure_uses_factual_conclusion_and_safe_suggestion(monkeypatch)
         "app.services.behavior_analysis_service.AcademicContext",
         lambda _db, _user_id: context(rows),
     )
-    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5]))
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5, 4, 0]))
 
     response = BehaviorAnalysisService(db, generator).analyze(93002)
 
     observation = response.observations[0]
     assert observation.conclusion == (
-        "En 4 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+        "En 4 de 5 sesiones, el tiempo registrado fue menor que el planificado."
     )
-    assert observation.interpretation_source == "factual_fallback"
+    assert observation.interpretation_source == "fallback"
     assert observation.uncertainty
-    assert observation.suggestion.startswith("Si fueron sesiones de estudio reales,")
+    assert "sesiones más breves" in observation.suggestion
 
 
 def test_insufficient_evidence_does_not_call_gemini(monkeypatch):
@@ -186,11 +205,11 @@ def test_insufficient_evidence_does_not_call_gemini(monkeypatch):
         "app.services.behavior_analysis_service.AcademicContext",
         lambda _db, _user_id: context(rows),
     )
-    db = SimpleNamespace(scalar=Mock(side_effect=[0, 1]))
+    db = SimpleNamespace(scalar=Mock(side_effect=[0, 1, 1, 0]))
 
     response = BehaviorAnalysisService(db, generator).analyze(93003)
 
-    assert response.observations[0].interpretation_source == "factual_fallback"
+    assert response.observations[0].interpretation_source == "deterministic"
     generator.assert_not_called()
 
 
@@ -205,7 +224,7 @@ def test_unsafe_or_unsupported_gemini_claims_are_replaced_with_factual_guidance(
         return_value=BehaviorInsight(
             interpretation="La motivación explica que hayas terminado antes.",
             suggestion=(
-                "Si fueron sesiones de estudio reales, intenta estudiar 25 minutos."
+                "Si estabas probando el temporizador, intenta estudiar 25 minutos."
             ),
         )
     )
@@ -213,11 +232,11 @@ def test_unsafe_or_unsupported_gemini_claims_are_replaced_with_factual_guidance(
         "app.services.behavior_analysis_service.AcademicContext",
         lambda _db, _user_id: context(rows),
     )
-    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5]))
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5, 4, 0]))
 
     response = BehaviorAnalysisService(db, generator).analyze(93004)
 
     observation = response.observations[0]
-    assert observation.interpretation_source == "factual_fallback"
+    assert observation.interpretation_source == "fallback"
     assert "motivación" not in observation.interpretation
     assert "25 minutos" not in observation.suggestion

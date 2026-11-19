@@ -68,27 +68,44 @@ Sin body. Respuesta de solo lectura:
 
 ```json
 {
-  "finished_session_count": 5,
-  "pattern_eligible": true,
+  "completed_session_count": 3,
+  "partial_session_count": 1,
+  "cancelled_session_count": 1,
+  "reviewed_session_count": 4,
+  "state": "factual_summary",
+  "insufficient_data_guidance": "Aún faltan registros para comparar.",
   "observations": [{
-    "observation": "Descripción o hipótesis, expresada con cautela.",
-    "evidence": ["Hecho verificable con cantidad y contexto."],
-    "question": "¿Cómo interpretas esta diferencia?",
-    "confidence_basis": "Muestra y límites de la evidencia.",
-    "related_subject_ids": [],
-    "related_activity_ids": [],
-    "related_session_ids": []
+    "conclusion": "En 3 de 4 sesiones, el tiempo registrado fue menor que el planificado.",
+    "observation": "En 3 de 4 sesiones, el tiempo registrado fue menor que el planificado.",
+    "interpretation": "Una comparación puede ayudar a ajustar la duración prevista.",
+    "uncertainty": "Los registros no indican por qué ocurrió.",
+    "suggestion": "Podrías probar sesiones más breves y evaluar los próximos resultados.",
+    "interpretation_source": "deterministic",
+    "evidence": [{
+      "session_id": 1,
+      "planned_minutes": 25,
+      "actual_seconds": "600",
+      "result": "completed",
+      "summary": "Biología: 25 min planificados"
+    }],
+    "question": "¿Qué contexto ayudaría a entender esta diferencia?",
+    "confidence_basis": "La muestra incluye sesiones completadas y parciales.",
+    "related_resources": [{
+      "kind": "session",
+      "id": 1,
+      "label": "Biología · 01/01 12:00",
+      "href": "/app/sessions/1"
+    }]
   }]
 }
 ```
 
-Cuenta solo Sesiones `finished` con resultado `completed` o `partial` y
-duración real positiva para el umbral de cinco. Con 0–4, Backend devuelve
-hechos deterministas y preguntas sin afirmar patrones ni llamar al modelo.
-Con al menos cinco, Gemini puede proponer hipótesis en forma de pregunta,
-validadas contra IDs propios y evidencia proporcionada. No se persisten
-inferencias como hechos. La salida no diagnostica ni atribuye causas
-psicológicas.
+Cuenta por separado sesiones completadas, parciales y canceladas. Solo compara
+duración de sesiones finalizadas `completed` o `partial` con duración real
+positiva; las canceladas no se incluyen en la comparación. La interpretación
+marca si fue `gemini`, `deterministic` o `fallback`; las respuestas de Gemini
+se validan y no se persisten como hechos. No se inventan causas ni se hacen
+excepciones por cuenta.
 
 En el contexto de Planes, `actual_minutes` expresa minutos: `actual_duration`
 persistido en Sesiones está en segundos y se divide por 60. Una Sesión cancelada
@@ -105,7 +122,9 @@ en evidencia de estudio.
 - 503 `STUDY_PLAN_GENERATION_UNAVAILABLE`: falta de clave, timeout, 500/503,
   respuesta vacía, JSON o esquema inválido, o salida insegura del modelo.
 - El proveedor usa timeout sin reintentos automáticos ni continuación:
-  una operación solicita una sola generación. No hay fallback.
+  una operación solicita una sola generación. Para Observaciones, las reglas
+  locales producen una interpretación `deterministic`; si Gemini falla o una
+  respuesta no supera las validaciones, se usa una interpretación `fallback`.
 - Las operaciones registran request id, nombre, duración, modelo y resultado
   general. Nunca prompts completos, datos académicos crudos, tokens ni clave.
 

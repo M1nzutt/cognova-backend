@@ -218,7 +218,7 @@ def test_behavior_insight_uses_structured_gemini_without_storing_context():
     insight = BehaviorInsight(
         interpretation="Comparar los tiempos puede orientar el tamaño del bloque.",
         suggestion=(
-            "Si fueron sesiones de estudio reales, podrías probar un bloque más breve."
+            "Podrías probar sesiones más breves y evaluar los resultados registrados."
         ),
     )
     calls = []
@@ -236,6 +236,10 @@ def test_behavior_insight_uses_structured_gemini_without_storing_context():
     assert calls[0]["generation_config"]["max_output_tokens"] == 900
     assert calls[0]["store"] is False
     assert "no afirmes hechos adicionales" in calls[0]["system_instruction"]
+    assert (
+        "no especules sobre si son pruebas o datos artificiales"
+        in calls[0]["system_instruction"]
+    )
 
 
 def test_gemini_client_uses_explicit_retry_budget(monkeypatch):

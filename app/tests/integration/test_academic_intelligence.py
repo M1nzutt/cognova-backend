@@ -499,7 +499,10 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
         session_ids.append(session["id"])
         path = f"/api/v1/sessions/{session['id']}"
         assert client.post(path + "/start", headers=headers).status_code == 200
-        clock["now"] += timedelta(seconds=60, milliseconds=140 if count == 0 else 0)
+        clock["now"] += timedelta(
+            seconds=60 if count < 4 else 600,
+            milliseconds=140 if count == 0 else 0,
+        )
         finished = client.post(
             path + "/finish",
             headers=headers,
@@ -535,17 +538,19 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
     assert response.status_code == 200, response.text
     result = response.json()
     assert result["completed_session_count"] == 1
+    assert result["partial_session_count"] == 4
+    assert result["cancelled_session_count"] == 1
     assert result["reviewed_session_count"] == 5
     assert pending["execution_state"] == "planned"
     assert result["state"] == "factual_summary"
     observation = result["observations"][0]
     assert observation["observation"] == (
-        "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+        "En 4 de 5 sesiones, el tiempo registrado fue menor que el planificado."
     )
     assert observation["conclusion"] == observation["observation"]
     assert "Los registros muestran la diferencia" in observation["uncertainty"]
-    assert observation["suggestion"].startswith("Si fueron sesiones de estudio reales,")
-    assert observation["interpretation_source"] == "factual_fallback"
+    assert "sesiones más breves" in observation["suggestion"]
+    assert observation["interpretation_source"] == "fallback"
     assert observation["question"].endswith("?")
     assert len(observation["evidence"]) == 5
     assert {row["result"] for row in observation["evidence"]} == {
@@ -568,6 +573,8 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
     isolated = client.post("/api/v1/analysis/behavior", headers=other_headers)
     assert isolated.status_code == 200, isolated.text
     assert isolated.json()["completed_session_count"] == 0
+    assert isolated.json()["partial_session_count"] == 0
+    assert isolated.json()["cancelled_session_count"] == 0
     assert isolated.json()["reviewed_session_count"] == 0
     assert isolated.json()["state"] == "insufficient_data"
     assert isolated.json()["observations"] == []
