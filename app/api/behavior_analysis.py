@@ -1,8 +1,10 @@
+import os
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.api.onboarding_dependencies import get_onboarded_user
 from app.database.dependencies import get_session
 from app.models.user import User
@@ -21,5 +23,20 @@ router = APIRouter(
 def analyze_behavior(
     user: Annotated[User, Depends(get_onboarded_user)],
     db: Annotated[Session, Depends(get_session)],
+    request: Request,
 ) -> BehaviorAnalysisResponse:
-    return BehaviorAnalysisService(db).analyze(user.id)
+    provider = GeminiProvider(
+        os.environ.get("GEMINI_API_KEY"),
+        request_id=getattr(request.state, "request_id", None),
+        model=request.app.state.settings.gemini_model,
+        timeout_ms=request.app.state.settings.gemini_timeout_ms,
+    )
+
+    def check_rate_limit() -> None:
+        limiter = request.app.state.rate_limiter
+        if limiter:
+            limiter.check("gemini-behavior-insight", str(user.id))
+
+    return BehaviorAnalysisService(db, provider.behavior_insight).analyze(
+        user.id, on_gemini_request=check_rate_limit
+    )

@@ -58,3 +58,18 @@ class AcademicChatReply(BaseModel):
         ):
             raise ValueError("Answer cannot be blank")
         return answer
+
+
+class BehaviorInsight(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    interpretation: str = Field(min_length=1, max_length=500)
+    suggestion: str = Field(min_length=1, max_length=500)
+
+    @field_validator("interpretation", "suggestion")
+    @classmethod
+    def clean_behavior_text(cls, value: str) -> str:
+        text = value.strip()
+        if not text or any(ord(character) < 32 for character in text):
+            raise ValueError("Behavior insight cannot be blank or contain controls")
+        return text

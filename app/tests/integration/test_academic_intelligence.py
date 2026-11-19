@@ -473,6 +473,10 @@ def test_legacy_ai_plan_without_snapshot_regenerates_safely(
 def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
     client, registration, monkeypatch
 ):
+    monkeypatch.setattr(
+        "app.api.behavior_analysis.GeminiProvider.behavior_insight",
+        lambda self, context: (_ for _ in ()).throw(RuntimeError("offline in test")),
+    )
     _, headers, activity_data, activity = setup_activity(client, registration)
     zero = client.post("/api/v1/analysis/behavior", headers=headers)
     assert zero.status_code == 200 and zero.json()["observations"] == [], zero.text
@@ -538,8 +542,10 @@ def test_behavior_summary_uses_facts_and_excludes_partial_from_completed_count(
     assert observation["observation"] == (
         "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
     )
-    assert "no explican la diferencia" in observation["interpretation"]
-    assert "ni permiten concluir que sea un hábito" in observation["interpretation"]
+    assert observation["conclusion"] == observation["observation"]
+    assert "Los registros muestran la diferencia" in observation["uncertainty"]
+    assert observation["suggestion"].startswith("Si fueron sesiones de estudio reales,")
+    assert observation["interpretation_source"] == "factual_fallback"
     assert observation["question"].endswith("?")
     assert len(observation["evidence"]) == 5
     assert {row["result"] for row in observation["evidence"]} == {

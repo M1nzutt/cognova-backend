@@ -1,10 +1,18 @@
+import hashlib
+import json
+import re
+import threading
+import time
 from collections import Counter
+from collections.abc import Callable
 from decimal import Decimal
+from typing import Literal
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.academic_intelligence.academic_context import AcademicContext
+from app.academic_intelligence.gemini_schemas import BehaviorInsight
 from app.models.study_session import StudySession
 from app.schemas.behavior_analysis_response import (
     BehaviorAnalysisResponse,
@@ -16,11 +24,33 @@ from app.schemas.behavior_analysis_response import (
 
 class BehaviorAnalysisService:
     _MAX_EVIDENCE = 10
+    _CACHE_TTL_SECONDS = 1800
+    _MAX_CACHE_ENTRIES = 256
+    _CACHE: dict[
+        str, tuple[float, BehaviorInsight, Literal["gemini", "factual_fallback"]]
+    ] = {}
+    _CACHE_LOCK = threading.Lock()
+    _CACHE_CONDITION = threading.Condition(_CACHE_LOCK)
+    _CACHE_INFLIGHT: set[str] = set()
+    _UNSAFE_TERMS = re.compile(
+        r"\b(disciplina|motivaci[oó]n|constancia|pereza|procrastinaci[oó]n|"
+        r"diagn[oó]stic\w*|h[aá]bito\w*)\b",
+        re.IGNORECASE,
+    )
 
-    def __init__(self, db: Session) -> None:
+    def __init__(
+        self,
+        db: Session,
+        insight_generator: Callable[[str], BehaviorInsight] | None = None,
+    ) -> None:
         self._db = db
+        self._insight_generator = insight_generator
 
-    def analyze(self, user_id: int) -> BehaviorAnalysisResponse:
+    def analyze(
+        self,
+        user_id: int,
+        on_gemini_request: Callable[[], None] | None = None,
+    ) -> BehaviorAnalysisResponse:
         context = AcademicContext(self._db, user_id)
         completed_count = (
             self._db.scalar(
@@ -103,12 +133,15 @@ class BehaviorAnalysisService:
                 )
             observations.append(
                 BehaviorObservation(
+                    conclusion=observation,
                     observation=observation,
-                    interpretation=(
-                        "Estos datos describen solo las sesiones registradas; "
-                        "no explican la diferencia ni permiten concluir que sea "
-                        "un hábito."
+                    interpretation="",
+                    uncertainty=(
+                        "Los registros muestran la diferencia, pero no indican por "
+                        "qué ocurrió ni bastan para concluir que sea un patrón estable."
                     ),
+                    suggestion="",
+                    interpretation_source="factual_fallback",
                     evidence=evidence,
                     question=(
                         "¿Qué contexto ayudaría a entender la diferencia entre "
@@ -124,12 +157,133 @@ class BehaviorAnalysisService:
                     related_resources=self._related_resources(evidence_rows, context),
                 )
             )
+            insight, source = self._insight(
+                user_id,
+                evidence,
+                differences,
+                reviewed_count,
+                on_gemini_request,
+            )
+            item = observations[0]
+            item.interpretation = insight.interpretation
+            item.suggestion = insight.suggestion
+            item.interpretation_source = source
         return BehaviorAnalysisResponse(
             completed_session_count=completed_count,
             reviewed_session_count=reviewed_count,
             state="factual_summary" if observations else "insufficient_data",
+            insufficient_data_guidance=(
+                "Aún faltan sesiones finalizadas con duración registrada para "
+                "comparar el tiempo planificado con el real. Las sesiones "
+                "planificadas, incompletas y canceladas no permiten esa comparación."
+            ),
             observations=observations,
         )
+
+    def _insight(
+        self,
+        user_id: int,
+        evidence: list[BehaviorEvidence],
+        differences: int,
+        reviewed_count: int,
+        on_gemini_request: Callable[[], None] | None,
+    ) -> tuple[BehaviorInsight, Literal["gemini", "factual_fallback"]]:
+        fallback = BehaviorInsight(
+            interpretation=(
+                "La diferencia puede ser relevante para valorar si la duración "
+                "planificada representa bien el tiempo disponible para estudiar."
+            ),
+            suggestion=(
+                "Si fueron sesiones de estudio reales, podrías probar un bloque "
+                "inicial más breve y comparar después el tiempo previsto con el "
+                "que te resulta viable."
+            ),
+        )
+        if not self._insight_generator or len(evidence) < 3 or not differences:
+            return fallback, "factual_fallback"
+        fingerprint = hashlib.sha256(
+            json.dumps(
+                [
+                    user_id,
+                    reviewed_count,
+                    [
+                        [
+                            row.session_id,
+                            row.planned_minutes,
+                            row.actual_seconds,
+                            row.result,
+                            row.summary,
+                        ]
+                        for row in evidence
+                    ],
+                ],
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode()
+        ).hexdigest()
+        now = time.monotonic()
+        with self._CACHE_CONDITION:
+            while fingerprint in self._CACHE_INFLIGHT:
+                self._CACHE_CONDITION.wait(timeout=20)
+                cached = self._CACHE.get(fingerprint)
+                if cached and cached[0] > time.monotonic():
+                    return cached[1], cached[2]
+            cached = self._CACHE.get(fingerprint)
+            if cached and cached[0] > now:
+                return cached[1], cached[2]
+            self._CACHE.pop(fingerprint, None)
+            self._CACHE_INFLIGHT.add(fingerprint)
+        result: BehaviorInsight
+        source: Literal["gemini", "factual_fallback"]
+        try:
+            if on_gemini_request:
+                on_gemini_request()
+            generated = self._insight_generator(
+                json.dumps(
+                    {
+                        "registered_records": [
+                            {
+                                "planned_minutes": row.planned_minutes,
+                                "actual_seconds": row.actual_seconds,
+                                "result": row.result,
+                                "context": row.summary,
+                            }
+                            for row in evidence
+                        ],
+                        "difference_count": differences,
+                        "reviewed_count": len(evidence),
+                    },
+                    ensure_ascii=False,
+                )
+            )
+            if (
+                self._UNSAFE_TERMS.search(generated.interpretation)
+                or self._UNSAFE_TERMS.search(generated.suggestion)
+                or not generated.suggestion.casefold().startswith(
+                    "si fueron sesiones de estudio reales,"
+                )
+                or re.search(r"\d", generated.interpretation + generated.suggestion)
+            ):
+                raise ValueError("Generated behavior insight failed safety checks")
+            result, source = generated, "gemini"
+        except Exception:
+            result, source = fallback, "factual_fallback"
+        with self._CACHE_CONDITION:
+            try:
+                expired = [key for key, value in self._CACHE.items() if value[0] <= now]
+                for key in expired:
+                    self._CACHE.pop(key, None)
+                if len(self._CACHE) >= self._MAX_CACHE_ENTRIES:
+                    self._CACHE.pop(next(iter(self._CACHE)))
+                self._CACHE[fingerprint] = (
+                    time.monotonic() + self._CACHE_TTL_SECONDS,
+                    result,
+                    source,
+                )
+            finally:
+                self._CACHE_INFLIGHT.discard(fingerprint)
+                self._CACHE_CONDITION.notify_all()
+        return result, source
 
     @staticmethod
     def _evidence_item(row: StudySession, context: AcademicContext) -> BehaviorEvidence:

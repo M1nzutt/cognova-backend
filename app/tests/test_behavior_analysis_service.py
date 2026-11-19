@@ -3,6 +3,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+from app.academic_intelligence.gemini_schemas import BehaviorInsight
 from app.services.behavior_analysis_service import BehaviorAnalysisService
 
 
@@ -51,7 +52,11 @@ def test_five_short_session_records_are_described_without_claiming_a_habit(monke
     assert observation.observation == (
         "En 5 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
     )
-    assert "ni permiten concluir que sea un hábito" in observation.interpretation
+    assert observation.conclusion == observation.observation
+    assert "puede ser relevante" in observation.interpretation
+    assert "no indican por qué ocurrió" in observation.uncertainty
+    assert observation.suggestion.startswith("Si fueron sesiones de estudio reales,")
+    assert observation.interpretation_source == "factual_fallback"
     assert "¿" == observation.question[0]
     assert observation.evidence[0].planned_minutes == 10
     assert observation.evidence[0].actual_seconds == "60.140789"
@@ -111,3 +116,108 @@ def test_only_cancelled_or_incomplete_records_produce_an_informative_empty_state
 
     assert response.state == "insufficient_data"
     assert response.observations == []
+    assert "sesiones finalizadas con duración registrada" in (
+        response.insufficient_data_guidance
+    )
+
+
+def test_grounded_gemini_insight_and_cached_result(monkeypatch):
+    rows = [
+        session(1, "completed", actual="600"),
+        *(session(identifier, "partial") for identifier in range(2, 6)),
+    ]
+    generator = Mock(
+        return_value=BehaviorInsight(
+            interpretation=(
+                "Comparar ambos tiempos puede ayudar a valorar el tamaño de los "
+                "bloques previstos."
+            ),
+            suggestion=(
+                "Si fueron sesiones de estudio reales, podrías probar un bloque "
+                "más breve y revisar si se ajusta mejor."
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        "app.services.behavior_analysis_service.AcademicContext",
+        lambda _db, _user_id: context(rows),
+    )
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5, 1, 5]))
+    service = BehaviorAnalysisService(db, generator)
+
+    first = service.analyze(93001)
+    second = service.analyze(93001)
+
+    assert first.observations[0].interpretation_source == "gemini"
+    assert first.observations[0].suggestion.startswith(
+        "Si fueron sesiones de estudio reales,"
+    )
+    assert second.observations[0].interpretation == first.observations[0].interpretation
+    generator.assert_called_once()
+
+
+def test_gemini_failure_uses_factual_conclusion_and_safe_suggestion(monkeypatch):
+    rows = [
+        session(1, "completed", actual="600"),
+        *(session(identifier, "partial") for identifier in range(2, 6)),
+    ]
+    generator = Mock(side_effect=RuntimeError("provider unavailable"))
+    monkeypatch.setattr(
+        "app.services.behavior_analysis_service.AcademicContext",
+        lambda _db, _user_id: context(rows),
+    )
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5]))
+
+    response = BehaviorAnalysisService(db, generator).analyze(93002)
+
+    observation = response.observations[0]
+    assert observation.conclusion == (
+        "En 4 de 5 registros se registró cerca de 1 min frente a 10 min planificados."
+    )
+    assert observation.interpretation_source == "factual_fallback"
+    assert observation.uncertainty
+    assert observation.suggestion.startswith("Si fueron sesiones de estudio reales,")
+
+
+def test_insufficient_evidence_does_not_call_gemini(monkeypatch):
+    rows = [session(1, "partial")]
+    generator = Mock()
+    monkeypatch.setattr(
+        "app.services.behavior_analysis_service.AcademicContext",
+        lambda _db, _user_id: context(rows),
+    )
+    db = SimpleNamespace(scalar=Mock(side_effect=[0, 1]))
+
+    response = BehaviorAnalysisService(db, generator).analyze(93003)
+
+    assert response.observations[0].interpretation_source == "factual_fallback"
+    generator.assert_not_called()
+
+
+def test_unsafe_or_unsupported_gemini_claims_are_replaced_with_factual_guidance(
+    monkeypatch,
+):
+    rows = [
+        session(1, "completed", actual="600"),
+        *(session(identifier, "partial") for identifier in range(2, 6)),
+    ]
+    generator = Mock(
+        return_value=BehaviorInsight(
+            interpretation="La motivación explica que hayas terminado antes.",
+            suggestion=(
+                "Si fueron sesiones de estudio reales, intenta estudiar 25 minutos."
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        "app.services.behavior_analysis_service.AcademicContext",
+        lambda _db, _user_id: context(rows),
+    )
+    db = SimpleNamespace(scalar=Mock(side_effect=[1, 5]))
+
+    response = BehaviorAnalysisService(db, generator).analyze(93004)
+
+    observation = response.observations[0]
+    assert observation.interpretation_source == "factual_fallback"
+    assert "motivación" not in observation.interpretation
+    assert "25 minutos" not in observation.suggestion

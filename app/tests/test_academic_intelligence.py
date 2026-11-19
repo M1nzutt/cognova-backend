@@ -13,6 +13,7 @@ from app.academic_intelligence.decision_route import DecisionRoute
 from app.academic_intelligence.decision_trail import DecisionTrail
 from app.academic_intelligence.gemini_provider import GeminiProvider
 from app.academic_intelligence.gemini_schemas import (
+    BehaviorInsight,
     PlanProposal,
     ProposedChallenge,
 )
@@ -211,6 +212,30 @@ def test_gemini_provider_uses_structured_output_and_handles_timeout():
     with pytest.raises(DomainError) as exc:
         provider.plan("{}")
     assert exc.value.code == "STUDY_PLAN_GENERATION_UNAVAILABLE"
+
+
+def test_behavior_insight_uses_structured_gemini_without_storing_context():
+    insight = BehaviorInsight(
+        interpretation="Comparar los tiempos puede orientar el tamaño del bloque.",
+        suggestion=(
+            "Si fueron sesiones de estudio reales, podrías probar un bloque más breve."
+        ),
+    )
+    calls = []
+
+    def create(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(output_text=insight.model_dump_json())
+
+    provider = GeminiProvider(
+        None, client=SimpleNamespace(interactions=SimpleNamespace(create=create))
+    )
+
+    assert provider.behavior_insight('{"difference_count":4}') == insight
+    assert calls[0]["response_format"]["schema"] == BehaviorInsight.model_json_schema()
+    assert calls[0]["generation_config"]["max_output_tokens"] == 900
+    assert calls[0]["store"] is False
+    assert "no afirmes hechos adicionales" in calls[0]["system_instruction"]
 
 
 def test_gemini_client_uses_explicit_retry_budget(monkeypatch):

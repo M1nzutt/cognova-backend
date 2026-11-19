@@ -25,8 +25,12 @@ class RelatedResource(BaseModel):
 class BehaviorObservation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    conclusion: str
     observation: str
     interpretation: str
+    uncertainty: str
+    suggestion: str
+    interpretation_source: Literal["gemini", "factual_fallback"]
     evidence: list[BehaviorEvidence]
     question: str
     confidence_basis: str
@@ -37,4 +41,5 @@ class BehaviorAnalysisResponse(BaseModel):
     completed_session_count: int
     reviewed_session_count: int
     state: Literal["factual_summary", "insufficient_data"]
+    insufficient_data_guidance: str
     observations: list[BehaviorObservation]
