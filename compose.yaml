@@ -13,12 +13,22 @@ services:
       PGTZ: UTC
       COGNOVA_RUNTIME_PASSWORD: ${COGNOVA_RUNTIME_PASSWORD:?set COGNOVA_RUNTIME_PASSWORD in .env}
       COGNOVA_MIGRATOR_PASSWORD: ${COGNOVA_MIGRATOR_PASSWORD:?set COGNOVA_MIGRATOR_PASSWORD in .env}
-    command: ["postgres", "-c", "timezone=UTC"]
+    command:
+      - postgres
+      - -c
+      - timezone=UTC
+      - -c
+      - "ssl=${POSTGRES_SSL:-off}"
+      - -c
+      - ssl_cert_file=/etc/postgresql/tls/server.crt
+      - -c
+      - ssl_key_file=/etc/postgresql/tls/server.key
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
     volumes:
       - cognova_pgdata:/var/lib/postgresql
       - ../cognova-database/docker/init/10-create-local-roles.sh:/docker-entrypoint-initdb.d/10-create-local-roles.sh:ro
+      - ./postgres-tls:/etc/postgresql/tls:ro
     networks:
       - cognova_private
     healthcheck:
@@ -64,13 +74,13 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      ENVIRONMENT: development
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DATABASE_URL: "postgresql+psycopg://cognova_runtime:${COGNOVA_RUNTIME_PASSWORD:?set COGNOVA_RUNTIME_PASSWORD in .env}@postgres:5432/cognova"
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       JWT_ALGORITHM: HS256
-      COOKIE_SECURE: "false"
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
       COOKIE_SAMESITE: lax
-      CORS_ALLOWED_ORIGINS: '["http://localhost:${FRONTEND_PORT:-8080}","http://127.0.0.1:${FRONTEND_PORT:-8080}"]'
+      CORS_ALLOWED_ORIGINS: '${CORS_ALLOWED_ORIGINS:-["http://localhost:8080","http://127.0.0.1:8080"]}'
       ACCESS_TOKEN_EXPIRE_MINUTES: "15"
       REFRESH_TOKEN_EXPIRE_DAYS: "30"
       AUTH_RATE_LIMIT: "20"
@@ -82,8 +92,8 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
       GEMINI_TIMEOUT_MS: ${GEMINI_TIMEOUT_MS:-15000}
       TZ: UTC
-    expose:
-      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
