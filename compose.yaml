@@ -32,6 +32,7 @@ services:
     build:
       context: ../cognova-database
       dockerfile: Dockerfile
+    command: ["python", "-m", "cognova_database", "initialize"]
     restart: "no"
     environment:
       ENVIRONMENT: development

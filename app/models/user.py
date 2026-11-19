@@ -14,7 +14,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(Text)
     email: Mapped[str] = mapped_column(Text)
-    password_hash: Mapped[str] = mapped_column(Text)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     degree_program: Mapped[str | None] = mapped_column(Text)
     semester: Mapped[int | None] = mapped_column(Integer)
     academic_goal: Mapped[str | None] = mapped_column(Text)
