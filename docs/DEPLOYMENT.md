@@ -1,5 +1,18 @@
 # Despliegue existente y transición de base de datos
 
+## Estado de despliegue — 2026-11-20
+
+Este corte actualiza documentación, no despliega servicios. El stack local tenía
+contenedores saludables y `/api/v1/ready` respondía 200, pero la base activa estaba
+en 0009 mientras el Backend fuente exige 0010. El pin del checkout también apunta
+a 0009. Por ello no se certifica el checkout actual como stack integrado final.
+
+Pendiente operativo: fijar en `tools/database-ref.json` el commit Database que
+incluya 0010, aplicar la migración con el Compose oficial, reconstruir Backend y
+validar `/ready`, cuenta demo, chat e IA. No se contactó ni modificó Render, Netlify
+ni un servidor externo en este corte. La guía local está en
+[DOCKER_DEPLOYMENT](DOCKER_DEPLOYMENT.md).
+
 ## Entorno Docker integrado local — runtime validado, sin deploy — 2026-11-12
 
 `feat/docker-integrated-env` pasó `docker compose config --quiet`, build y arranque

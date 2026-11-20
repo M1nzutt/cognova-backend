@@ -1,5 +1,28 @@
 # Cognova — Estado backend
 
+## Estado final de código e integración local — 2026-11-20
+
+El router actual expone Auth/sesiones, onboarding/cuestionario, Materias,
+Actividades/historial, Sesiones/temporizador, Calendario, Planes/Retos, Analytics,
+análisis de comportamiento y chat académico. Gemini se integra desde Backend y una
+generación real en el entorno local tuvo respuesta 201 el 2026-11-16; véanse
+[PERMANENT_DEMO](PERMANENT_DEMO.md) y [GEMINI_BUSINESS_VALIDATION](GEMINI_BUSINESS_VALIDATION.md).
+La propuesta contextual adicional sigue pendiente por el presupuesto acotado de esa
+demo. No presentar fixtures de pruebas ni esa única llamada como uso prolongado.
+
+**Desajuste que impide declarar el stack fuente alineado:** el Backend actual fija
+`ReadinessService.expected_revision = 0010_nullable_password_hash`; sin embargo,
+`tools/database-ref.json` aún selecciona Database 0009 y la base Docker inspeccionada
+el 2026-11-20 informa `0009_academic_companion_chat`. El contenedor activo responde
+ready, pero no es prueba de que contenga este checkout. Alinear el pin y reconstruir/
+actualizar el entorno son trabajo operativo pendiente; no se hizo en esta tarea
+documental.
+
+El working tree del Backend contiene además dos archivos Python sin seguimiento
+(`app/academic_intelligence/gemini_diagnostic.py` y su test); se preservaron. No se
+afirma aquí validación de esos archivos. Los bloques inferiores son registros
+históricos fechados.
+
 ## Auditoría funcional local — actualización — 2026-11-15
 
 El smoke autenticado previo contra Docker con el usuario sintético existente

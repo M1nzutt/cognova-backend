@@ -1,28 +1,40 @@
 #  Cognova Backend
 
 Backend de acompañamiento académico con Python, FastAPI y PostgreSQL.
-Autenticación avanzada y configuración de despliegue implementadas en `06c3d2a`.
-Materias, Actividades, Sesiones de Estudio + temporizador y Calendario están
-desplegados y cerrados en Backend, junto con auth y onboarding.
-Contrato Actividades: [ACTIVITIES_CONTRACT.md](docs/ACTIVITIES_CONTRACT.md).
-Consultar [estado real](docs/PROJECT_STATE.md),
-[traspaso de database](docs/DATABASE_HANDOFF.md) y [despliegue](docs/DEPLOYMENT.md).
-ORM, consultas y conexiones permanecen en backend; Alembic/historial viven en
-cognova-database. Database producción usa `0006_study_sessions`, fijada en
-`eff87b387345a1d3f286e3a6007d41e707ec9d13`. Render despliega `main` automáticamente;
-el estado Live y el SHA validado están en [DEPLOYMENT](docs/DEPLOYMENT.md).
 
-API: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra ele, no
-número uno). Health, readiness y OpenAPI se validaron después del release 0006;
-auth exige token.
+## Estado del producto — 2026-11-20
 
-## Calendario v1 — desplegado y cerrado
+La API implementa autenticación y sesiones, onboarding/cuestionario, Materias,
+Actividades e historial, Sesiones/temporizador, Calendario, Planes/Retos,
+Analytics, análisis de comportamiento IA y Acompañamiento académico con historial
+persistente. Database posee las migraciones; Backend conserva ORM, autorización,
+transacciones, lógica de negocio e integración Gemini. Ver [PROJECT_STATE](docs/PROJECT_STATE.md)
+y [contratos](docs/API_CONTRACT.md).
+
+La integración de código no equivale a un release remoto. En este checkout,
+`ReadinessService` requiere Database `0010_nullable_password_hash`, pero
+`tools/database-ref.json` aún fija el commit con revisión 0009. El volumen Docker
+inspeccionado está en 0009. Hay que alinear el pin y validar migración, grants,
+readiness y flujos con la imagen actual antes de declarar este checkout desplegado.
+Render/Netlify se conservan como destinos de releases históricos; el estado actual
+de despliegue está detallado en [DEPLOYMENT](docs/DEPLOYMENT.md).
+
+La cuenta de demostración usa datos ficticios. El hash de contraseña no se incluye
+en el seed: configúralo con el comando interactivo indicado en
+[PERMANENT_DEMO](docs/PERMANENT_DEMO.md). El frontend muestra las credenciales
+públicamente; configura la misma contraseña en el backend antes de la demostración.
+
+API histórica: https://cognova-backend-lpsi.onrender.com (`lpsi` empieza con letra
+ele, no número uno). No se verificó en este corte que esa URL sirva el código fuente
+actual; no usarla como prueba del estado final de la integración local.
+
+## Calendario v1 — consulta de recursos reales
 
 GET /api/v1/calendar ofrece Actividades y Sesiones por rango, con filtros,
 ownership, onboarding y paginación cronológica mixta. Solo consulta recursos
 existentes; sin eventos libres, tablas ni migraciones. [Contrato](docs/CALENDAR_CONTRACT.md).
-El smoke y SHA de esta ampliación se registran en PROJECT_STATE e
-INTEGRATION_VALIDATION.
+Este es uno de los módulos de la API; el índice completo está en
+[API_CONTRACT](docs/API_CONTRACT.md).
 
 ## Entorno local
 
@@ -39,9 +51,8 @@ Copy-Item .env.example .env
 
 En macOS/Linux usar `.venv/bin/python` y `cp .env.example .env`.
 Documentación interactiva: http://127.0.0.1:8000/docs.
-Están implementados auth, health/readiness, perfil académico, cuestionario, Materias,
-Actividades, Sesiones y Calendario bajo `/api/v1`. Ver
-[el contrato](docs/API_CONTRACT.md).
+Las rutas implementadas están bajo `/api/v1`; ver
+[el contrato vigente](docs/API_CONTRACT.md).
 
 `CORS_ALLOWED_ORIGINS` recibe un array JSON de orígenes explícitos. Por defecto se
 deniega el acceso entre orígenes; el ejemplo habilita Vite local.
@@ -59,12 +70,13 @@ Las conexiones de la factory son diferidas: iniciar Uvicorn directamente no veri
 disponibilidad PostgreSQL; el launcher sí conecta para validar esquema antes de servir.
 La dependencia `get_session` abre una sesión por petición, revierte
 ante excepciones y siempre cierra; los servicios harán commit explícito.
-No se usa `create_all`. Database conserva `0001_create_users` →
-`0002_auth_sessions` → `0003_onboarding_questionnaire` → `0004_subjects` →
-`0005_activities` → `0006_study_sessions`. El Backend fija el estado productivo
-en `eff87b387345a1d3f286e3a6007d41e707ec9d13`.
+No se usa `create_all`. El historial actual de Database termina en
+`0010_nullable_password_hash`; el Backend fuente exige esa revisión. Sin embargo,
+el pin del tooling y el volumen Docker inspeccionado todavía están en 0009. Resuelve
+esa diferencia antes de ejecutar tests de integración o afirmar que el checkout está
+desplegado. Ver [PROJECT_STATE](docs/PROJECT_STATE.md).
 Materias: [contrato de API, catálogo y concurrencia](docs/SUBJECTS_CONTRACT.md).
-`python scripts/start.py` valida disponibilidad y revisión 0006 antes de escuchar,
+`python scripts/start.py` valida disponibilidad y revisión 0010 antes de escuchar,
 sin aplicar migraciones. Readiness mantiene esa protección durante ejecución.
 
 ## Configuración de autenticación
@@ -119,8 +131,10 @@ Una copia hermana correcta no se selecciona automáticamente: apunta a ella con
 `COGNOVA_DATABASE_PATH` y confirma que esté limpia y en ese mismo SHA. No cambies el
 pin ni adaptes el esquema para resolver una discrepancia de checkout.
 
-IA, seed y demás módulos de producto están fuera de la fase actual. El despliegue
-existente fue confirmado por el usuario; no se recrea durante la separación DB.
+IA, seed y cuenta de demostración forman parte del estado actual. Consulta
+[PERMANENT_DEMO](docs/PERMANENT_DEMO.md) para las limitaciones de los datos demo y
+la preparación de Gemini. Las notas de releases anteriores sobre estas funciones
+fuera de fase son históricas.
 
 ## Validación
 

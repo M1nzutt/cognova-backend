@@ -1,10 +1,23 @@
 # Cognova — Contrato API v1
 
-La generación Gemini y el análisis de comportamiento se definen en
-[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md). Las nuevas rutas conservan
-auth, onboarding, ownership, errores seguros y `no-store` de esta API.
+## Estado vigente del código — 2026-11-20
 
-## Extensión Gemini sobre Database 0008
+El router implementa Auth/sesiones, onboarding/cuestionario, Materias,
+Actividades/historial, Sesiones/temporizador, Calendario, Planes/Retos, Analytics,
+análisis de comportamiento y chat académico persistente. Los endpoints y DTOs
+detallados a continuación son el contrato del código fuente.
+
+La verificación de integración detectó una desalineación: Backend exige Database
+0010, `tools/database-ref.json` fija Database 0009 y el volumen activo informa
+0009. Los releases Render/Netlify nombrados en secciones posteriores son evidencia
+histórica y no afirman que el código actual esté desplegado. Estado y pasos de
+alineación: [PROJECT_STATE](PROJECT_STATE.md) y [DEPLOYMENT](DEPLOYMENT.md).
+
+La generación Gemini y el análisis de comportamiento se definen en
+[AI_GENERATION_CONTRACT](AI_GENERATION_CONTRACT.md). Las rutas conservan auth,
+onboarding, ownership, errores seguros y `no-store`.
+
+## Snapshot de propuesta IA introducido en Database 0008
 
 El detalle de Plan añade
 `ai_proposal_snapshot` nullable, `explanation` nullable y
@@ -16,7 +29,7 @@ para snapshot y 65536 para `proposed_value`, medidos como `jsonb::text`.
 La integración Gemini está en `main` a nivel de código/CI. Render está suspendida
 y el despliegue final queda pendiente del entorno Docker.
 
-## Alcance vigente
+## Alcance registrado en la integración inicial — histórico
 
 Materias, Actividades, Sesiones, Calendario y Planes/Retos tienen contratos
 implementados en Backend. La rama `main` integra Gemini y fija Database

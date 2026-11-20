@@ -1,9 +1,12 @@
 # Cuenta permanente: Lucia Torres / TurnoClaro
 
-## Estado real de la preparación
+## Estado real de la preparación — actualizado 2026-11-20
 
-**Cuenta académica operativa; componente Gemini pendiente. No presentar esta
-preparación como seis semanas de uso real ni como una demo IA terminada.**
+**Cuenta académica ficticia preparada y una propuesta Gemini real validada; no
+presentar las fechas planificadas como seis semanas de uso real.** Se comprobó una
+propuesta válida guardada, editada y aceptada. La propuesta contextual adicional
+continúa pendiente y el presupuesto documentado de llamadas ya está consumido.
+No hacer más llamadas con esa configuración sin autorización y presupuesto nuevos.
 
 - Dirección local: `http://localhost:8080`.
 - Identidad ficticia: **Lucia Torres Demo**, `demo.software@example.com`.
@@ -12,6 +15,9 @@ preparación como seis semanas de uso real ni como una demo IA terminada.**
 - Proyecto transversal ficticio: **TurnoClaro**, software de reservas sin datos
   de pacientes ni personas reales.
 - Referencia congelada: **2026-11-16**. En otra instalación se elige al crearla.
+- El Frontend muestra correo y contraseña demo públicamente. La contraseña no está
+  en el seed Git: debe establecerse localmente con el comando interactivo de abajo
+  y debe coincidir con la que presenta el login.
 
 El preparador utiliza exclusivamente rutas HTTP oficiales. No contiene SQL,
 migraciones, resets, borrados de recursos ni operaciones sobre volúmenes.

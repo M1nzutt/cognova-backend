@@ -1,6 +1,23 @@
 # Cognova — Contexto Funcional y Conceptual de la Aplicación
 
-## Estado implementado — 2026-11-04
+## Estado de producto vigente — 2026-11-20
+
+El Backend actual ofrece los contratos para Auth, onboarding/cuestionario,
+Materias, Actividades e historial, Sesiones/temporizador, Calendario de lectura,
+Planes/Retos, Analytics, análisis académico y Acompañamiento escrito con
+conversaciones persistentes. Los recursos pertenecen al usuario autenticado. El
+Backend es la única capa que accede a PostgreSQL y al proveedor Gemini.
+
+Gemini ha sido ejercitado con datos de la cuenta ficticia en Docker local; existe
+evidencia de una propuesta válida persistida y aceptada. Una propuesta contextual
+adicional permanece pendiente y no se deben atribuir al usuario semanas de estudio
+real a partir de fechas planificadas. Ver [PERMANENT_DEMO](PERMANENT_DEMO.md).
+
+La compatibilidad de código todavía requiere cerrar el pin Database 0009 → 0010 y
+actualizar el volumen local. Esta descripción funcional no declara un release
+remoto: ver [PROJECT_STATE](PROJECT_STATE.md) y [DEPLOYMENT](DEPLOYMENT.md).
+
+## Estado implementado — 2026-11-04 (histórico)
 
 Materias, Actividades, Sesiones de Estudio + temporizador, Calendario y Planes +
 Retos están cerrados en Backend. Database producción está en
