@@ -3,9 +3,11 @@
 Modelo configurable mediante `GEMINI_MODEL`, usando SDK oficial `google-genai`
 para Python. Sin variable se conserva `gemini-3.8-flash`; la opción validada
 para las pruebas locales de Planes es `gemini-3.5-flash-lite`.
-La rama Backend fija Database `0009_academic_companion_chat` en
-`tools/database-ref.json`; producción permanece suspendida en 0007. Solo Backend envía
-datos al proveedor. Todas las rutas exigen Bearer, onboarding completo y
+El código fuente actual exige Database `0010_nullable_password_hash`, pero el pin
+de tooling `tools/database-ref.json` aún selecciona 0009; alinea el pin antes de
+validar este contrato de extremo a extremo. Producción se documentó suspendida en
+0007 y no se revalidó en este corte. Solo Backend envía datos al proveedor. Todas
+las rutas exigen Bearer, onboarding completo y
 ownership; `Cache-Control: no-store`. La clave `GEMINI_API_KEY` vive únicamente
 en el entorno del proceso Backend.
 

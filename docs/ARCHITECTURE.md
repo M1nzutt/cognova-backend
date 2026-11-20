@@ -1,6 +1,20 @@
 # Cognova — Arquitectura Backend
 
-## Snapshot IA en la rama 0008
+## Estado vigente de arquitectura — 2026-11-20
+
+Backend concentra API, autenticación/autorización, reglas académicas, transacciones,
+integración del proveedor Gemini y acceso PostgreSQL. Database conserva el historial
+Alembic/DDL y Frontend consume únicamente REST. El sistema incluye módulos académicos,
+Analytics read-only, análisis de comportamiento y chat académico con persistencia
+propia; las conversaciones no modifican recursos académicos sin una operación
+explícita del usuario.
+
+Backend fuente exige Database `0010_nullable_password_hash`; el pin de tooling
+`tools/database-ref.json` aún apunta a 0009 y el volumen local observado está en
+0009. Alinear pin/entorno es requisito antes de tratar el checkout como un release
+integrado. Los apartados de 0008 y releases anteriores son históricos.
+
+## Snapshot IA en Database 0008 — histórico
 
 Backend fija Database 0008 y mapea `study_plans.ai_proposal_snapshot JSONB NULL`.
 `AiPlanProposalSnapshot` construye exclusivamente datos visibles tipados;

@@ -7,9 +7,17 @@ Render/Netlify y no define servidor, dominio, IP o reverse proxy. La validación
 completó en Docker Desktop / Compose V2 el 2026-11-12. `docker compose config --quiet`
 y `docker compose build` pasaron; PostgreSQL 18.6, Backend y Frontend Nginx quedaron
 healthy, y migración/grants finalizaron con código 0 en
-`0008_ai_plan_proposal_snapshot`. Smoke API/browser, persistencia y backup/restore
-local se documentan abajo. Esta configuración no es un perfil de producción para
-Internet.
+`0008_ai_plan_proposal_snapshot`. **Ese registro es histórico.**
+
+En la inspección del 2026-11-20, el volumen activo estaba en
+`0009_academic_companion_chat`; el código Database tiene como head
+`0010_nullable_password_hash`, y el Backend fuente actual exige exactamente 0010.
+`tools/database-ref.json` aún pinnea el commit anterior (0009). Los contenedores
+activos respondían healthy/ready, pero no se consideran sincronizados con los tres
+checkouts fuente. Antes de una demo rehecha desde código, alinea el pin, aplica 0010,
+reconstruye Backend y repite las pruebas de aceptación de esta guía. Este documento
+no ejecuta ni autoriza esa actualización. La configuración tampoco es un perfil de
+producción para Internet.
 
 Requiere Docker Engine y Docker Compose V2 2.20+. Las carpetas deben estar juntas:
 
@@ -32,12 +40,13 @@ Gemini. Referencias oficiales: [PostgreSQL](https://hub.docker.com/_/postgres),
 ## Orden de arranque
 
 - postgres: PostgreSQL 18.6, healthcheck pg_isready y scripts de inicialización local.
-- database-migrate: imagen de cognova-database, Alembic ejecuta upgrade head hasta
-  0008_ai_plan_proposal_snapshot.
+- database-migrate: imagen de cognova-database, inicializa y ejecuta migraciones
+  oficiales hasta el head fijado y compatible con Backend (0010 para el código
+  fuente actual).
 - database-runtime-grants: aplica ACL runtime mínimos después de la migración y
   rechaza hosts, roles o entornos distintos al Compose local.
 - backend: Python 3.14.10, no root, dependencias del requirements.lock, launcher
-  scripts/start.py; exige Database 0008 antes de escuchar.
+  scripts/start.py; el checkout actual exige Database 0010 antes de escuchar.
 - frontend: Node 24.22.3 compila React/TypeScript; Nginx 1.30.6 sirve assets, fallback
   de React Router y proxy same-origin /api hacia backend:8000.
 
@@ -75,7 +84,8 @@ docker compose logs --tail=100 postgres database-migrate database-runtime-grants
 docker compose down
 ~~~
 
-La revisión debe ser exactamente 0008_ai_plan_proposal_snapshot. Espera a que
+Para el código fuente actual, la revisión debe ser exactamente
+`0010_nullable_password_hash`. Espera a que
 postgres/backend/frontend estén healthy y los dos trabajos de una sola ejecución
 terminen con código 0. docker compose down preserva cognova_pgdata; no ejecutes
 down -v con información que deba preservarse.
@@ -114,7 +124,7 @@ Gemini real.
 ## Backup, restore y persistencia
 
 Se verificó localmente un dump PostgreSQL 18.6 custom con `pg_restore --list` y restore
-aislado. Restauró `0008_ai_plan_proposal_snapshot` y coincidieron los counts
+aislado. Esa prueba histórica restauró `0008_ai_plan_proposal_snapshot` y coincidieron los counts
 sanitizados de las tablas 0001–0007. Dump local:
 `%USERPROFILE%\cognova-backups\cognova-local-20261112-204131.dump`; SHA-256
 `11820C0ECC41102E706B6312B69666B7ABC121C44B829FE86EB520BEF46EABAD`. Un primer
@@ -148,7 +158,7 @@ y up -d. Alembic es la única autoridad del schema. No edites tablas a mano. Los
 de /docker-entrypoint-initdb.d solo se ejecutan al crear el volumen inicial; cambiar
 .env no rota contraseñas ya creadas.
 
-Si falla migración, grants o Backend, mira logs sanitizados y comprueba revisión 0008,
+Si falla migración, grants o Backend, mira logs sanitizados y comprueba revisión 0010,
 roles y health/readiness. Si /api falla, confirma backend:8000 dentro de la red. Para
 cookies y autenticación usa uno de los dos orígenes locales explícitos:
 http://localhost:8080 o http://127.0.0.1:8080. Otros hosts y puertos no están
